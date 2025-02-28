@@ -85,7 +85,6 @@ public class ManejadorArchivos {
         if (resultado == JFileChooser.APPROVE_OPTION) {
             File archivoSeleccionado = fileChooser.getSelectedFile();
             rutaCarpetaExcel = archivoSeleccionado.getAbsolutePath(); // Guarda la ruta seleccionada
-            rutaCarpetaPrincipal = archivoSeleccionado.getParent(); // Actualiza la carpeta base
 
             // Leer y analizar el archivo Excel
             try (FileInputStream fis = new FileInputStream(archivoSeleccionado);
@@ -93,30 +92,26 @@ public class ManejadorArchivos {
 
                 Sheet sheet = workbook.getSheetAt(0); // Obtener la primera hoja
 
-                for (int i = filaSeleccionada; i <= sheet.getLastRowNum(); i++) {
-                    Row row = sheet.getRow(i);
 
-                    if (row == null) {
-                        estadoTextField.setText("Disponible (fila vacía) - Fila: " + i);
-                        return;
-                    }
+                Row row = sheet.getRow(filaSeleccionada);
 
-                    int celdasLlenas = 0;
-                    for (int j = 0; j < 12; j++) {
-                        Cell cell = row.getCell(j);
-                        if (cell != null && cell.getCellType() != CellType.BLANK) {
-                            celdasLlenas++;
-                        }
-                    }
-
-                    if (celdasLlenas == 0) {
-                        estadoTextField.setText("Disponible - Fila: " + i);
-                        return;
-                    } else if (celdasLlenas < 12) {
-                        estadoTextField.setText("Fila parcialmente llena");
-                        return;
+                int celdasLlenas = 0;
+                
+                for (int j = 0; j < 12; j++) {
+                    Cell cell = row.getCell(j);
+                    if (cell != null && cell.getCellType() != CellType.BLANK) {
+                        celdasLlenas++;
                     }
                 }
+
+                if (celdasLlenas == 0) {
+                    estadoTextField.setText("La fila esta completamente vacia: " + filaSeleccionada);
+                    return;
+                } else if (celdasLlenas < 12) {
+                    estadoTextField.setText("Fila parcialmente llena: " + filaSeleccionada);
+                    return;
+                }
+                
 
                 estadoTextField.setText("Cambie de fila, todas llenas");
 
