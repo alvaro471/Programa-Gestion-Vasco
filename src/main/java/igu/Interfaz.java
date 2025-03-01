@@ -442,12 +442,12 @@ public class Interfaz extends javax.swing.JFrame {
             txtSegundoNombre.getText().toUpperCase(), txtDni.getText(), (String) jcbMes.getSelectedItem(), 
             txtAnio.getText(), nombreCarpeta, nombreExpediente};
         ManejadorArchivos.agregarFilaExcel(ManejadorArchivos.getRutaCarpetaExcel(), nombres, (Integer.parseInt(txtFilaSeleccionada.getText())-1), txtEstadoFila);
+        
         if (ManejadorArchivos.getCondicionFila() == "vacio") {
         ManejadorArchivos.procesarCarpeta(ManejadorArchivos.getRutaCarpeta(),txtDni.getText());
         ManejadorArchivos.renombrarCarpeta(ManejadorArchivos.getRutaCarpeta(), nombreCarpeta);        
         String nuevaRutaCarpeta = new File(ManejadorArchivos.getRutaCarpeta()).getParent() + File.separator + nombreCarpeta;
         ManejadorArchivos.renombrarArchivo(nuevaRutaCarpeta, new File(nuevaRutaCarpeta).getName());
-
         JOptionPane.showMessageDialog(null, "Datos ingresados en: " + (ManejadorArchivos.getFilaIngresada() + 1));
         }
     }//GEN-LAST:event_btnRegistrarActionPerformed

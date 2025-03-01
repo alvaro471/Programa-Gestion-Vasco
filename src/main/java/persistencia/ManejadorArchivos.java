@@ -58,6 +58,10 @@ public class ManejadorArchivos {
         return condicionFila;
     }
     
+    
+    
+    
+    //Selecciona, Guarda la direccion en rutaCarpeta
     public static void seleccionarCarpeta(JTextField txtRuta) {
         JFileChooser chooser = new JFileChooser(rutaCarpetaPrincipal); // Siempre usa rutaCarpetaPrincipal
         chooser.setDialogTitle("Selecciona una carpeta");
@@ -72,6 +76,7 @@ public class ManejadorArchivos {
             txtRuta.setText(rutaCarpeta); // Muestra la ruta en el JTextField
         }
     }
+    //Selecciona, Guarda la direccion del Excel en rutaCarpetaExcel, muestra estado
     public static void seleccionarExcel(int filaSeleccionada, JTextField estadoTextField) {
         JFileChooser fileChooser = new JFileChooser(rutaCarpetaPrincipal); // Siempre usa rutaCarpetaPrincipal
         fileChooser.setDialogTitle("Seleccionar archivo Excel");
@@ -120,7 +125,6 @@ public class ManejadorArchivos {
             }
         }
     }
-    
     public static void crearCarpetaConSubcarpetas(String rutaBase, String nombreCarpeta, String[] subcarpetas) {
         // Crear la carpeta principal
         File carpetaPrincipal = new File(rutaBase, nombreCarpeta);
@@ -148,12 +152,17 @@ public class ManejadorArchivos {
 
         JOptionPane.showMessageDialog(null, "Estructura de carpetas creada exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
     }
+    //Crea las subcarpetas y la vez ordena los archivos
     public static void procesarCarpeta(String rutaBase, String variable) {
         File carpetaBase = new File(rutaBase);
 
         // Validar que la carpeta existe
-        if (!carpetaBase.exists() || !carpetaBase.isDirectory()) {
-            System.out.println("La carpeta especificada no existe o no es una carpeta.");
+        if (!carpetaBase.exists()) {
+            System.out.println("La carpeta especificada no existe.");
+            return;
+        }
+        if(!carpetaBase.isDirectory()){
+            System.out.println("No ha seleccionado una carpeta");
             return;
         }
 
@@ -173,14 +182,14 @@ public class ManejadorArchivos {
             File subcarpeta = new File(rutaBase, nombre);
             if (!subcarpeta.exists()) {
                 if (subcarpeta.mkdir()) {
-                    
+                    System.out.println("Se creo la subcarpeta: " + nombre);
                 } else {
-                    JOptionPane.showMessageDialog(null, "Error al crear: " + subcarpeta.getAbsolutePath());
+                    JOptionPane.showMessageDialog(null, "Error al crear la subcarpeta: " + subcarpeta.getAbsolutePath());
                 }
             }
         }
 
-        // Listar archivos PDF y Word
+        // Ordenar archivos PDF y Word
         File[] archivos = carpetaBase.listFiles((dir, name) -> name.matches("(?i)^\\d+.*\\.(pdf|docx|doc|jpg|jpeg|png)$"));
 
         if (archivos == null || archivos.length == 0) {
@@ -194,19 +203,19 @@ public class ManejadorArchivos {
             String numeroInicial = nombreArchivo.replaceAll("^([0-9]+).*", "$1");
 
             // Buscar carpeta correspondiente
-            for (String nombreCarpeta : nombresSubcarpetas) {
-                if (nombreCarpeta.startsWith(numeroInicial + "_")) {
-                    File carpetaDestino = new File(rutaBase, nombreCarpeta);
-                    Path origen = archivo.toPath();
+            for (String nombreSubcarpeta : nombresSubcarpetas) {
+                if (nombreSubcarpeta.startsWith(numeroInicial + "_")) {
+                    File carpetaDestino = new File(rutaBase, nombreSubcarpeta);
+                    Path archivoPath = archivo.toPath();
                     Path destino = carpetaDestino.toPath().resolve(archivo.getName());
 
                     try {
-                        Files.move(origen, destino, StandardCopyOption.REPLACE_EXISTING);
-                        System.out.println("Movido: " + nombreArchivo + " → " + carpetaDestino.getName());
+                        Files.move(archivoPath, destino, StandardCopyOption.REPLACE_EXISTING);
+                        System.out.println("Movido: " + nombreArchivo + " hacia " + carpetaDestino.getName());
+                        break; // Dejar de buscar una vez que se encuentra la carpeta
                     } catch (Exception e) {
-                        System.out.println("Error moviendo " + nombreArchivo + ": " + e.getMessage());
+                        JOptionPane.showMessageDialog(null, "Error moviendo " + nombreArchivo + ": " + e.getMessage());
                     }
-                    break; // Dejar de buscar una vez que se encuentra la carpeta
                 }
             }
         }
