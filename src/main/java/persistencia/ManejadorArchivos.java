@@ -120,33 +120,7 @@ public class ManejadorArchivos {
             }
         }
     }
-    public static void crearSubcarpetas(String rutaCarpeta, String dni) {
-        // Lista de nombres de subcarpetas con la variable incluida en la primera
-        String[] nombres = {
-            "1_REC_" + dni,
-            "2_ID_" + dni,
-            "3_EMI_" + dni,
-            "4_ARC_" + dni,
-            "5_APE_" + dni,
-            "6_SEG_" + dni,
-            "7_AGR_" + dni,
-            "8_CON_" + dni
-        };
-
-        // Crear cada subcarpeta
-        for (String nombre : nombres) {
-            File subcarpeta = new File(rutaCarpeta, nombre);
-            if (!subcarpeta.exists()) {
-                if (subcarpeta.mkdir()) {
-                    System.out.println("Carpetas creadas");
-                } else {
-                    System.out.println("Error al crear: " + subcarpeta.getAbsolutePath());
-                }
-            } else {
-                System.out.println("La carpeta ya existe: " + subcarpeta.getAbsolutePath());
-            }
-        }
-    }
+    
     public static void crearCarpetaConSubcarpetas(String rutaBase, String nombreCarpeta, String[] subcarpetas) {
         // Crear la carpeta principal
         File carpetaPrincipal = new File(rutaBase, nombreCarpeta);
