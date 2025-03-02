@@ -433,7 +433,7 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_btnBuscarExcelActionPerformed
 
     private void btnRegistrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegistrarActionPerformed
-        nombreExpediente= txtCaso.getText().toUpperCase() + "_" + txtApellidoPaterno.getText().toUpperCase() + txtApellidoMaterno.getText().toUpperCase() + txtPrimerNombre.getText().toUpperCase() + txtSegundoNombre.getText().toUpperCase() + "_" + txtDni.getText();
+        nombreExpediente = txtCaso.getText().toUpperCase() + "_" + txtApellidoPaterno.getText().toUpperCase() + txtApellidoMaterno.getText().toUpperCase() + txtPrimerNombre.getText().toUpperCase() + txtSegundoNombre.getText().toUpperCase() + "_" + txtDni.getText();
         String nombreCarpeta = "EXP_" + nombreExpediente;
         
         String[] nombres = {txtCaso.getText(), txtNumeroExpediente.getText(), 

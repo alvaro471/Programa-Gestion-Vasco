@@ -125,6 +125,7 @@ public class ManejadorArchivos {
             }
         }
     }
+    //Crea la carpeta y subcarpetas
     public static void crearCarpetaConSubcarpetas(String rutaBase, String nombreCarpeta, String[] subcarpetas) {
         // Crear la carpeta principal
         File carpetaPrincipal = new File(rutaBase, nombreCarpeta);
@@ -220,6 +221,7 @@ public class ManejadorArchivos {
             }
         }
     }
+    //Renombra la carpeta seleccionada en rutaCarpeta
     public static boolean renombrarCarpeta(String currentPath, String newName) {
         File folder = new File(currentPath);
         if (!folder.exists() || !folder.isDirectory()) {
@@ -229,19 +231,20 @@ public class ManejadorArchivos {
 
         File newFolder = new File(folder.getParent(), newName);
         if (folder.renameTo(newFolder)) {
-            JOptionPane.showMessageDialog(null, "Carpetas renombradas con exito");
+            JOptionPane.showMessageDialog(null, "Carpeta renombrada con exito");
             return true;
         } else {
             JOptionPane.showMessageDialog(null, "Error al renombrar la carpeta.");
             return false;
         }
     }
+    //Mueve todos los tipos de archivo y los reemplaza si existen
     public static void moverArchivosCoincidentes(String rutaBase) {
         File carpetaBase = new File(rutaBase);
 
         // Validar que la carpeta base existe y es un directorio
         if (!carpetaBase.exists() || !carpetaBase.isDirectory()) {
-            System.out.println("La carpeta especificada no existe o no es un directorio.");
+            JOptionPane.showMessageDialog(null, "La carpeta especificada no existe o no es un directorio.");
             return;
         }
 
@@ -249,15 +252,15 @@ public class ManejadorArchivos {
         File[] subcarpetas = carpetaBase.listFiles(File::isDirectory);
 
         if (subcarpetas == null || subcarpetas.length == 0) {
-            System.out.println("No se encontraron subcarpetas.");
+            JOptionPane.showMessageDialog(null, "No se encontraron subcarpetas.");
             return;
         }
 
         // Obtener todos los archivos PDF y Word que comienzan con un número
-        File[] archivos = carpetaBase.listFiles((dir, name) -> name.matches("^\\d+.*\\.(pdf|docx)$"));
+        File[] archivos = carpetaBase.listFiles((dir, name) -> name.matches("(?i)^\\d+.*\\.(pdf|docx|doc|jpg|jpeg|png)$"));
 
         if (archivos == null || archivos.length == 0) {
-            System.out.println("No se encontraron archivos PDF o Word con número inicial.");
+            JOptionPane.showMessageDialog(null,"No se encontraron archivos PDF o Word con número inicial.");
             return;
         }
 
@@ -275,10 +278,11 @@ public class ManejadorArchivos {
                     try {
                         Files.move(origen, destino, StandardCopyOption.REPLACE_EXISTING);
                         System.out.println("Movido: " + nombreArchivo + " → " + subcarpeta.getName());
+                        break; // Una vez que se mueve, no hay que seguir buscando
                     } catch (Exception e) {
                         System.out.println("Error moviendo " + nombreArchivo + ": " + e.getMessage());
                     }
-                    break; // Una vez que se mueve, no hay que seguir buscando
+                    
                 }
             }
         }
