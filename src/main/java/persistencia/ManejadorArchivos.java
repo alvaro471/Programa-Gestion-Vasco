@@ -12,13 +12,16 @@ import javax.swing.JTextField;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.*;
+import java.awt.Color;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
@@ -564,6 +567,101 @@ public class ManejadorArchivos {
             return;
         }
     }
+    public static void mostrarLlenuraSubcarpetas(String rutaPadre, JTextField[] camposTexto, Color colorVacio, Color colorLleno){
+        File carpetaPadre = new File(rutaPadre);
 
+        if (!carpetaPadre.exists() || !carpetaPadre.isDirectory()) {
+            System.out.println("La ruta proporcionada no es válida.");
+            return;
+        }
+
+        File[] subCarpetas = carpetaPadre.listFiles(File::isDirectory);
+
+        if (subCarpetas == null) {
+            return;
+        }
+
+        // Recorrer las subcarpetas y actualizar los colores en los JTextField correspondientes
+        for (int i = 0; i < subCarpetas.length && i < camposTexto.length; i++) {
+            File subCarpeta = subCarpetas[i];
+
+            boolean tieneArchivos = subCarpeta.listFiles() != null && subCarpeta.listFiles().length > 0;
+
+            camposTexto[i].setBackground(tieneArchivos ? colorLleno : colorVacio);
+        }
+    }
+    public static void asignarArchivosEtapas(String rutaPadre, String rutaDestino, int numeroEtapa) {
+        // Validar que la ruta padre existe
+        File directorioPadre = new File(rutaPadre);
+        if (!directorioPadre.exists() || !directorioPadre.isDirectory()) {
+            JOptionPane.showMessageDialog(null, "La ruta padre no es válida o no existe.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Seleccionar archivos con JFileChooser
+        JFileChooser fileChooser = new JFileChooser(rutaPadre);
+        fileChooser.setMultiSelectionEnabled(true);
+        fileChooser.setFileFilter(new FileNameExtensionFilter(
+                "Archivos permitidos (PDF, Word, JPG, PNG)", "pdf", "doc", "docx", "jpg", "jpeg", "png"));
+
+        int resultado = fileChooser.showOpenDialog(null);
+        if (resultado != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File[] archivosSeleccionados = fileChooser.getSelectedFiles();
+        if (archivosSeleccionados.length == 0) {
+            JOptionPane.showMessageDialog(null, "No se seleccionaron archivos.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Buscar la carpeta destino que comience con el número especificado
+        File directorioDestino = new File(rutaDestino);
+        if (!directorioDestino.exists() || !directorioDestino.isDirectory()) {
+            JOptionPane.showMessageDialog(null, "La ruta destino no es válida.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        File carpetaDestino = null;
+        File[] carpetas = directorioDestino.listFiles(File::isDirectory);
+        if (carpetas != null) {
+            for (File carpeta : carpetas) {
+                if (carpeta.getName().startsWith(String.valueOf(numeroEtapa))) {
+                    carpetaDestino = carpeta;
+                    break;
+                }
+            }
+        }
+
+        if (carpetaDestino == null) {
+            JOptionPane.showMessageDialog(null, "No se encontró una carpeta que comience con el número " + numeroEtapa, "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Mover los archivos seleccionados a la carpeta destino encontrada
+        int archivosMovidos = 0;
+        for (File archivo : archivosSeleccionados) {
+            File archivoDestino = new File(carpetaDestino, archivo.getName());
+
+            try {
+                Files.move(archivo.toPath(), archivoDestino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                archivosMovidos++;
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Error al mover el archivo: " + archivo.getName(), "Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+
+        JOptionPane.showMessageDialog(null, archivosMovidos + " archivo(s) movido(s) exitosamente a: " + carpetaDestino.getAbsolutePath());
+    }
+    //
+    public static void verificarSeleccion(JCheckBox jcbSeleccionarTodo, JCheckBox checkBox) {
+        if (!checkBox.isSelected()) {
+            jcbSeleccionarTodo.setSelected(false);
+            return; // Si hay al menos uno desmarcado, salimos
+        }
+        
+        jcbSeleccionarTodo.setSelected(true); // Si llegamos aquí, todos están seleccionados
+    }
 
 }
