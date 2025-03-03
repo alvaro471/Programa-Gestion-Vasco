@@ -57,7 +57,7 @@ public class ManejadorArchivos {
     public static String getCondicionFila(){
         return condicionFila;
     }
-    
+
     
     
     
@@ -287,6 +287,7 @@ public class ManejadorArchivos {
             }
         }
     }
+    //Pienso, no tiene funcion
     public static void renombrarArchivo(String folderPath, String newFileName) {
         if (folderPath == null || folderPath.isEmpty()) {
             System.out.println("Error: La ruta de la carpeta es nula o vacía.");
@@ -378,6 +379,7 @@ public class ManejadorArchivos {
                 fila = hoja.createRow(numeroFila);
             }
 
+            
             // Contar celdas llenas en la fila
             int celdasLlenas = 0;
             for (int i = 0; i < 12; i++) {
@@ -403,7 +405,7 @@ public class ManejadorArchivos {
 
                 // Cerrar recursos
                 fileOutputStream.close();
-                estadoField.setText("Fila lista");
+                estadoField.setText("Fila ingresada");
                 JOptionPane.showMessageDialog(null, "Fila añadida correctamente en " + rutaArchivo);
                 filaIngresada = numeroFila;
 
@@ -529,6 +531,37 @@ public class ManejadorArchivos {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    public static void renombrarArchivoMerged(String rutaCarpeta, String newFileName){
+        // Crear un objeto File para la carpeta
+        File folder = new File(rutaCarpeta);
+        
+        // Verificar que la carpeta exista y sea un directorio
+        if (!folder.exists() || !folder.isDirectory()) {
+            System.out.println("❌ La carpeta especificada no existe o no es un directorio.");
+            return;
+        }
+
+        // Buscar el archivo que se llama exactamente "merged"
+        File mergedFile = new File(folder, "merged");
+
+        // Verificar si el archivo "merged" existe
+        if (!mergedFile.exists() || !mergedFile.isFile()) {
+            System.out.println("❌ No se encontró el archivo 'merged' en la carpeta especificada.");
+            return;
+        }
+
+        // Crear el nuevo archivo con el nombre deseado dentro de la misma carpeta
+        File renamedFile = new File(folder, newFileName);
+
+        // Intentar renombrar el archivo
+        if (mergedFile.renameTo(renamedFile)) {
+            System.out.println("✅ Archivo renombrado con éxito a: " + renamedFile.getName());
+            return;
+        } else {
+            System.out.println("❌ No se pudo renombrar el archivo.");
+            return;
         }
     }
 

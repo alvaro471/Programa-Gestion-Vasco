@@ -81,9 +81,9 @@ public class Interfaz extends javax.swing.JFrame {
         jLabel14 = new javax.swing.JLabel();
         jLabel18 = new javax.swing.JLabel();
         txtSeleccionaFilaAutocompletado = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
         txtEstadoExcelAutocompletar = new javax.swing.JTextField();
         jLabel19 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
         btnCrearSubcarpetas = new javax.swing.JButton();
         jCheckBoxEstadoAutocompletado = new javax.swing.JCheckBox();
 
@@ -178,16 +178,16 @@ public class Interfaz extends javax.swing.JFrame {
 
         jLabel14.setText("Autocompletar datos en base a excel: (Los nombres se crearan automaticamente)");
 
-        jLabel18.setText("Seleccionar fila");
+        jLabel18.setText("SELECCIONAR FILA");
 
-        jButton2.setText("SELECCIONAR Y COMPLETAR");
+        jLabel19.setText("Estado");
+
+        jButton2.setText("SELECCIONAR EXCEL");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
             }
         });
-
-        jLabel19.setText("Estado");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -197,31 +197,35 @@ public class Interfaz extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jLabel14))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(114, 114, 114)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel18)
-                            .addComponent(jLabel19))
-                        .addGap(62, 62, 62)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton2)
-                            .addComponent(txtSeleccionaFilaAutocompletado, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtEstadoExcelAutocompletar, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(32, Short.MAX_VALUE))
+                            .addComponent(jLabel14)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel18)
+                                    .addComponent(jLabel19))
+                                .addGap(18, 18, 18)
+                                .addComponent(txtSeleccionaFilaAutocompletado, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(jPanel2Layout.createSequentialGroup()
+                            .addContainerGap()
+                            .addComponent(txtEstadoExcelAutocompletar, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
+                            .addGap(198, 198, 198)
+                            .addComponent(jButton2))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(8, 8, 8)
                 .addComponent(jLabel14)
-                .addGap(18, 18, 18)
+                .addGap(13, 13, 13)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel18)
                     .addComponent(txtSeleccionaFilaAutocompletado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton2)
-                .addGap(17, 17, 17)
+                .addGap(19, 19, 19)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel19)
                     .addComponent(txtEstadoExcelAutocompletar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -251,6 +255,7 @@ public class Interfaz extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(56, 56, 56)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -272,14 +277,6 @@ public class Interfaz extends javax.swing.JFrame {
                             .addComponent(txtPrimerNombre, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE)
                             .addComponent(txtSegundoNombre)
                             .addComponent(txtDni)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnRegistrar)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnCrearSubcarpetas))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -316,10 +313,16 @@ public class Interfaz extends javax.swing.JFrame {
                                                 .addComponent(txtCarpetaExpediente, javax.swing.GroupLayout.Alignment.LEADING)
                                                 .addComponent(jcbMes, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addComponent(txtAnio)
-                                                .addComponent(txtCarpetaPrincipal, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                                .addComponent(txtCarpetaPrincipal, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jButton4)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(btnCrearSubcarpetas)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(btnRegistrar)))
                                 .addComponent(btnBuscarExcel, javax.swing.GroupLayout.Alignment.TRAILING))
                             .addComponent(jCheckBoxEstadoAutocompletado))))
-                .addGap(15, 67, Short.MAX_VALUE))
+                .addContainerGap(67, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -401,11 +404,13 @@ public class Interfaz extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jButton4)
-                        .addComponent(btnRegistrar)
-                        .addComponent(btnCrearSubcarpetas)))
-                .addContainerGap(20, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(36, 36, 36)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnRegistrar)
+                            .addComponent(btnCrearSubcarpetas)
+                            .addComponent(jButton4))))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -444,11 +449,10 @@ public class Interfaz extends javax.swing.JFrame {
         ManejadorArchivos.agregarFilaExcel(ManejadorArchivos.getRutaCarpetaExcel(), nombres, (Integer.parseInt(txtFilaSeleccionada.getText())-1), txtEstadoFila);
         
         if (ManejadorArchivos.getCondicionFila() == "vacio") {
-        ManejadorArchivos.procesarCarpeta(ManejadorArchivos.getRutaCarpeta(),txtDni.getText());
-        ManejadorArchivos.renombrarCarpeta(ManejadorArchivos.getRutaCarpeta(), nombreCarpeta);        
-        String nuevaRutaCarpeta = new File(ManejadorArchivos.getRutaCarpeta()).getParent() + File.separator + nombreCarpeta;
-        ManejadorArchivos.renombrarArchivo(nuevaRutaCarpeta, new File(nuevaRutaCarpeta).getName());
-        JOptionPane.showMessageDialog(null, "Datos ingresados en: " + (ManejadorArchivos.getFilaIngresada() + 1));
+            ManejadorArchivos.procesarCarpeta(ManejadorArchivos.getRutaCarpeta(),txtDni.getText());
+            ManejadorArchivos.renombrarCarpeta(ManejadorArchivos.getRutaCarpeta(), nombreCarpeta);
+            ManejadorArchivos.renombrarArchivoMerged(ManejadorArchivos.getRutaCarpeta(), nombreExpediente);
+            JOptionPane.showMessageDialog(null, "Datos ingresados en: " + (ManejadorArchivos.getFilaIngresada() + 1));
         }
     }//GEN-LAST:event_btnRegistrarActionPerformed
 
@@ -490,7 +494,8 @@ public class Interfaz extends javax.swing.JFrame {
         String nombreCarpeta = "EXP_" + txtCaso.getText() + "_" + txtApellidoPaterno.getText() + 
                 txtApellidoMaterno.getText() + txtPrimerNombre.getText() + txtSegundoNombre.getText() + 
                 "_" + txtDni.getText();
-        ManejadorArchivos.crearCarpetaConSubcarpetas(ManejadorArchivos.getRutaCarpetaPrincipal(), nombreCarpeta, nombreSubcarpetas);
+        ManejadorArchivos.procesarCarpeta(ManejadorArchivos.getRutaCarpeta(), txtDni.getText());
+        ManejadorArchivos.renombrarCarpeta(ManejadorArchivos.getRutaCarpeta(), nombreCarpeta);
     }//GEN-LAST:event_btnCrearSubcarpetasActionPerformed
 
     private void jCheckBoxEstadoAutocompletadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxEstadoAutocompletadoActionPerformed
@@ -500,8 +505,8 @@ public class Interfaz extends javax.swing.JFrame {
         txtEstadoFila.setEnabled(!seleccionado);  // Desactiva el JTextField
         btnBuscarExcel.setEnabled(!seleccionado);  // Desactiva el JButton
         btnRegistrar.setEnabled(!seleccionado);
-        txtCarpetaExpediente.setEnabled(!seleccionado);
-        btnBuscarCarpeta.setEnabled(!seleccionado);
+        txtCarpetaExpediente.setEnabled(seleccionado);
+        btnBuscarCarpeta.setEnabled(seleccionado);
         btnCrearSubcarpetas.setEnabled(seleccionado);
         txtSeleccionaFilaAutocompletado.setEnabled(seleccionado);
         jButton2.setEnabled(seleccionado);
