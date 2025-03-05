@@ -13,17 +13,38 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.*;
 import java.awt.Color;
+import java.util.ArrayList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.util.List;
-import java.util.Map;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.File;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Comparator;
+import javax.imageio.ImageIO;
+import org.apache.commons.math3.util.Pair;
 
 public class ManejadorArchivos {
     private static String rutaCarpeta;
@@ -35,6 +56,8 @@ public class ManejadorArchivos {
     private static String nombreCarpetaObtenido = "";
     private static String nombreExpedienteObtenido = "";
     private static String condicionFila = "vacio";
+    public static String[] rutasRenombradas;
+    private static List<File> pdfFiles = new ArrayList<>(); // Lista estática para almacenar los PDFs
     
     public static String getRutaCarpetaExcel(){
         return rutaCarpetaExcel;
@@ -654,7 +677,6 @@ public class ManejadorArchivos {
 
         JOptionPane.showMessageDialog(null, archivosMovidos + " archivo(s) movido(s) exitosamente a: " + carpetaDestino.getAbsolutePath());
     }
-    //
     public static void verificarSeleccion(JCheckBox jcbSeleccionarTodo, JCheckBox checkBox) {
         if (!checkBox.isSelected()) {
             jcbSeleccionarTodo.setSelected(false);
@@ -663,5 +685,186 @@ public class ManejadorArchivos {
         
         jcbSeleccionarTodo.setSelected(true); // Si llegamos aquí, todos están seleccionados
     }
+    public static void buscarPonerNumeroArchivo(String carpetaInicial, int numero, JTextField textField) {
+        // Configurar JFileChooser para que abra la carpeta inicial
+        JFileChooser chooser = new JFileChooser(carpetaInicial);
+        chooser.setDialogTitle("Seleccione los archivos a renombrar");
+        chooser.setMultiSelectionEnabled(true); // Permitir selección múltiple
+
+        // Filtro para mostrar solo archivos con extensiones permitidas
+        FileNameExtensionFilter filtro = new FileNameExtensionFilter(
+                "Archivos permitidos (PDF, DOC, DOCX, JPG, JPEG, PNG)",
+                "pdf", "doc", "docx", "jpg", "jpeg", "png");
+        chooser.setFileFilter(filtro);
+
+        int resultado = chooser.showOpenDialog(null);
+
+        if (resultado != JFileChooser.APPROVE_OPTION) {
+            System.out.println("No se seleccionaron archivos.");
+            return;
+        }
+
+        // Obtener los archivos seleccionados
+        File[] archivosSeleccionados = chooser.getSelectedFiles();
+        if (archivosSeleccionados.length == 0) {
+            System.out.println("No se seleccionaron archivos.");
+            return;
+        }
+
+        List<String> rutasRenombradasList = new ArrayList<>();
+
+        // Renombrar archivos seleccionados
+        for (File archivo : archivosSeleccionados) {
+            try {
+                String nuevoNombre = numero + " " + archivo.getName();
+                File nuevoArchivo = new File(archivo.getParent(), nuevoNombre);
+                Files.move(archivo.toPath(), nuevoArchivo.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                rutasRenombradasList.add(nuevoArchivo.getAbsolutePath());
+                System.out.println("Archivo renombrado: " + nuevoArchivo.getAbsolutePath());
+                textField.setText("Archivos Agregados");
+            } catch (Exception e) {
+                System.out.println("Error al renombrar archivo: " + archivo.getName() + " - " + e.getMessage());
+            }
+        }
+
+        // Mostrar lista de archivos renombrados en un cuadro de diálogo
+        if (!rutasRenombradasList.isEmpty()) {
+            StringBuilder mensaje = new StringBuilder("Archivos renombrados:\n");
+            for (String ruta : rutasRenombradasList) {
+                mensaje.append(ruta).append("\n");
+            }
+            JOptionPane.showMessageDialog(null, mensaje.toString(), "Renombrado Exitoso", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    
+
+    //----------------------------------------------------------------------------
+    //Metodo en desarrollo
+    public static void buscarConverirAPdfs(String rutaInicial, String nombreArchivoFusion) {
+    JFileChooser fileChooser = new JFileChooser(rutaInicial);
+    fileChooser.setMultiSelectionEnabled(true);
+    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos PDF, Word, Imágenes", "pdf", "docx", "doc", "png", "jpeg", "jpg"));
+
+    int resultado = fileChooser.showOpenDialog(null);
+
+    if (resultado == JFileChooser.APPROVE_OPTION) {
+        File[] archivosSeleccionados = fileChooser.getSelectedFiles();
+        List<Pair<Integer, Object>> listaArchivos = new ArrayList<>();
+
+        Pattern pattern = Pattern.compile("^(\\d+)"); // Capturar números al inicio del nombre
+
+        for (File archivo : archivosSeleccionados) {
+            String fileName = archivo.getName().toLowerCase();
+            Matcher matcher = pattern.matcher(fileName);
+            int num = matcher.find() ? Integer.parseInt(matcher.group(1)) : Integer.MAX_VALUE; // Si no hay número, poner un valor alto
+
+            if (fileName.endsWith(".pdf")) {
+                listaArchivos.add(new Pair<>(num, archivo)); // Guardamos número y archivo
+            } else if (fileName.endsWith(".docx") || fileName.endsWith(".doc") || fileName.endsWith(".png") || fileName.endsWith(".jpeg") || fileName.endsWith(".jpg")) {
+                PDDocument pdfConvertido = convertirA_PDF(archivo);
+                if (pdfConvertido != null) {
+                    listaArchivos.add(new Pair<>(num, pdfConvertido)); // Guardamos número y documento en memoria
+                }
+            }
+        }
+
+        // Ordenar correctamente según el número extraído del nombre
+        listaArchivos.sort(Comparator.comparingInt(Pair::getKey));
+
+        // Fusionar directamente desde listaArchivos sin dividir
+        fusionarPDFs(listaArchivos, rutaInicial + "/" + nombreArchivoFusion + ".pdf");
+    }
+}
+
+    private static PDDocument convertirA_PDF(File archivo) {
+    String fileName = archivo.getName().toLowerCase();
+    try {
+        if (fileName.endsWith(".docx") || fileName.endsWith(".doc")) {
+            File outputFile = File.createTempFile("temp_pdf_", ".pdf");
+            convertirWordAPDF(archivo, outputFile);
+            return PDDocument.load(outputFile);
+        } else if (fileName.endsWith(".png") || fileName.endsWith(".jpeg") || fileName.endsWith(".jpg")) {
+            return convertirImagenAPDF(archivo);
+        }
+    } catch (Exception e) {
+        System.err.println("Error al convertir " + archivo.getName() + " a PDF: " + e.getMessage());
+    }
+    return null;
+}
+    private static void convertirWordAPDF(File inputFile, File outputFile) throws Exception {
+        FileInputStream fis = new FileInputStream(inputFile);
+        XWPFDocument document = new XWPFDocument(fis);
+        Document pdfDocument = new Document();
+        PdfWriter.getInstance(pdfDocument, new FileOutputStream(outputFile));
+
+        pdfDocument.open();
+        document.getParagraphs().forEach(p -> {
+            try {
+                pdfDocument.add(new Paragraph(p.getText()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        pdfDocument.close();
+        document.close();
+        fis.close();
+    }
+    private static PDDocument convertirImagenAPDF(File inputFile) throws Exception {
+    BufferedImage image = ImageIO.read(inputFile);
+    PDDocument pdfDocument = new PDDocument();
+    PDPage page = new PDPage();
+    pdfDocument.addPage(page);
+
+    float pageWidth = page.getMediaBox().getWidth();
+    float pageHeight = page.getMediaBox().getHeight();
+
+    float imageWidth = image.getWidth();
+    float imageHeight = image.getHeight();
+
+    float scale = Math.min(pageWidth / imageWidth, pageHeight / imageHeight);
+    float scaledWidth = imageWidth * scale;
+    float scaledHeight = imageHeight * scale;
+
+    float xPosition = (pageWidth - scaledWidth) / 2;
+    float yPosition = (pageHeight - scaledHeight) / 2;
+
+    PDImageXObject pdImage = PDImageXObject.createFromFile(inputFile.getAbsolutePath(), pdfDocument);
+    PDPageContentStream contentStream = new PDPageContentStream(pdfDocument, page);
+
+    contentStream.drawImage(pdImage, xPosition, yPosition, scaledWidth, scaledHeight);
+    contentStream.close();
+
+    return pdfDocument; // Se devuelve el documento en memoria
+}
+    private static void fusionarPDFs(List<Pair<Integer, Object>> listaArchivos, String destino) {
+    PDFMergerUtility fusionador = new PDFMergerUtility();
+    fusionador.setDestinationFileName(destino);
+
+    try {
+        for (Pair<Integer, Object> item : listaArchivos) {
+            if (item.getValue() instanceof File) {
+                fusionador.addSource((File) item.getValue());
+            } else {
+                PDDocument doc = (PDDocument) item.getValue();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                doc.save(out);
+                fusionador.addSource(new ByteArrayInputStream(out.toByteArray()));
+                doc.close(); // Cerrar después de agregar
+            }
+        }
+
+        fusionador.mergeDocuments(null);
+        JOptionPane.showMessageDialog(null, "PDFs fusionados correctamente en: " + destino);
+
+    } catch (IOException e) {
+        JOptionPane.showMessageDialog(null, "Error al fusionar PDFs: " + e.getMessage());
+    }
+}
+
+
+
 
 }
