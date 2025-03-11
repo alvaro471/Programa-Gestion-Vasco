@@ -376,6 +376,7 @@ public class ManejadorArchivos {
             System.out.println("Error al renombrar el archivo. Asegúrate de que no esté en uso.");
         }
     }
+    //Introducion 12 valores del String[] a la fila Excel
     public static void agregarFilaExcel(String rutaArchivo, String[] valores, int numeroFila, JTextField estadoField) {
         if (valores.length != 12) {
             throw new IllegalArgumentException("Se requieren exactamente 12 valores.");
@@ -397,12 +398,12 @@ public class ManejadorArchivos {
 
             Sheet hoja = workbook.getSheetAt(0); // Primera hoja del archivo
             if (hoja == null) {
-                hoja = workbook.createSheet("Hoja1");
+                hoja = workbook.createSheet("Hoja1"); //LLogico porque workbook es NUEVO
             }
 
             Row fila = hoja.getRow(numeroFila);
             if (fila == null) {
-                fila = hoja.createRow(numeroFila);
+                fila = hoja.createRow(numeroFila); 
             }
 
             
@@ -448,6 +449,7 @@ public class ManejadorArchivos {
             e.printStackTrace();
         }
     }
+    //Busca la carpeta principal de busqueda
     public static void seleccionarCarpetaPrincipal(){
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); // Solo carpetas
@@ -462,9 +464,10 @@ public class ManejadorArchivos {
             rutaCarpetaPrincipal = null; // Si el usuario cancela, asignamos null
         }
     }
+    //Completa el array de JComponent con elementos en orden de la linea excel
     public static void autocompletarPorFilaExcel(String rutaArchivo, int numeroFila, JComponent[] campos) {
         try (FileInputStream file = new FileInputStream(new File(rutaArchivo));
-             Workbook workbook = new XSSFWorkbook(file)) {
+            Workbook workbook = new XSSFWorkbook(file)) {
 
             Sheet sheet = workbook.getSheetAt(0);
             Row row = sheet.getRow(numeroFila - 1);
@@ -863,8 +866,4 @@ public class ManejadorArchivos {
         JOptionPane.showMessageDialog(null, "Error al fusionar PDFs: " + e.getMessage());
     }
 }
-
-
-
-
 }
