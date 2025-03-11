@@ -562,6 +562,7 @@ public class ManejadorArchivos {
             e.printStackTrace();
         }
     }
+    //Renombra el MERGED
     public static void renombrarArchivoMerged(String rutaCarpeta, String newFileName){
         // Crear un objeto File para la carpeta
         File folder = new File(rutaCarpeta);
@@ -593,6 +594,7 @@ public class ManejadorArchivos {
             return;
         }
     }
+    //La cantidad de subcarpetas deberian ser iguales a la cantidad de JTextField(EN QUE ORDEN ESTARA?)
     public static void mostrarLlenuraSubcarpetas(String rutaPadre, JTextField[] camposTexto, Color colorVacio, Color colorLleno){
         File carpetaPadre = new File(rutaPadre);
 
@@ -616,6 +618,7 @@ public class ManejadorArchivos {
             camposTexto[i].setBackground(tieneArchivos ? colorLleno : colorVacio);
         }
     }
+    //Solo buscar una carpeta,SELLAMA VARIAS VECES
     public static void asignarArchivosEtapas(String rutaPadre, String rutaDestino, int numeroEtapa) {
         // Validar que la ruta padre existe
         File directorioPadre = new File(rutaPadre);
@@ -680,6 +683,7 @@ public class ManejadorArchivos {
 
         JOptionPane.showMessageDialog(null, archivosMovidos + " archivo(s) movido(s) exitosamente a: " + carpetaDestino.getAbsolutePath());
     }
+    //
     public static void verificarSeleccion(JCheckBox jcbSeleccionarTodo, JCheckBox checkBox) {
         if (!checkBox.isSelected()) {
             jcbSeleccionarTodo.setSelected(false);
@@ -688,6 +692,7 @@ public class ManejadorArchivos {
         
         jcbSeleccionarTodo.setSelected(true); // Si llegamos aquí, todos están seleccionados
     }
+    //Muestraun mensaje el JOptionPane "Archivos renombrados" y en JTextField "Archivos agregados"
     public static void buscarPonerNumeroArchivo(String carpetaInicial, int numero, JTextField textField) {
         // Configurar JFileChooser para que abra la carpeta inicial
         JFileChooser chooser = new JFileChooser(carpetaInicial);
