@@ -124,7 +124,7 @@ public class ManejadorArchivos {
                 Sheet sheet = workbook.getSheetAt(0); // Obtener la primera hoja
 
 
-                Row row = sheet.getRow(filaSeleccionada);
+                Row row = sheet.getRow(filaSeleccionada - 1);
 
                 int celdasLlenas = 0;
                 
@@ -729,7 +729,7 @@ public class ManejadorArchivos {
                 Files.move(archivo.toPath(), nuevoArchivo.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 rutasRenombradasList.add(nuevoArchivo.getAbsolutePath());
                 System.out.println("Archivo renombrado: " + nuevoArchivo.getAbsolutePath());
-                textField.setText("Archivos Agregados");
+                textField.setBackground(Color.GREEN);;
             } catch (Exception e) {
                 System.out.println("Error al renombrar archivo: " + archivo.getName() + " - " + e.getMessage());
             }

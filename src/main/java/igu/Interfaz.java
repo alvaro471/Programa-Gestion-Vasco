@@ -28,6 +28,7 @@ public class Interfaz extends javax.swing.JFrame {
         txtSeleccionaFilaAutocompletado.setEnabled(false);
         jButton2.setEnabled(false);
         txtEstadoExcelAutocompletar.setEnabled(false);
+        this.setLocationRelativeTo(null); // Centrar la ventana
     }
     
 
@@ -234,7 +235,7 @@ public class Interfaz extends javax.swing.JFrame {
         );
 
         btnCrearSubcarpetas.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        btnCrearSubcarpetas.setText("CREAR CARPETA");
+        btnCrearSubcarpetas.setText("RENOMBRAR CARPETA");
         btnCrearSubcarpetas.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCrearSubcarpetasActionPerformed(evt);
@@ -507,8 +508,12 @@ public class Interfaz extends javax.swing.JFrame {
         String nombreCarpeta = "EXP_" + txtCaso.getText() + "_" + txtApellidoPaterno.getText() + 
                 txtApellidoMaterno.getText() + txtPrimerNombre.getText() + txtSegundoNombre.getText() + 
                 "_" + txtDni.getText();
+        String expediente = txtCaso.getText() + "_" + txtApellidoPaterno.getText() + 
+                txtApellidoMaterno.getText() + txtPrimerNombre.getText() + txtSegundoNombre.getText() + 
+                "_" + txtDni.getText();;
         ManejadorArchivos.procesarCarpeta(ManejadorArchivos.getRutaCarpeta(), txtDni.getText());
         ManejadorArchivos.renombrarCarpeta(ManejadorArchivos.getRutaCarpeta(), nombreCarpeta);
+        ManejadorArchivos.renombrarArchivoMerged(ManejadorArchivos.getRutaCarpeta(), expediente);
     }//GEN-LAST:event_btnCrearSubcarpetasActionPerformed
 
     private void jCheckBoxEstadoAutocompletadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxEstadoAutocompletadoActionPerformed

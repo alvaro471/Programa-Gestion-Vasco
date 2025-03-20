@@ -27,6 +27,7 @@ public class EtapasInterfaz extends javax.swing.JFrame {
         btnExaminarEtapa6.setEnabled(false);
         btnExaminarEtapa7.setEnabled(false);
         btnExaminarEtapa8.setEnabled(false);
+        this.setLocationRelativeTo(null); // Centrar la ventana
     }
 
     
