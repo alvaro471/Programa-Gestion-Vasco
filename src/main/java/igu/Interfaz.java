@@ -68,7 +68,6 @@ public class Interfaz extends javax.swing.JFrame {
         txtPrimerNombre = new javax.swing.JTextField();
         txtSegundoNombre = new javax.swing.JTextField();
         btnRegistrar = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
         jcbMes = new javax.swing.JComboBox<>();
         txtAnio = new javax.swing.JTextField();
         txtFilaSeleccionada = new javax.swing.JTextField();
@@ -85,6 +84,8 @@ public class Interfaz extends javax.swing.JFrame {
         txtEstadoExcelAutocompletar = new javax.swing.JTextField();
         jLabel19 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
         btnCrearSubcarpetas = new javax.swing.JButton();
         jCheckBoxEstadoAutocompletado = new javax.swing.JCheckBox();
         jButton1 = new javax.swing.JButton();
@@ -151,14 +152,6 @@ public class Interfaz extends javax.swing.JFrame {
             }
         });
 
-        jButton4.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
-        jButton4.setText("LIMPIAR");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
-            }
-        });
-
         jcbMes.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE" }));
 
         jLabel15.setText("¿Desde que fila quiere iniciar?");
@@ -192,6 +185,21 @@ public class Interfaz extends javax.swing.JFrame {
             }
         });
 
+        jButton5.setText("CARGAR DATOS");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+
+        jButton4.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        jButton4.setText("LIMPIAR");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -203,11 +211,15 @@ public class Interfaz extends javax.swing.JFrame {
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel14)
                             .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel18)
-                                    .addComponent(jLabel19))
+                                .addComponent(jLabel19)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButton5))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jLabel18)
                                 .addGap(18, 18, 18)
-                                .addComponent(txtSeleccionaFilaAutocompletado, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(txtSeleccionaFilaAutocompletado, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 160, Short.MAX_VALUE)
+                                .addComponent(jButton4))))
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                         .addGroup(jPanel2Layout.createSequentialGroup()
                             .addContainerGap()
@@ -215,23 +227,25 @@ public class Interfaz extends javax.swing.JFrame {
                         .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
                             .addGap(198, 198, 198)
                             .addComponent(jButton2))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(16, 16, 16))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(8, 8, 8)
                 .addComponent(jLabel14)
-                .addGap(13, 13, 13)
+                .addGap(11, 11, 11)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel18)
-                    .addComponent(txtSeleccionaFilaAutocompletado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtSeleccionaFilaAutocompletado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton2)
                 .addGap(19, 19, 19)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel19)
-                    .addComponent(txtEstadoExcelAutocompletar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtEstadoExcelAutocompletar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton5))
                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
@@ -300,10 +314,10 @@ public class Interfaz extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(RegistrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(RegistrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, RegistrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, RegistrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(RegistrarLayout.createSequentialGroup()
                                         .addGap(2, 2, 2)
-                                        .addGroup(RegistrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(RegistrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                             .addGroup(RegistrarLayout.createSequentialGroup()
                                                 .addComponent(jLabel13)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -333,8 +347,6 @@ public class Interfaz extends javax.swing.JFrame {
                                                 .addComponent(txtAnio)
                                                 .addComponent(txtCarpetaPrincipal, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, RegistrarLayout.createSequentialGroup()
-                                        .addComponent(jButton4)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                         .addComponent(btnCrearSubcarpetas)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                         .addComponent(btnRegistrar)))
@@ -434,9 +446,8 @@ public class Interfaz extends javax.swing.JFrame {
                         .addGap(36, 36, 36)
                         .addGroup(RegistrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnRegistrar)
-                            .addComponent(btnCrearSubcarpetas)
-                            .addComponent(jButton4))))
-                .addContainerGap(17, Short.MAX_VALUE))
+                            .addComponent(btnCrearSubcarpetas))))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -501,10 +512,9 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_btnBuscarCarpetaPrincipalActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        JComponent[] componentes = {txtCaso, txtNumeroExpediente, jcbSIMISGD, txtApellidoPaterno, txtApellidoMaterno, 
-                            txtPrimerNombre, txtSegundoNombre, txtDni, txtAnio, jcbMes};
+        
         ManejadorArchivos.seleccionarExcel(Integer.parseInt(txtSeleccionaFilaAutocompletado.getText()), txtEstadoExcelAutocompletar);
-        ManejadorArchivos.autocompletarPorFilaExcel(ManejadorArchivos.getRutaCarpetaExcel(), Integer.parseInt(txtSeleccionaFilaAutocompletado.getText()), componentes);
+        
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void btnCrearSubcarpetasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearSubcarpetasActionPerformed
@@ -555,8 +565,14 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        JOptionPane.showMessageDialog(null, "1. Despues de completar todos los datos se buscara la carpeta principal de trabajo, luegoo se tendra que escribir la fila en la que se quieren inngresar los datos y seleccionar la carpeta donde se encuentra el excel \n 2. Si se quiere renombrar una carpeta con datos de alguna fila del Excel se debe presionar en 'Automcompletar', luego se buscara la carpeta principal y la carpeta que se quiere renombrar, dedpues se escribira la fila y se seleccionara el Excel, esto tomara automcompletara el formulario con los datos de la fila, al darle click en Renombrar Carpeta renombrara la carpeta, creara las subcarpetas y ordenara los archivos que tengan el indice de las etapas");
+        JOptionPane.showMessageDialog(null, "1. Despues de completar todos los datos se buscara la carpeta principal de trabajo, luego se tendra que escribir \nla fila en la que se quieren inngresar los datos y seleccionar la carpeta donde se encuentra el excel \n 2. Si se quiere renombrar una carpeta con datos de alguna fila del Excel se debe presionar en 'Automcompletar',\nluego se buscara la carpeta principal y la carpeta que se quiere renombrar, dedpues se escribira la fila\n y se seleccionara el Excel, esto tomara automcompletara el formulario con los datos de la fila, al darle click \nen Renombrar Carpeta renombrara la carpeta, creara las subcarpetas y ordenara los archivos que tengan el indice de las etapas");
     }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        JComponent[] componentes = {txtCaso, txtNumeroExpediente, jcbSIMISGD, txtApellidoPaterno, txtApellidoMaterno, 
+                            txtPrimerNombre, txtSegundoNombre, txtDni, txtAnio, jcbMes};
+        ManejadorArchivos.autocompletarPorFilaExcel(ManejadorArchivos.getRutaCarpetaExcel(), Integer.parseInt(txtSeleccionaFilaAutocompletado.getText()), componentes);
+    }//GEN-LAST:event_jButton5ActionPerformed
     
     /**
      * @param args the command line arguments
@@ -604,6 +620,7 @@ public class Interfaz extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
     private javax.swing.JCheckBox jCheckBoxEstadoAutocompletado;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

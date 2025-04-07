@@ -164,7 +164,7 @@ public class InterfazSeleccionar extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // Crear una instancia del segundo JFrame
-        interfazEnumerar ventana = new interfazEnumerar();
+        interfazEnumerar3 ventana = new interfazEnumerar3();
 
         // Hacerlo visible
         ventana.setVisible(true);

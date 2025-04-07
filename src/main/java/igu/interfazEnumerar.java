@@ -33,6 +33,7 @@ public class interfazEnumerar extends javax.swing.JFrame {
         txtEtapa5.setBackground(Color.RED);
         txtEtapa6.setBackground(Color.RED);
         txtEtapa7.setBackground(Color.RED);
+        txtEtapa8.setBackground(Color.RED);
     }
 
     /**
@@ -68,6 +69,17 @@ public class interfazEnumerar extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         txtEtapa7 = new javax.swing.JTextField();
         jButton7 = new javax.swing.JButton();
+        jLabel9 = new javax.swing.JLabel();
+        txtEtapa8 = new javax.swing.JTextField();
+        jButton11 = new javax.swing.JButton();
+        btnVerArchivos1 = new javax.swing.JButton();
+        btnVerArchivos2 = new javax.swing.JButton();
+        btnVerArchivos3 = new javax.swing.JButton();
+        btnVerArchivos4 = new javax.swing.JButton();
+        btnVerArchivos5 = new javax.swing.JButton();
+        btnVerArchivos6 = new javax.swing.JButton();
+        btnVerArchivos7 = new javax.swing.JButton();
+        btnVerArchivos8 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         txtNombreConsolidado = new javax.swing.JTextField();
@@ -118,6 +130,12 @@ public class interfazEnumerar extends javax.swing.JFrame {
             }
         });
 
+        txtEtapa2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtEtapa2ActionPerformed(evt);
+            }
+        });
+
         jLabel3.setText("Etapa 2");
 
         jLabel4.setText("Etapa 3");
@@ -165,12 +183,83 @@ public class interfazEnumerar extends javax.swing.JFrame {
             }
         });
 
+        jLabel9.setText("Etapa 8");
+
+        jButton11.setText("EXAMINAR");
+        jButton11.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton11ActionPerformed(evt);
+            }
+        });
+
+        btnVerArchivos1.setText("Archivos seleccionados");
+        btnVerArchivos1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVerArchivos1ActionPerformed(evt);
+            }
+        });
+
+        btnVerArchivos2.setText("Archivos seleccionados");
+        btnVerArchivos2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVerArchivos2ActionPerformed(evt);
+            }
+        });
+
+        btnVerArchivos3.setText("Archivos seleccionados");
+        btnVerArchivos3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVerArchivos3ActionPerformed(evt);
+            }
+        });
+
+        btnVerArchivos4.setText("Archivos seleccionados");
+        btnVerArchivos4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVerArchivos4ActionPerformed(evt);
+            }
+        });
+
+        btnVerArchivos5.setText("Archivos seleccionados");
+        btnVerArchivos5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVerArchivos5ActionPerformed(evt);
+            }
+        });
+
+        btnVerArchivos6.setText("Archivos seleccionados");
+        btnVerArchivos6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVerArchivos6ActionPerformed(evt);
+            }
+        });
+
+        btnVerArchivos7.setText("Archivos seleccionados");
+        btnVerArchivos7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVerArchivos7ActionPerformed(evt);
+            }
+        });
+
+        btnVerArchivos8.setText("Archivos seleccionados");
+        btnVerArchivos8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVerArchivos8ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(116, 116, 116)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnVerArchivos1)
+                    .addComponent(btnVerArchivos2)
+                    .addComponent(btnVerArchivos3)
+                    .addComponent(btnVerArchivos4))
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel5)
@@ -189,17 +278,27 @@ public class interfazEnumerar extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(txtEtapa1, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jButton4)
-                    .addComponent(jButton1)
                     .addComponent(jButton2)
-                    .addComponent(jButton3))
-                .addGap(214, 214, 214)
+                    .addComponent(jButton3)
+                    .addComponent(jButton1))
+                .addGap(92, 92, 92)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnVerArchivos5)
+                    .addComponent(btnVerArchivos6)
+                    .addComponent(btnVerArchivos7)
+                    .addComponent(btnVerArchivos8))
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel8)
+                        .addComponent(jLabel9)
                         .addGap(18, 18, 18)
-                        .addComponent(txtEtapa7))
+                        .addComponent(txtEtapa8, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtEtapa7, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addGap(18, 18, 18)
@@ -212,8 +311,9 @@ public class interfazEnumerar extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton5)
                     .addComponent(jButton6)
-                    .addComponent(jButton7))
-                .addGap(178, 178, 178))
+                    .addComponent(jButton7)
+                    .addComponent(jButton11))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -225,7 +325,9 @@ public class interfazEnumerar extends javax.swing.JFrame {
                     .addComponent(jButton1)
                     .addComponent(jLabel6)
                     .addComponent(txtEtapa5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton5))
+                    .addComponent(jButton5)
+                    .addComponent(btnVerArchivos1)
+                    .addComponent(btnVerArchivos5))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
@@ -233,7 +335,9 @@ public class interfazEnumerar extends javax.swing.JFrame {
                     .addComponent(jButton2)
                     .addComponent(jLabel7)
                     .addComponent(txtEtapa6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton6))
+                    .addComponent(jButton6)
+                    .addComponent(btnVerArchivos2)
+                    .addComponent(btnVerArchivos6))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
@@ -241,12 +345,19 @@ public class interfazEnumerar extends javax.swing.JFrame {
                     .addComponent(jButton3)
                     .addComponent(jLabel8)
                     .addComponent(txtEtapa7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton7))
+                    .addComponent(jButton7)
+                    .addComponent(btnVerArchivos3)
+                    .addComponent(btnVerArchivos7))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtEtapa4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton4))
+                    .addComponent(jButton4)
+                    .addComponent(jLabel9)
+                    .addComponent(txtEtapa8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton11)
+                    .addComponent(btnVerArchivos4)
+                    .addComponent(btnVerArchivos8))
                 .addContainerGap(31, Short.MAX_VALUE))
         );
 
@@ -395,7 +506,7 @@ public class interfazEnumerar extends javax.swing.JFrame {
                         .addComponent(jButton8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton10)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGap(0, 146, Short.MAX_VALUE))
                     .addComponent(jPanel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -458,7 +569,12 @@ public class interfazEnumerar extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton7ActionPerformed
 
     private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
-        ManejadorArchivos.buscarConverirAPdfs(ManejadorArchivos.getRutaCarpeta(), txtNombreConsolidado.getText());
+        if(!"".equals(txtNombreConsolidado.getText())){
+            ManejadorArchivos.buscarConverirAPdfs(ManejadorArchivos.getRutaCarpeta(), txtNombreConsolidado.getText());
+        }
+        else{
+            JOptionPane.showMessageDialog(null, "Debe ingresar un nombre para el expediente");
+        }
     }//GEN-LAST:event_jButton9ActionPerformed
 
     private void btnLimpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarActionPerformed
@@ -480,6 +596,46 @@ public class interfazEnumerar extends javax.swing.JFrame {
         // Cerrar el actual (opcional)
         this.dispose();
     }//GEN-LAST:event_jButton10ActionPerformed
+
+    private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton11ActionPerformed
+        ManejadorArchivos.buscarPonerNumeroArchivo(ManejadorArchivos.getRutaCarpeta(), 8, txtEtapa8);
+    }//GEN-LAST:event_jButton11ActionPerformed
+
+    private void btnVerArchivos1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerArchivos1ActionPerformed
+        ManejadorArchivos.mostrarDocumentosLista(1);
+    }//GEN-LAST:event_btnVerArchivos1ActionPerformed
+
+    private void btnVerArchivos2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerArchivos2ActionPerformed
+        ManejadorArchivos.mostrarDocumentosLista(2);
+    }//GEN-LAST:event_btnVerArchivos2ActionPerformed
+
+    private void btnVerArchivos3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerArchivos3ActionPerformed
+        ManejadorArchivos.mostrarDocumentosLista(3);
+    }//GEN-LAST:event_btnVerArchivos3ActionPerformed
+
+    private void btnVerArchivos4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerArchivos4ActionPerformed
+        ManejadorArchivos.mostrarDocumentosLista(4);
+    }//GEN-LAST:event_btnVerArchivos4ActionPerformed
+
+    private void btnVerArchivos5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerArchivos5ActionPerformed
+        ManejadorArchivos.mostrarDocumentosLista(5);
+    }//GEN-LAST:event_btnVerArchivos5ActionPerformed
+
+    private void btnVerArchivos6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerArchivos6ActionPerformed
+        ManejadorArchivos.mostrarDocumentosLista(6);
+    }//GEN-LAST:event_btnVerArchivos6ActionPerformed
+
+    private void btnVerArchivos7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerArchivos7ActionPerformed
+        ManejadorArchivos.mostrarDocumentosLista(7);
+    }//GEN-LAST:event_btnVerArchivos7ActionPerformed
+
+    private void btnVerArchivos8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerArchivos8ActionPerformed
+        ManejadorArchivos.mostrarDocumentosLista(8);
+    }//GEN-LAST:event_btnVerArchivos8ActionPerformed
+
+    private void txtEtapa2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtEtapa2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtEtapa2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -521,8 +677,17 @@ public class interfazEnumerar extends javax.swing.JFrame {
     private javax.swing.JButton btnCarpetaPrincipal;
     private javax.swing.JButton btnLimpiar;
     private javax.swing.JButton btnSeleccionarCarpetaArchivos;
+    private javax.swing.JButton btnVerArchivos1;
+    private javax.swing.JButton btnVerArchivos2;
+    private javax.swing.JButton btnVerArchivos3;
+    private javax.swing.JButton btnVerArchivos4;
+    private javax.swing.JButton btnVerArchivos5;
+    private javax.swing.JButton btnVerArchivos6;
+    private javax.swing.JButton btnVerArchivos7;
+    private javax.swing.JButton btnVerArchivos8;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton10;
+    private javax.swing.JButton jButton11;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
@@ -543,6 +708,7 @@ public class interfazEnumerar extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -556,6 +722,7 @@ public class interfazEnumerar extends javax.swing.JFrame {
     private javax.swing.JTextField txtEtapa5;
     private javax.swing.JTextField txtEtapa6;
     private javax.swing.JTextField txtEtapa7;
+    private javax.swing.JTextField txtEtapa8;
     private javax.swing.JTextField txtNombreConsolidado;
     // End of variables declaration//GEN-END:variables
 }
