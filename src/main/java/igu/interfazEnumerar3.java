@@ -4,19 +4,58 @@
  */
 package igu;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Desktop;
+import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import persistencia.ConfigUtil;
 import persistencia.ManejadorArchivos;
+import static persistencia.ManejadorArchivos.obtenerExtensionArchivo;
 
-/**
- *
- * @author user
- */
+
 public class interfazEnumerar3 extends javax.swing.JFrame {
-
     
+    DefaultListModel<String> modeloLista1Nombres = new DefaultListModel<>();
+    DefaultListModel<String> modeloLista1Rutas = new DefaultListModel<>();
+
+
+    // Modelo para jList2 (destino)
+    DefaultListModel<String> modeloLista2Rutas = new DefaultListModel<>(); // Guarda rutas
+    DefaultListModel<String> modeloLista2Nombres = new DefaultListModel<>(); // Muestra nombres
+
     public interfazEnumerar3() {
         initComponents();
-        
+        String rutaGuardada = ConfigUtil.cargarRuta();
+        if (rutaGuardada != null) {
+            ManejadorArchivos.setRutaCarpetaPrincipal(rutaGuardada);
+            System.out.println("Ruta cargada desde config.txt: " + rutaGuardada);
+        }
+        setLocationRelativeTo(null);
+        setResizable(false);
+        inicializarModelos();
+    }
+    private void inicializarModelos() {
+        jListConsolidado.setModel(modeloLista2Nombres); // Muestra solo nombres
+        jList1.setModel(modeloLista1Nombres);
+
+    }
+    protected void processWindowEvent(WindowEvent e) {
+        super.processWindowEvent(e);
+
+        if (e.getID() == WindowEvent.WINDOW_DEICONIFIED) {
+            revalidate();
+            repaint();
+        }
     }
 
     /**
@@ -39,7 +78,7 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jButton3 = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
+        jComboBox1 = new javax.swing.JComboBox<>();
         jPanel3 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         jTextField4 = new javax.swing.JTextField();
@@ -47,11 +86,36 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList<>();
         jButton5 = new javax.swing.JButton();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jListConsolidado = new javax.swing.JList<>();
+        jLabel7 = new javax.swing.JLabel();
+        txtNombreConsolidado = new javax.swing.JTextField();
+        btnCrearConsolidado = new javax.swing.JButton();
+        btnArriba = new javax.swing.JButton();
+        btnAbajo = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
+        jButton9 = new javax.swing.JButton();
+        jButton10 = new javax.swing.JButton();
+        btnEnviarConsolidado = new javax.swing.JButton();
+        btnVisualizarPDF = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
+        jButton8 = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        txtPDF = new javax.swing.JTextField();
+        jLabel11 = new javax.swing.JLabel();
+        txtDOC = new javax.swing.JTextField();
+        txtImagenes = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
+        jButton11 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        jLabel1.setText("ENUMERAR DOCUMENTOS - CREAR CONSOLIDADO");
+        jLabel1.setText("DOCUMENTAR ETAPAS - CREAR EXPEDIENTE");
 
         jLabel2.setText("Seleccionar carpeta principal");
 
@@ -82,29 +146,34 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
 
         jLabel4.setText("ETAPA:");
 
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1", "2", "3", "4", "5", "6", "7", "8" }));
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(30, 30, 30)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jButton3)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel4)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addContainerGap(232, Short.MAX_VALUE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton3)
+                        .addGap(61, 61, 61))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGap(18, 18, 18)
                 .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 77, Short.MAX_VALUE)
-                .addComponent(jButton3)
-                .addGap(39, 39, 39))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton3))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -139,9 +208,9 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
                 .addComponent(jLabel5)
                 .addGap(18, 18, 18)
                 .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(52, 52, 52)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton4)
-                .addGap(41, 41, 41))
+                .addGap(81, 81, 81))
         );
 
         jList1.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
@@ -159,22 +228,177 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
             }
         });
 
+        jPanel4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        jLabel6.setText("CONSOLIDADO");
+
+        jListConsolidado.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                jListConsolidadoValueChanged(evt);
+            }
+        });
+        jScrollPane1.setViewportView(jListConsolidado);
+
+        jLabel7.setText("Nombre:");
+
+        btnCrearConsolidado.setText("CREAR");
+        btnCrearConsolidado.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCrearConsolidadoActionPerformed(evt);
+            }
+        });
+
+        btnArriba.setText("ARRIBA");
+        btnArriba.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnArribaActionPerformed(evt);
+            }
+        });
+
+        btnAbajo.setText("ABAJO");
+        btnAbajo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAbajoActionPerformed(evt);
+            }
+        });
+
+        jButton6.setText("BORRAR");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
+        jButton9.setText("BORRAR TODO");
+        jButton9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton9ActionPerformed(evt);
+            }
+        });
+
+        jButton10.setText("CREAR CONSOLIDADO GENERAL");
+        jButton10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton10ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                        .addComponent(jScrollPane1)
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnArriba)
+                            .addComponent(btnAbajo)
+                            .addComponent(jButton6)
+                            .addComponent(jButton9))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtNombreConsolidado, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnCrearConsolidado)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(23, 23, 23)
+                        .addComponent(jButton10)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 454, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(btnArriba)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnAbajo)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton6)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton9)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(txtNombreConsolidado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCrearConsolidado))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 14, Short.MAX_VALUE)
+                .addComponent(jButton10)
+                .addGap(24, 24, 24))
+        );
+
+        btnEnviarConsolidado.setText("ENVIAR AL CONSOLIDADO");
+        btnEnviarConsolidado.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEnviarConsolidadoActionPerformed(evt);
+            }
+        });
+
+        btnVisualizarPDF.setText("VISUALIZAR");
+        btnVisualizarPDF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVisualizarPDFActionPerformed(evt);
+            }
+        });
+
+        jButton7.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        jButton7.setText("REGRESAR");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+
+        jButton8.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        jButton8.setText("LIMPIAR");
+        jButton8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton8ActionPerformed(evt);
+            }
+        });
+
+        jLabel8.setText("ASIGNAR ETAPA");
+
+        jLabel9.setText("ELIMINAR ETAPA");
+
+        jLabel10.setText("PDFS");
+
+        jLabel11.setText("DOC o DOCX");
+
+        txtImagenes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtImagenesActionPerformed(evt);
+            }
+        });
+
+        jLabel12.setText("IMAGENES");
+
+        jButton11.setText("MODIFICAR NOMBRE");
+        jButton11.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton11ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(20, 20, 20)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 396, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(65, 65, 65)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -187,38 +411,106 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jButton1)
-                            .addComponent(jButton2))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jButton5)
-                .addGap(24, 24, 24))
+                            .addComponent(jButton2)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel10)
+                                .addGap(74, 74, 74)
+                                .addComponent(jLabel11)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButton5))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addGap(29, 29, 29)
+                                .addComponent(jButton7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton8))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 396, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(btnEnviarConsolidado)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(btnVisualizarPDF)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jButton11))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(txtPDF, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(26, 26, 26)
+                                        .addComponent(txtDOC, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(33, 33, 33)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel12)
+                                            .addComponent(txtImagenes, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel8)
+                                    .addComponent(jLabel9))))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(txtCarpetaPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(txtCarpetaArchivos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2))
-                .addGap(34, 34, 34)
-                .addComponent(jButton5)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel1)
+                                    .addComponent(jButton7)
+                                    .addComponent(jButton8))
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                            .addComponent(jLabel2)
+                                            .addComponent(txtCarpetaPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jButton1))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                            .addComponent(jLabel3)
+                                            .addComponent(txtCarpetaArchivos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jButton2))
+                                        .addGap(40, 40, 40)
+                                        .addComponent(jButton5))
+                                    .addComponent(jLabel12)))
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel10)
+                                .addComponent(jLabel11)))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(20, 20, 20)
+                                .addComponent(jLabel8))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(txtPDF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtDOC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtImagenes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane2))
-                .addContainerGap(20, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(24, 24, 24)
+                                .addComponent(jLabel9)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 316, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(btnEnviarConsolidado)
+                                    .addComponent(btnVisualizarPDF)
+                                    .addComponent(jButton11)))))
+                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -238,8 +530,45 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        ManejadorArchivos.renombrarArchivoConNumero(ManejadorArchivos.getRutaArchivoSeleccionado(), Integer.parseInt(jTextField3.getText()));
-        ManejadorArchivos.cargarArchivosEnLista(ManejadorArchivos.getRutaCarpeta(), jList1);
+        int numeroInicial = Integer.parseInt(jComboBox1.getSelectedItem().toString());
+
+        // Obtener los archivos seleccionados en el JList (solo nombres)
+        List<String> archivosSeleccionados = jList1.getSelectedValuesList();
+
+        // Iterar sobre los archivos seleccionados
+        for (int i = 0; i < archivosSeleccionados.size(); i++) {
+            String nombreArchivo = archivosSeleccionados.get(i);
+
+            // Buscar la ruta completa del archivo usando el modelo de rutas
+            String rutaArchivo = null;
+            for (int j = 0; j < modeloLista1Nombres.getSize(); j++) {
+                if (modeloLista1Nombres.get(j).equals(nombreArchivo)) {
+                    rutaArchivo = modeloLista1Rutas.get(j);  // Obtener la ruta completa
+                    break;
+                }
+            }
+
+            // Verificar si se obtuvo la ruta completa
+            if (rutaArchivo != null) {
+                // Imprimir ruta para depuración
+                System.out.println("Renombrando archivo en: " + rutaArchivo);
+                ManejadorArchivos.renombrarArchivoConNumero(rutaArchivo, numeroInicial + i);
+            } else {
+                JOptionPane.showMessageDialog(null, "No se encontró la ruta para el archivo: " + nombreArchivo,
+                                              "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        // Recargar la lista de archivos después de renombrarlos
+        modeloLista1Nombres = new DefaultListModel<>();
+        modeloLista1Rutas = new DefaultListModel<>();
+
+        ManejadorArchivos.cargarArchivosEnLista(
+            ManejadorArchivos.getRutaCarpeta(),
+            jList1,
+            modeloLista1Nombres,
+            modeloLista1Rutas
+        );
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -252,18 +581,58 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        
-        ManejadorArchivos.cargarArchivosEnLista(ManejadorArchivos.getRutaCarpeta(), jList1);
+        // Asegúrate de inicializar los modelos antes de usar
+        modeloLista1Nombres = new DefaultListModel<>();
+        modeloLista1Rutas = new DefaultListModel<>();
 
+        // Llamar al método para cargar los archivos en jList1
+        ManejadorArchivos.cargarArchivosEnLista(
+            ManejadorArchivos.getRutaCarpeta(),  // Ruta de la carpeta
+            jList1,  // El JList que muestra los archivos
+            modeloLista1Nombres,  // Modelo de los nombres de archivo (con numeración)
+            modeloLista1Rutas  // Modelo de las rutas de archivo (originales)
+        );
 
+        // Contar tipos de archivos
+        ManejadorArchivos.contarYActualizarTiposDeArchivos(
+            modeloLista1Rutas,
+            modeloLista1Nombres,
+            txtPDF,
+            txtDOC,
+            txtImagenes
+        );
 
+        // Buscar archivo con "RD" después del primer carácter alfabético
+        for (int i = 0; i < modeloLista1Nombres.size(); i++) {
+            String nombreArchivo = modeloLista1Nombres.get(i);
+
+            // Remover numeración tipo "3.1 " si está presente
+            String nombreSinNumeracion = nombreArchivo.replaceFirst("^\\d+\\.\\d+\\s*", "");
+
+            // Buscar desde la primera letra
+            int indexLetra = -1;
+            for (int j = 0; j < nombreSinNumeracion.length(); j++) {
+                if (Character.isLetter(nombreSinNumeracion.charAt(j))) {
+                    indexLetra = j;
+                    break;
+                }
+            }
+
+            if (indexLetra != -1) {
+                String desdePrimeraLetra = nombreSinNumeracion.substring(indexLetra);
+                if (desdePrimeraLetra.toLowerCase().startsWith("rd")) {
+                    txtNombreConsolidado.setText(nombreArchivo); // Mostrar nombre completo
+                    break; // Solo queremos el primero que cumpla
+                }
+            }
+        }
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jList1ValueChanged
         if (!evt.getValueIsAdjusting()) {
             String archivoSeleccionado = jList1.getSelectedValue();
             if (archivoSeleccionado != null) {
-                ManejadorArchivos.reaccionSeleccion(archivoSeleccionado, ManejadorArchivos.getRutaCarpeta(), jTextField3);
+                ManejadorArchivos.reaccionSeleccion(archivoSeleccionado, ManejadorArchivos.getRutaCarpeta(), jComboBox1);
             }
         }
         // Obtener la ruta del archivo seleccionado
@@ -278,16 +647,368 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
         // Establecer el nombre del archivo en el JTextField
         jTextField4.setText(nombreArchivo);
 
-
     }//GEN-LAST:event_jList1ValueChanged
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // Renombramos el archivo sin los números
-        ManejadorArchivos.renombrarArchivoSinNumeros(ManejadorArchivos.getRutaArchivoSeleccionado());
+        // Obtener la ruta completa del archivo seleccionado desde el modelo de rutas
+        String rutaArchivoSeleccionado = ManejadorArchivos.getRutaArchivoSeleccionado();
 
-        // Recargamos la lista de archivos
-        ManejadorArchivos.cargarArchivosEnLista(ManejadorArchivos.getRutaCarpeta(), jList1);
+        if (rutaArchivoSeleccionado == null || rutaArchivoSeleccionado.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No se ha seleccionado un archivo o la ruta es inválida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Renombramos el archivo sin los números y guiones al inicio
+        ManejadorArchivos.renombrarArchivoSinNumeros(rutaArchivoSeleccionado);
+
+        // Recargamos la lista de archivos, asegurándonos de usar las rutas correctas
+        modeloLista1Nombres = new DefaultListModel<>();
+        modeloLista1Rutas = new DefaultListModel<>();
+
+        // Recargamos la lista con las rutas originales y los nombres
+        ManejadorArchivos.cargarArchivosEnLista(
+            ManejadorArchivos.getRutaCarpeta(),  // Ruta de la carpeta
+            jList1,  // El JList que muestra los archivos
+            modeloLista1Nombres,  // Modelo de los nombres de archivo (con numeración)
+            modeloLista1Rutas  // Modelo de las rutas de archivo (originales)
+        );
     }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void btnEnviarConsolidadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnviarConsolidadoActionPerformed
+        int[] indices = jList1.getSelectedIndices(); // Obtener todos los índices seleccionados
+
+        if (indices.length > 0) {
+            for (int index : indices) {
+                String rutaReal = modeloLista1Rutas.get(index);
+                String nombreMostrado = modeloLista1Nombres.get(index);
+
+                // Obtener extensión del archivo
+                String extension = "";
+                int i = nombreMostrado.lastIndexOf('.');
+                if (i > 0) {
+                    extension = nombreMostrado.substring(i + 1).toLowerCase();
+                }
+
+                // Validar extensión
+                if (extension.equals("doc") || extension.equals("docx")) {
+                    JOptionPane.showMessageDialog(this, "El archivo \"" + nombreMostrado + "\" no está permitido.");
+                    continue;
+                }
+
+                // Verificar si ya está
+                if (!modeloLista2Rutas.contains(rutaReal)) {
+                    // 👇 Insertar ordenadamente en ambos modelos
+                    ManejadorArchivos.insertarOrdenadoPorNumero(
+                        modeloLista2Nombres,
+                        modeloLista2Rutas,
+                        nombreMostrado,
+                        rutaReal
+                    );
+
+                    ManejadorArchivos.agregarRutaArchivo(rutaReal); // Si usás esto para consolidar luego
+                } else {
+                    JOptionPane.showMessageDialog(this, "El archivo \"" + nombreMostrado + "\" ya está en la lista.");
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona al menos un archivo en la primera lista.");
+        }
+    }//GEN-LAST:event_btnEnviarConsolidadoActionPerformed
+
+    private void jListConsolidadoValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListConsolidadoValueChanged
+        if (!evt.getValueIsAdjusting()) {
+            int index = jListConsolidado.getSelectedIndex();
+
+            if (index != -1) {
+                // Obtener la ruta real desde el modelo de rutas
+                String rutaCompleta = modeloLista2Rutas.get(index);
+
+                // Guardar la ruta usando el nuevo método
+                ManejadorArchivos.setRutaArchivoSeleccionadoConsolidado(rutaCompleta);
+
+                // También podés reutilizar el método de reacción si te sirve
+                File archivo = new File(rutaCompleta);
+                String nombreArchivo = archivo.getName();
+
+                // Llenar el textField como hiciste en jList1
+                jTextField4.setText(nombreArchivo);
+
+                // Si querés reutilizar la lógica del método original (por ejemplo para actualizar jTextField3 también)
+                ManejadorArchivos.reaccionSeleccion(nombreArchivo, archivo.getParent(), jComboBox1);
+            }
+        }
+    }//GEN-LAST:event_jListConsolidadoValueChanged
+
+    private void btnArribaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnArribaActionPerformed
+        int index = jListConsolidado.getSelectedIndex();
+        if (index > 0) {
+            // Intercambiar en modelo visual
+            String nombre = modeloLista2Nombres.get(index);
+            modeloLista2Nombres.remove(index);
+            modeloLista2Nombres.add(index - 1, nombre);
+
+            // Intercambiar en modelo lógico
+            ManejadorArchivos.moverRuta(index, index - 1);
+
+            jListConsolidado.setSelectedIndex(index - 1);
+        }
+    }//GEN-LAST:event_btnArribaActionPerformed
+
+    private void btnAbajoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAbajoActionPerformed
+        int index = jListConsolidado.getSelectedIndex();
+        if (index < modeloLista2Nombres.size() - 1 && index != -1) {
+            String nombre = modeloLista2Nombres.get(index);
+            modeloLista2Nombres.remove(index);
+            modeloLista2Nombres.add(index + 1, nombre);
+
+            ManejadorArchivos.moverRuta(index, index + 1);
+
+            jListConsolidado.setSelectedIndex(index + 1);
+        }
+    }//GEN-LAST:event_btnAbajoActionPerformed
+
+    private void btnCrearConsolidadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearConsolidadoActionPerformed
+        String nombreArchivo = txtNombreConsolidado.getText().trim(); // Asegúrate que txtNombreConsolidado es tu JTextField
+
+        if (nombreArchivo.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Debes ingresar un nombre para el archivo PDF.");
+            return;
+        }
+
+        // Usar la ruta definida en ManejadorArchivos
+        String rutaDestino = ManejadorArchivos.getRutaCarpeta();
+        if (rutaDestino == null || rutaDestino.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No se ha definido una carpeta válida para guardar el consolidado.");
+            return;
+        }
+
+        // Usar la ruta obtenida para crear el archivo destino
+        File carpetaDestino = new File(rutaDestino);
+        if (!carpetaDestino.exists() || !carpetaDestino.isDirectory()) {
+            JOptionPane.showMessageDialog(this, "La carpeta destino no existe.");
+            return;
+        }
+
+        try {
+            ManejadorArchivos.unirPDFs(nombreArchivo, carpetaDestino);
+            JOptionPane.showMessageDialog(this, "Archivo PDF combinado creado correctamente.");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error al crear el PDF: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }//GEN-LAST:event_btnCrearConsolidadoActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        int index = jListConsolidado.getSelectedIndex();
+
+        if (index != -1) {
+            int confirmacion = JOptionPane.showConfirmDialog(this, "¿Estás seguro de eliminar este archivo de la lista?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+
+            if (confirmacion == JOptionPane.YES_OPTION) {
+                // Elimina del modelo visual
+                modeloLista2Nombres.remove(index);
+                modeloLista2Rutas.remove(index);
+
+                // Elimina del modelo lógico (rutas)
+                ManejadorArchivos.eliminarRuta(index);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona un archivo para eliminar.");
+        }
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void btnVisualizarPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVisualizarPDFActionPerformed
+        int index = jList1.getSelectedIndex();
+        if (index != -1) {
+            String rutaCompleta = modeloLista1Rutas.get(index); // ✅ Usamos la ruta real directamente
+            if (rutaCompleta.toLowerCase().endsWith(".pdf")) {
+                // Abrir el PDF en el visor interno
+                VisualizarPDF visor = new VisualizarPDF(rutaCompleta);
+                visor.setVisible(true);
+            } else if (rutaCompleta.toLowerCase().endsWith(".docx")) {
+                // Abrir archivo Word en la aplicación predeterminada
+                try {
+                    File wordFile = new File(rutaCompleta);
+                    if (wordFile.exists()) {
+                        Desktop.getDesktop().open(wordFile);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "El archivo de Word no existe.");
+                    }
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(null, "Error al intentar abrir el archivo de Word: " + e.getMessage());
+                }
+            } else if (rutaCompleta.toLowerCase().endsWith(".jpg") || 
+                       rutaCompleta.toLowerCase().endsWith(".jpeg") || 
+                       rutaCompleta.toLowerCase().endsWith(".png") || 
+                       rutaCompleta.toLowerCase().endsWith(".gif")) {
+                // Abrir imagen en el visor predeterminado
+                try {
+                    File imageFile = new File(rutaCompleta);
+                    if (imageFile.exists()) {
+                        Desktop.getDesktop().open(imageFile);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "La imagen no existe.");
+                    }
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(null, "Error al intentar abrir la imagen: " + e.getMessage());
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Archivo no soportado. Solo se permiten PDF, Word (.docx) o imágenes.");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No has seleccionado ningún archivo.");
+        }
+    }//GEN-LAST:event_btnVisualizarPDFActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        // Crear una instancia del segundo JFrame
+        InterfazSeleccionar ventana = new InterfazSeleccionar();
+
+        // Hacerlo visible
+        ventana.setVisible(true);
+
+        // Cerrar el actual (opcional)
+        this.dispose();
+    }//GEN-LAST:event_jButton7ActionPerformed
+
+    private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
+        if (modeloLista2Nombres.getSize() == 0) {
+        JOptionPane.showMessageDialog(this, "La lista ya está vacía.");
+        return;
+        }
+
+        int confirmacion = JOptionPane.showConfirmDialog(this, "¿Estás seguro de eliminar todos los archivos de la lista?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+
+        if (confirmacion == JOptionPane.YES_OPTION) {
+            // Limpiar el modelo visual
+            modeloLista2Nombres.clear();
+            modeloLista2Rutas.clear();
+
+            // Limpiar el modelo lógico
+            ManejadorArchivos.eliminarTodasLasRutas();  // Este método deberías crearlo si no existe
+        }
+    }//GEN-LAST:event_jButton9ActionPerformed
+
+    private void txtImagenesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtImagenesActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtImagenesActionPerformed
+
+    private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+        txtPDF.setText("");
+        txtDOC.setText("");
+        txtImagenes.setText("");
+        
+    }//GEN-LAST:event_jButton8ActionPerformed
+
+    private void jButton10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton10ActionPerformed
+        // Filtrar archivos válidos y agregarlos uno a uno
+        for (int i = 0; i < modeloLista1Rutas.size(); i++) {
+            String ruta = modeloLista1Rutas.get(i);
+            String extension = obtenerExtensionArchivo(ruta).toLowerCase();
+
+            if (extension.equals("pdf") ||
+                extension.equals("jpg") ||
+                extension.equals("jpeg") ||
+                extension.equals("png") ||
+                extension.equals("bmp") ||
+                extension.equals("gif")) {
+                ManejadorArchivos.agregarRutaArchivo(ruta);
+            }
+        }
+
+        if (ManejadorArchivos.getRutasArchivos().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay archivos válidos para fusionar (solo PDF e imágenes).");
+            return;
+        }
+
+        String nombreSalida = "merged";  // Nombre fijo por defecto
+        File carpetaDestino = new File(ManejadorArchivos.getRutaCarpeta());
+        File archivoSalida = new File(carpetaDestino, nombreSalida + ".pdf");
+
+        // Verificar si el archivo ya existe
+        if (archivoSalida.exists()) {
+            // Mostrar un JOptionPane para preguntar al usuario si desea cambiar el nombre
+            String nuevoNombre = JOptionPane.showInputDialog(this, 
+                    "Ya existe un archivo 'merged.pdf'.\n¿Desea darle otro nombre?", 
+                    "Renombrar archivo", 
+                    JOptionPane.QUESTION_MESSAGE);
+
+            // Si el usuario no cancela o deja vacío el campo
+            if (nuevoNombre != null && !nuevoNombre.trim().isEmpty()) {
+                nombreSalida = nuevoNombre.trim();
+                archivoSalida = new File(carpetaDestino, nombreSalida + ".pdf");
+            } else {
+                // Si el usuario no ingresa un nombre válido, salimos del método
+                return;
+            }
+        }
+
+        // Intentar fusionar los archivos
+        try {
+            ManejadorArchivos.unirPDFs(nombreSalida, carpetaDestino);
+            JOptionPane.showMessageDialog(this, "Archivo fusionado creado exitosamente como '" + nombreSalida + ".pdf'.");
+
+            // (Opcional) Actualizar txtNombreConsolidado
+            txtNombreConsolidado.setText(nombreSalida + ".pdf");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al fusionar archivos: " + e.getMessage());
+        }
+    }//GEN-LAST:event_jButton10ActionPerformed
+
+    private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton11ActionPerformed
+        String archivoSeleccionado = jList1.getSelectedValue();
+    
+        if (archivoSeleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Selecciona un archivo de la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Obtener ruta completa del archivo seleccionado
+        int index = jList1.getSelectedIndex();
+        if (index < 0 || index >= modeloLista1Rutas.size()) {
+            JOptionPane.showMessageDialog(this, "Índice inválido de archivo.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String rutaCompleta = modeloLista1Rutas.getElementAt(index);
+        ManejadorArchivos.setRutaArchivoSeleccionado(rutaCompleta); // Opcional si usás esa lógica
+
+        // Llamar al método de renombrar
+        ManejadorArchivos.renombrarArchivoPorNombreJOptionPane(rutaCompleta);
+
+        // Refrescar la lista para mostrar el nuevo nombre
+        jButton5ActionPerformed(null); // Asumimos que este recarga la lista desde la carpeta
+    }//GEN-LAST:event_jButton11ActionPerformed
+    
+    
+
+    public class ArchivoListRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(
+            JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+
+            JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+            String nombreArchivo = value.toString();
+
+            if (nombreArchivo.matches("^\\d.*")) {
+                label.setBackground(Color.GREEN);
+            } else {
+                label.setBackground(Color.RED);
+            }
+
+            label.setForeground(Color.BLACK);
+
+            if (isSelected) {
+                label.setBackground(label.getBackground().darker());
+                label.setForeground(Color.WHITE);
+            }
+
+            return label;
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -325,24 +1046,49 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAbajo;
+    private javax.swing.JButton btnArriba;
+    private javax.swing.JButton btnCrearConsolidado;
+    private javax.swing.JButton btnEnviarConsolidado;
+    private javax.swing.JButton btnVisualizarPDF;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton10;
+    private javax.swing.JButton jButton11;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
+    private javax.swing.JButton jButton8;
+    private javax.swing.JButton jButton9;
+    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JList<String> jList1;
+    private javax.swing.JList<String> jListConsolidado;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField txtCarpetaArchivos;
     private javax.swing.JTextField txtCarpetaPrincipal;
+    private javax.swing.JTextField txtDOC;
+    private javax.swing.JTextField txtImagenes;
+    private javax.swing.JTextField txtNombreConsolidado;
+    private javax.swing.JTextField txtPDF;
     // End of variables declaration//GEN-END:variables
 }
