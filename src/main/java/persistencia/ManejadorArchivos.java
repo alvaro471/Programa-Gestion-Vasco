@@ -364,12 +364,12 @@ public class ManejadorArchivos {
         int archivosMovidosSeguimiento = 0;
 
         // Archivos con número inicial y extensiones conocidas (PDF, imágenes)
-        File[] archivosConNumero = carpetaBase.listFiles((dir, name) -> 
+        File[] archivosConNumero = carpetaBase.listFiles((dir, name) ->
             name.matches("(?i)^\\d+.*\\.(pdf|jpg|jpeg|png)$")
         );
 
         // Archivos Word sin necesidad de número inicial
-        File[] archivosWord = carpetaBase.listFiles((dir, name) -> 
+        File[] archivosWord = carpetaBase.listFiles((dir, name) ->
             name.toLowerCase().endsWith(".doc") || name.toLowerCase().endsWith(".docx")
         );
 
@@ -418,6 +418,18 @@ public class ManejadorArchivos {
             }
         }
 
+        // --- NUEVO: Mover archivos con número desde cualquier subcarpeta común ---
+        for (File subcarpeta : subcarpetas) {
+            if (!subcarpeta.getName().equalsIgnoreCase("seguimiento") &&
+                !subcarpeta.getName().startsWith("3_") &&
+                !subcarpeta.getName().startsWith("4_") &&
+                !subcarpeta.getName().startsWith("6_")) {
+                
+                archivosMovidosEtapas += moverDesdeSubcarpeta(subcarpeta, subcarpetas);
+            }
+        }
+        // ---------------------------------------------------------------------------
+
         // Buscar carpeta 'seguimiento'
         File carpetaSeguimiento = null;
         for (File subcarpeta : carpetaBase.listFiles(File::isDirectory)) {
@@ -464,10 +476,10 @@ public class ManejadorArchivos {
             // Eliminar carpeta 'seguimiento' después de mover los archivos
             try {
                 Files.walk(carpetaSeguimiento.toPath())
-                    .sorted(Comparator.reverseOrder()) // Elimina primero los archivos dentro
+                    .sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
-                    .forEach(File::delete); // Elimina los archivos
-                carpetaSeguimiento.delete(); // Elimina la carpeta vacía
+                    .forEach(File::delete);
+                carpetaSeguimiento.delete();
                 System.out.println("Carpeta 'seguimiento' eliminada exitosamente.");
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(null, "Error al eliminar la carpeta 'seguimiento': " + e.getMessage());
@@ -532,6 +544,42 @@ public class ManejadorArchivos {
             mensajeFinal = "ℹ️ No se movieron archivos.";
         }
         JOptionPane.showMessageDialog(null, mensajeFinal);
+    }
+
+    // ------- Método auxiliar para mover archivos desde subcarpetas comunes -------
+    private static int moverDesdeSubcarpeta(File carpeta, File[] subcarpetasDestino) {
+        int archivosMovidos = 0;
+
+        File[] archivos = carpeta.listFiles();
+        if (archivos == null) return archivosMovidos;
+
+        for (File archivo : archivos) {
+            if (archivo.isDirectory()) {
+                archivosMovidos += moverDesdeSubcarpeta(archivo, subcarpetasDestino); // Recursivo
+            } else if (archivo.isFile()) {
+                String nombreArchivo = archivo.getName();
+                if (nombreArchivo.matches("(?i)^\\d+.*\\.(pdf|jpg|jpeg|png)$")) {
+                    String numeroInicial = nombreArchivo.replaceAll("^([0-9]+).*", "$1");
+
+                    for (File subcarpeta : subcarpetasDestino) {
+                        if (subcarpeta.getName().startsWith(numeroInicial + "_")) {
+                            Path origen = archivo.toPath();
+                            Path destino = subcarpeta.toPath().resolve(nombreArchivo);
+                            try {
+                                Files.move(origen, destino, StandardCopyOption.REPLACE_EXISTING);
+                                System.out.println("Movido desde subcarpeta: " + nombreArchivo + " → " + subcarpeta.getName());
+                                archivosMovidos++;
+                            } catch (IOException e) {
+                                JOptionPane.showMessageDialog(null, "Error moviendo " + nombreArchivo + ": " + e.getMessage());
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return archivosMovidos;
     }
 
 
@@ -1080,10 +1128,8 @@ public class ManejadorArchivos {
         }
     }
 
-
-
     
-    
+    //----------------------------------------------------------
     public static void mostrarDocumentosLista(int clave) {
         StringBuilder mensaje = new StringBuilder();
 
@@ -1227,7 +1273,6 @@ public class ManejadorArchivos {
     }
 }
 
-
     public static void cargarArchivosEnLista(String rutaCarpeta, JList<String> lista, DefaultListModel<String> modeloNombres, DefaultListModel<String> modeloRutas) {
         File carpeta = new File(rutaCarpeta);
 
@@ -1264,13 +1309,14 @@ public class ManejadorArchivos {
                 }
             }
 
-            // Subcarpeta "seguimiento"
+            // Procesar subcarpetas
             File[] subcarpetas = carpeta.listFiles(File::isDirectory);
             for (File subcarpeta : subcarpetas) {
                 if (subcarpeta.getName().equalsIgnoreCase("seguimiento")) {
-                    int[] contador = {1}; // Para numeración tipo 6.1, 6.2, etc.
-                    procesarCarpetaRecursiva(subcarpeta, modeloNombres, modeloRutas, "6", contador);
-                    break;
+                    int[] contadorSeguimiento = {1}; // Para numerar tipo 6.1, 6.2, etc.
+                    procesarCarpetaSeguimiento(subcarpeta, modeloNombres, modeloRutas, "6", contadorSeguimiento);
+                } else {
+                    contadorWord = procesarCarpetaNormal(subcarpeta, modeloNombres, modeloRutas, contadorWord);
                 }
             }
 
@@ -1281,10 +1327,81 @@ public class ManejadorArchivos {
         }
     }
 
+    private static int procesarCarpetaNormal(File carpeta, DefaultListModel<String> modeloNombres, DefaultListModel<String> modeloRutas, int contadorWord) {
+    File[] archivosYCarpetas = carpeta.listFiles();
+    if (archivosYCarpetas != null) {
+        for (File archivo : archivosYCarpetas) {
+            if (archivo.isFile()) {
+                String nombreArchivo = archivo.getName();
+                String rutaCompleta = archivo.getAbsolutePath();
+
+                // Obtener extensión
+                String extension = "";
+                int i = nombreArchivo.lastIndexOf('.');
+                if (i > 0) {
+                    extension = nombreArchivo.substring(i + 1).toLowerCase();
+                }
+
+                if (extension.equals("doc") || extension.equals("docx")) {
+                    String nombreConNumero = "3." + contadorWord + " " + nombreArchivo;
+                    modeloNombres.addElement(nombreConNumero);
+                    contadorWord++;
+                } else {
+                    modeloNombres.addElement(nombreArchivo);
+                }
+
+                modeloRutas.addElement(rutaCompleta);
+                System.out.println("Archivo cargado: " + rutaCompleta);
+            } else if (archivo.isDirectory()) {
+                // Recursivo si hay más subcarpetas
+                contadorWord = procesarCarpetaNormal(archivo, modeloNombres, modeloRutas, contadorWord);
+            }
+        }
+    }
+    return contadorWord;
+}
+
+    private static void procesarCarpetaSeguimiento(File carpeta, DefaultListModel<String> modeloNombres, DefaultListModel<String> modeloRutas, String prefijo, int[] contador) {
+        File[] archivosYCarpetas = carpeta.listFiles();
+        if (archivosYCarpetas != null) {
+            for (File archivo : archivosYCarpetas) {
+                if (archivo.isFile()) {
+                    String nombreMostrado = prefijo + "." + contador[0] + " - " + archivo.getName();
+                    modeloNombres.addElement(nombreMostrado);
+                    modeloRutas.addElement(archivo.getAbsolutePath());
+                    contador[0]++;
+                } else if (archivo.isDirectory()) {
+                    procesarCarpetaSeguimiento(archivo, modeloNombres, modeloRutas, prefijo, contador);
+                }
+            }
+        }
+    }
+
+    
+    private static void agregarArchivo(File archivo, DefaultListModel<String> modeloNombres, DefaultListModel<String> modeloRutas, int[] contadorWord, boolean ignorar) {
+        String nombreArchivo = archivo.getName();
+        String rutaCompleta = archivo.getAbsolutePath();
+
+        String extension = "";
+        int i = nombreArchivo.lastIndexOf('.');
+        if (i > 0) {
+            extension = nombreArchivo.substring(i + 1).toLowerCase();
+        }
+
+        if (extension.equals("doc") || extension.equals("docx")) {
+            String nombreConNumero = "3." + contadorWord[0] + " " + nombreArchivo;
+            modeloNombres.addElement(nombreConNumero);
+            contadorWord[0]++;
+        } else {
+            modeloNombres.addElement(nombreArchivo);
+        }
+
+        modeloRutas.addElement(rutaCompleta);
+        System.out.println("Archivo cargado: " + rutaCompleta);
+    }
 
 
     private static void procesarCarpetaRecursiva(File carpeta, DefaultListModel<String> modeloNombres, DefaultListModel<String> modeloRutas, String prefijo, int[] contador) {
-
         File[] archivosYCarpetas = carpeta.listFiles();
         if (archivosYCarpetas != null) {
             for (File archivo : archivosYCarpetas) {
@@ -1299,7 +1416,6 @@ public class ManejadorArchivos {
             }
         }
     }
-
 
 
     public static void cargarArchivosEnListaSinColor(String rutaCarpeta, JList<String> lista) {
@@ -1377,6 +1493,8 @@ public class ManejadorArchivos {
                  nombre.contains("oficio") || 
                  nombre.contains("notificación") || 
                  nombre.contains("temporal") || 
+                nombre.contains("rd") || 
+                nombre.contains("RD") || 
                  nombre.contains("protección temporal")) {
             comboBox.setSelectedItem("3");
         }
@@ -1410,6 +1528,10 @@ public class ManejadorArchivos {
         else if (nombre.contains("expediente consolidado") || 
                  nombre.contains("consolidación") || 
                  nombre.contains("finalización") || 
+                nombre.contains("EXPEDIENTE") || 
+                nombre.contains("expediente") || 
+                nombre.contains("exp") || 
+                nombre.contains("EXP") || 
                  nombre.contains("expediente completo")) {
             comboBox.setSelectedItem("8");
         }

@@ -7,6 +7,7 @@ package igu;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,9 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
 
     public interfazEnumerar3() {
         initComponents();
+        pack();
+        //Se desacomoda
+        jListConsolidado.setPreferredSize(new Dimension(270, 454));  // Establece el tamaño preferido del componente
         String rutaGuardada = ConfigUtil.cargarRuta();
         if (rutaGuardada != null) {
             ManejadorArchivos.setRutaCarpetaPrincipal(rutaGuardada);
@@ -290,18 +294,6 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                        .addComponent(jScrollPane1)
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnArriba)
-                            .addComponent(btnAbajo)
-                            .addComponent(jButton6)
-                            .addComponent(jButton9))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -310,8 +302,19 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
                         .addComponent(btnCrearConsolidado)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGap(23, 23, 23)
-                        .addComponent(jButton10)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(btnArriba)
+                                    .addComponent(btnAbajo)
+                                    .addComponent(jButton6)
+                                    .addComponent(jButton9)))
+                            .addComponent(jLabel6)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addGap(23, 23, 23)
+                                .addComponent(jButton10)))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanel4Layout.setVerticalGroup(
@@ -321,7 +324,6 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 454, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(btnArriba)
                         .addGap(18, 18, 18)
@@ -329,7 +331,8 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(jButton6)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton9)))
+                        .addComponent(jButton9))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 454, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
@@ -552,7 +555,7 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
             if (rutaArchivo != null) {
                 // Imprimir ruta para depuración
                 System.out.println("Renombrando archivo en: " + rutaArchivo);
-                ManejadorArchivos.renombrarArchivoConNumero(rutaArchivo, numeroInicial + i);
+                ManejadorArchivos.renombrarArchivoConNumero(rutaArchivo, numeroInicial);
             } else {
                 JOptionPane.showMessageDialog(null, "No se encontró la ruta para el archivo: " + nombreArchivo,
                                               "Error", JOptionPane.ERROR_MESSAGE);
@@ -650,27 +653,29 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
     }//GEN-LAST:event_jList1ValueChanged
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // Obtener la ruta completa del archivo seleccionado desde el modelo de rutas
-        String rutaArchivoSeleccionado = ManejadorArchivos.getRutaArchivoSeleccionado();
+        // Obtener los índices seleccionados
+        int[] indicesSeleccionados = jList1.getSelectedIndices();
 
-        if (rutaArchivoSeleccionado == null || rutaArchivoSeleccionado.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No se ha seleccionado un archivo o la ruta es inválida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        if (indicesSeleccionados == null || indicesSeleccionados.length == 0) {
+            JOptionPane.showMessageDialog(this, "No se han seleccionado archivos o las rutas son inválidas.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Renombramos el archivo sin los números y guiones al inicio
-        ManejadorArchivos.renombrarArchivoSinNumeros(rutaArchivoSeleccionado);
+        // Para cada índice seleccionado, obtener la ruta y renombrar el archivo
+        for (int indice : indicesSeleccionados) {
+            String rutaArchivo = modeloLista1Rutas.get(indice);  // Aquí usamos modeloLista1Rutas
+            ManejadorArchivos.renombrarArchivoSinNumeros(rutaArchivo);
+        }
 
-        // Recargamos la lista de archivos, asegurándonos de usar las rutas correctas
+        // Recargar la lista de archivos
         modeloLista1Nombres = new DefaultListModel<>();
         modeloLista1Rutas = new DefaultListModel<>();
 
-        // Recargamos la lista con las rutas originales y los nombres
         ManejadorArchivos.cargarArchivosEnLista(
-            ManejadorArchivos.getRutaCarpeta(),  // Ruta de la carpeta
-            jList1,  // El JList que muestra los archivos
-            modeloLista1Nombres,  // Modelo de los nombres de archivo (con numeración)
-            modeloLista1Rutas  // Modelo de las rutas de archivo (originales)
+            ManejadorArchivos.getRutaCarpeta(), // Ruta de la carpeta
+            jList1,                             // El JList que muestra los archivos
+            modeloLista1Nombres,                // Modelo de los nombres de archivo (con numeración)
+            modeloLista1Rutas                   // Modelo de las rutas de archivo (originales)
         );
     }//GEN-LAST:event_jButton4ActionPerformed
 
