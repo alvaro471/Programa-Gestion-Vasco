@@ -75,7 +75,7 @@
                 </descriptorRefs>
                 <archive>
                     <manifest>
-                        <mainClass>igu.login</mainClass> 
+                        <mainClass>view.login</mainClass> 
                     </manifest>
                 </archive>
             </configuration>

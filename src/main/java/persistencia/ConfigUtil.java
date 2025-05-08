@@ -6,14 +6,15 @@ public class ConfigUtil {
     private static final File ARCHIVO_CONFIG;
 
     static {
-        // Ubicación del archivo config.txt junto al .jar ejecutado
-        File jarDir = new File(ConfigUtil.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile();
-        ARCHIVO_CONFIG = new File(jarDir, "config.txt");
+        // Guardar config.txt en la carpeta del usuario
+        String userHome = System.getProperty("user.home");
+        ARCHIVO_CONFIG = new File(userHome, "config.txt");
     }
 
     public static void guardarRuta(String ruta) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(ARCHIVO_CONFIG))) {
             writer.write(ruta);
+            System.out.println("Ruta guardada exitosamente en: " + ARCHIVO_CONFIG.getAbsolutePath());
         } catch (IOException e) {
             System.out.println("No se pudo guardar la ruta: " + e.getMessage());
         }
