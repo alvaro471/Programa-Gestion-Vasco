@@ -64,6 +64,7 @@ view\EtapasInterfaz$22.class
 view\interfazEnumerar3$ArchivoListRenderer.class
 view\EtapasInterfaz$17.class
 view\interfazEnumerar$12.class
+view\interfazBuscarInformacion$7.class
 view\interfazEnumerar3$10.class
 view\EtapasInterfaz$9.class
 view\interfazEnumerar$4.class
@@ -83,6 +84,7 @@ view\Interfaz$FiltroNumericoLimitado4numeros.class
 view\Interfaz$4.class
 view\InterfazSeleccionar$5.class
 view\EtapasInterfaz$33.class
+view\interfazBuscarInformacion$8.class
 persistencia\ManejadorArchivos$2.class
 view\EtapasInterfaz$23.class
 view\EtapasInterfaz$13.class

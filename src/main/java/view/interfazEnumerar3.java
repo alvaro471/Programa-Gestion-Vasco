@@ -760,7 +760,6 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
                         );
                     }
 
-                    ManejadorArchivos.agregarRutaArchivo(rutaReal); // Agrega a la lista consolidada
                 } else {
                     JOptionPane.showMessageDialog(this, "El archivo \"" + nombreMostrado + "\" ya está en la lista.");
                 }
@@ -802,15 +801,17 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
         for (int i = 0; i < indices.length; i++) {
             int index = indices[i];
             if (index > 0 && !contains(indices, index - 1)) {
-                // Intercambiar en modelo visual
+                // Intercambiar en modelo visual (nombres)
                 String nombre = modeloLista2Nombres.get(index);
                 modeloLista2Nombres.set(index, modeloLista2Nombres.get(index - 1));
                 modeloLista2Nombres.set(index - 1, nombre);
 
-                // Intercambiar en modelo lógico
-                ManejadorArchivos.moverRuta(index, index - 1);
+                // Intercambiar en modelo lógico (rutas)
+                String ruta = modeloLista2Rutas.get(index);
+                modeloLista2Rutas.set(index, modeloLista2Rutas.get(index - 1));
+                modeloLista2Rutas.set(index - 1, ruta);
 
-                indices[i]--; // Actualizar índice
+                indices[i]--; // Actualizar índice seleccionado
             }
         }
 
@@ -825,13 +826,17 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
         for (int i = indices.length - 1; i >= 0; i--) {
             int index = indices[i];
             if (index < modeloLista2Nombres.size() - 1 && !contains(indices, index + 1)) {
+                // Intercambiar en modelo visual (nombres)
                 String nombre = modeloLista2Nombres.get(index);
                 modeloLista2Nombres.set(index, modeloLista2Nombres.get(index + 1));
                 modeloLista2Nombres.set(index + 1, nombre);
 
-                ManejadorArchivos.moverRuta(index, index + 1);
+                // Intercambiar en modelo lógico (rutas)
+                String ruta = modeloLista2Rutas.get(index);
+                modeloLista2Rutas.set(index, modeloLista2Rutas.get(index + 1));
+                modeloLista2Rutas.set(index + 1, ruta);
 
-                indices[i]++; // Actualizar índice
+                indices[i]++; // Actualizar índice seleccionado
             }
         }
 
@@ -858,6 +863,11 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
         if (!carpetaDestino.exists() || !carpetaDestino.isDirectory()) {
             JOptionPane.showMessageDialog(this, "La carpeta destino no existe.");
             return;
+        }
+
+        ManejadorArchivos.limpiarRutasArchivos();
+        for (int i = 0; i < modeloLista2Rutas.size(); i++) {
+            ManejadorArchivos.agregarRutaArchivo(modeloLista2Rutas.get(i));
         }
 
         try {
@@ -984,19 +994,25 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
             return;
         }
 
-        // Usar la ruta definida en ManejadorArchivos
         String rutaDestino = ManejadorArchivos.getRutaCarpeta();
         if (rutaDestino == null || rutaDestino.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No se ha definido una carpeta válida para guardar el consolidado.");
             return;
         }
 
-        // Usar la ruta obtenida para crear el archivo destino
         File carpetaDestino = new File(rutaDestino);
         if (!carpetaDestino.exists() || !carpetaDestino.isDirectory()) {
             JOptionPane.showMessageDialog(this, "La carpeta destino no existe.");
             return;
         }
+
+        // ✅ Sincronizar la lista real antes de fusionar
+        ManejadorArchivos.limpiarRutasArchivos();
+
+        for (int i = 0; i < modeloLista2Rutas.size(); i++) {
+            ManejadorArchivos.agregarRutaArchivo(modeloLista2Rutas.get(i));
+        }
+
 
         try {
             ManejadorArchivos.unirPDFs(nombreArchivo, carpetaDestino);

@@ -94,6 +94,24 @@ public class ManejadorArchivos {
             System.out.println("Aún no se ha asignado una dirección principal.");
         }
     }
+    
+    private static String rutaGeneralExpedientes;
+
+    static {
+        try {
+            // Obtiene la ruta del archivo .jar actual
+            String pathJar = new File(
+                view.login.class.getProtectionDomain().getCodeSource().getLocation().toURI()
+            ).getParent();
+
+            rutaGeneralExpedientes = pathJar;
+            System.out.println("Ruta general de expedientes (ubicación del .jar): " + rutaGeneralExpedientes);
+        } catch (Exception e) {
+            System.out.println("No se pudo determinar la ruta del ejecutable: " + e.getMessage());
+            rutaGeneralExpedientes = "C:\\RutaPorDefecto\\Expedientes"; // Ruta fallback opcional
+        }
+    }
+
 
     private static String nombreCarpetaObtenido = "";
     private static String nombreExpedienteObtenido = "";
@@ -189,6 +207,9 @@ public class ManejadorArchivos {
     }
     public static void setContadorArchivosRenombrados(int _contadorArchivosRenombrados){
         contadorArchivosRenombrados = _contadorArchivosRenombrados;
+    }
+    public static String getRutaGeneralExpedientes(){
+        return rutaGeneralExpedientes;
     }
     //--------------------------------------------------------------------------------------------------------------------------------
     
@@ -2049,12 +2070,13 @@ public class ManejadorArchivos {
         }
     }
     
-    public static void moverRuta(int indexDesde, int indexHasta) {
-        if (indexDesde >= 0 && indexHasta >= 0 && indexDesde < rutasArchivosSeleccionados.size() && indexHasta < rutasArchivosSeleccionados.size()) {
-            String temp = rutasArchivosSeleccionados.remove(indexDesde);
-            rutasArchivosSeleccionados.add(indexHasta, temp);
+    public static void moverRuta(DefaultListModel<String> lista, int desde, int hasta) {
+        if (desde >= 0 && hasta >= 0 && desde < lista.size() && hasta < lista.size()) {
+            String temp = lista.remove(desde);
+            lista.add(hasta, temp);
         }
     }
+
     
     //TAMPOCO SE ESTA USANDO
     public static void crearArchivoUnido(String rutaSalida) throws IOException {
@@ -2144,7 +2166,7 @@ public class ManejadorArchivos {
             rutasArchivosSeleccionados.remove(index);
         }
     }
-        public static void eliminarTodasLasRutas() {
+    public static void eliminarTodasLasRutas() {
         rutasArchivosSeleccionados.clear();
     }
     
@@ -2312,6 +2334,165 @@ public class ManejadorArchivos {
         String rutaEjecutable = System.getProperty("user.dir");
         return rutaEjecutable + File.separator + ARCHIVO_CONFIG;
     }
+    
+    //---------------------->
+    
+    //Interfaz Buscar Informacion
+    public static void seleccionarCarpetaGeneralExpedientes(JTextField txtMostrarRuta){
+        JFileChooser chooser = new JFileChooser(rutaGeneralExpedientes);//Se empieza a buscar desde "rutaCarpetaPrincipal"
+        chooser.setDialogTitle("Selecciona una carpeta");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
 
+        int seleccion = chooser.showOpenDialog(null);
+
+        if (seleccion == JFileChooser.APPROVE_OPTION) {
+            File carpetaSeleccionada = chooser.getSelectedFile();
+            rutaGeneralExpedientes = carpetaSeleccionada.getAbsolutePath(); // Aqui guarda la ruta del RD
+            txtMostrarRuta.setText(rutaGeneralExpedientes); // Muestra la ruta en el JTextField ingresado comp parametro
+        }
+    }
+    
+    //Tiene un metodo auxiliar llamado "buscarRecursivamente"
+    public static void buscarCarpetasEnGeneral(
+            String nombre,
+            String rd,
+            String dni,
+            DefaultListModel<String> modeloNombres,
+            DefaultListModel<String> modeloRutas,
+            JList<String> jListCarpetas) {
+
+        modeloNombres.clear();
+        modeloRutas.clear();
+
+        File carpetaRaiz = new File(rutaGeneralExpedientes);
+
+        if (!carpetaRaiz.exists() || !carpetaRaiz.isDirectory()) {
+            JOptionPane.showMessageDialog(null, "Ruta no válida: " + rutaGeneralExpedientes);
+            return;
+        }
+
+        // Llamar al método recursivo que busca carpetas
+        buscarRecursivamente(carpetaRaiz, nombre, rd, dni, modeloNombres, modeloRutas);
+
+        // Establecer el modelo de nombres en el JList
+        jListCarpetas.setModel(modeloNombres);
+    }
+
+    
+    //Metodo Auxiliar de "buscarCarpetasEnGeneral"
+    private static void buscarRecursivamente(
+            File carpeta,
+            String nombre,
+            String rd,
+            String dni,
+            DefaultListModel<String> modeloNombres,
+            DefaultListModel<String> modeloRutas) {
+
+        File[] archivos = carpeta.listFiles();
+        if (archivos == null) return;
+
+        for (File archivo : archivos) {
+            if (archivo.isDirectory()) {
+                String nombreCarpeta = archivo.getName().toLowerCase();
+
+                boolean coincideNombre = nombre.isEmpty() || nombreCarpeta.contains(nombre);
+                boolean coincideRd     = rd.isEmpty()     || nombreCarpeta.contains(rd);
+                boolean coincideDni    = dni.isEmpty()    || nombreCarpeta.contains(dni);
+
+                if (coincideNombre && coincideRd && coincideDni) {
+                    modeloNombres.addElement(archivo.getName());
+                    modeloRutas.addElement(archivo.getAbsolutePath());
+                }
+
+                // Búsqueda recursiva
+                buscarRecursivamente(archivo, nombre, rd, dni, modeloNombres, modeloRutas);
+            }
+        }
+    }
+    
+    
+    //-----
+    public static void cargarEstructura(
+            String rutaBase,
+            JComboBox<String> jcbAnios,
+            JComboBox<String> jcbMeses,
+            JComboBox<String> jcbExpedientes,
+            JComboBox<String> jcbEtapas
+    ) {
+        File baseDir = new File(rutaBase);
+        if (!baseDir.exists() || !baseDir.isDirectory()) {
+            JOptionPane.showMessageDialog(null, "Ruta inválida");
+            return;
+        }
+
+        // Limpiar todos los combos
+        jcbAnios.removeAllItems();
+        jcbMeses.removeAllItems();
+        jcbExpedientes.removeAllItems();
+        jcbEtapas.removeAllItems();
+
+        // Paso 1: Llenar jcbAnios desde ruta base
+        File[] carpetasNivel1 = baseDir.listFiles(File::isDirectory);
+        if (carpetasNivel1 == null) return;
+
+        for (File carpeta : carpetasNivel1) {
+            jcbAnios.addItem(carpeta.getName());
+        }
+
+        // Paso 2: Listener para llenar jcbMeses
+        jcbAnios.addActionListener(e -> {
+            jcbMeses.removeAllItems();
+            jcbExpedientes.removeAllItems();
+            jcbEtapas.removeAllItems();
+
+            String seleccionNivel1 = (String) jcbAnios.getSelectedItem();
+            if (seleccionNivel1 == null) return;
+
+            File carpetaNivel1 = new File(baseDir, seleccionNivel1);
+            File[] carpetasNivel2 = carpetaNivel1.listFiles(File::isDirectory);
+            if (carpetasNivel2 == null) return;
+
+            for (File carpeta : carpetasNivel2) {
+                jcbMeses.addItem(carpeta.getName());
+            }
+        });
+
+        // Paso 3: Listener para llenar jcbExpedientes
+        jcbMeses.addActionListener(e -> {
+            jcbExpedientes.removeAllItems();
+            jcbEtapas.removeAllItems();
+
+            String seleccionNivel1 = (String) jcbAnios.getSelectedItem();
+            String seleccionNivel2 = (String) jcbMeses.getSelectedItem();
+            if (seleccionNivel1 == null || seleccionNivel2 == null) return;
+
+            File carpetaNivel2 = new File(baseDir + File.separator + seleccionNivel1 + File.separator + seleccionNivel2);
+            File[] carpetasNivel3 = carpetaNivel2.listFiles(File::isDirectory);
+            if (carpetasNivel3 == null) return;
+
+            for (File carpeta : carpetasNivel3) {
+                jcbExpedientes.addItem(carpeta.getName());
+            }
+        });
+
+        // Paso 4: Listener para llenar jcbEtapas
+        jcbExpedientes.addActionListener(e -> {
+            jcbEtapas.removeAllItems();
+
+            String seleccionNivel1 = (String) jcbAnios.getSelectedItem();
+            String seleccionNivel2 = (String) jcbMeses.getSelectedItem();
+            String seleccionNivel3 = (String) jcbExpedientes.getSelectedItem();
+            if (seleccionNivel1 == null || seleccionNivel2 == null || seleccionNivel3 == null) return;
+
+            File carpetaNivel3 = new File(baseDir + File.separator + seleccionNivel1 + File.separator + seleccionNivel2 + File.separator + seleccionNivel3);
+            File[] carpetasNivel4 = carpetaNivel3.listFiles(File::isDirectory);
+            if (carpetasNivel4 == null) return;
+
+            for (File carpeta : carpetasNivel4) {
+                jcbEtapas.addItem(carpeta.getName());
+            }
+        });
+    }
 
 }

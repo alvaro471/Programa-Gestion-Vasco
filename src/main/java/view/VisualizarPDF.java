@@ -1,6 +1,7 @@
 package view;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -10,6 +11,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -44,6 +47,8 @@ public class VisualizarPDF extends javax.swing.JFrame {
     private int paginasCargadas = 0;
     private final int PAGINAS_POR_BATCH = 3;
     private JTextField txtPaginasTotales;
+    private JLabel lblPaginaActual;
+
 
 
     
@@ -182,17 +187,32 @@ public class VisualizarPDF extends javax.swing.JFrame {
         scrollPane.getVerticalScrollBar().setUnitIncrement(35);
 
         scrollPane.getVerticalScrollBar().addAdjustmentListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                int extent = scrollPane.getVerticalScrollBar().getModel().getExtent();
-                int maximum = scrollPane.getVerticalScrollBar().getMaximum();
-                int value = scrollPane.getVerticalScrollBar().getValue();
+        if (!e.getValueIsAdjusting()) {
+            int extent = scrollPane.getVerticalScrollBar().getModel().getExtent();
+            int maximum = scrollPane.getVerticalScrollBar().getMaximum();
+            int value = scrollPane.getVerticalScrollBar().getValue();
 
-                // Si estamos cerca del fondo, cargamos más páginas
-                if (value + extent >= maximum - 100) {
-                    cargarMasPaginas();
+            if (value + extent >= maximum - 100) {
+                cargarMasPaginas();
+            }
+
+            // Detectar página visible
+            Component[] componentes = panelPaginas.getComponents();
+            for (int i = 0, pagina = 0; i < componentes.length; i++) {
+                Component comp = componentes[i];
+                if (comp instanceof JLabel) {
+                    Rectangle bounds = comp.getBounds();
+                    Point visible = scrollPane.getViewport().getViewPosition();
+
+                    if (bounds.getMaxY() > visible.getY()) {
+                        lblPaginaActual.setText("Página: " + (pagina + 1));
+                        break;
+                    }
+                    pagina++;
                 }
             }
-        });
+        }
+    });
 
         panelPDF.removeAll();
         panelPDF.setLayout(new BorderLayout());
@@ -295,6 +315,11 @@ public class VisualizarPDF extends javax.swing.JFrame {
         }
         panelBotones.revalidate();
         panelBotones.repaint();
+        lblPaginaActual = new JLabel("Página: 1");
+        lblPaginaActual.setFont(new Font("Arial", Font.PLAIN, 14));
+        lblPaginaActual.setForeground(Color.DARK_GRAY);
+        panelBotones.add(lblPaginaActual);
+
     }
 
 
