@@ -1,6 +1,11 @@
 package persistencia;
 
-import java.io.File;
+import com.github.sardine.DavResource;
+import com.github.sardine.Sardine;
+import com.github.sardine.SardineFactory;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,6 +45,7 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -50,6 +56,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,6 +78,34 @@ import javax.swing.SwingWorker;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import java.util.regex.*;
+import view.VisualizarPDF;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
+
+import com.google.api.services.drive.model.FileList;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.FileList;
+import java.awt.print.PrinterJob;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.text.Normalizer;
+import java.time.Duration;
+import java.util.LinkedHashMap;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+
 
 
 
@@ -82,36 +118,28 @@ public class ManejadorArchivos {
     private static String ultimaRuta = ".";
     private static int filaIngresada;
     private static String rutaCarpetaPrincipal;
+    private Sardine sardine;
+     public static String nombreExpediente = null;
+    private static String rutaCarpetaGeneral;
 
     static {
-        String rutaGuardada = ConfigUtil.cargarRuta();
-        if (rutaGuardada != null) {
-            rutaCarpetaPrincipal = rutaGuardada;
-            System.out.println("Ruta cargada desde configuración: " + rutaCarpetaPrincipal);
-        } else {
+        // Inicializar rutas al inicio del programa
+        rutaCarpetaPrincipal = ConfigUtil.cargarRutaPrincipal();
+        if (rutaCarpetaPrincipal == null) {
             rutaCarpetaPrincipal = "C:\\Users";
-            System.out.println("Primera vez ejecutando el programa. Usando ruta por defecto: " + rutaCarpetaPrincipal);
-            System.out.println("Aún no se ha asignado una dirección principal.");
+            System.out.println("Usando ruta por defecto para principal.");
+        } else {
+            System.out.println("Ruta principal cargada: " + rutaCarpetaPrincipal);
+        }
+
+        rutaCarpetaGeneral = ConfigUtil.cargarRutaGeneral();
+        if (rutaCarpetaGeneral == null) {
+            rutaCarpetaGeneral = "C:\\Users";
+            System.out.println("Usando ruta por defecto para general.");
+        } else {
+            System.out.println("Ruta general cargada: " + rutaCarpetaGeneral);
         }
     }
-    
-    private static String rutaGeneralExpedientes;
-
-    static {
-        try {
-            // Obtiene la ruta del archivo .jar actual
-            String pathJar = new File(
-                view.login.class.getProtectionDomain().getCodeSource().getLocation().toURI()
-            ).getParent();
-
-            rutaGeneralExpedientes = pathJar;
-            System.out.println("Ruta general de expedientes (ubicación del .jar): " + rutaGeneralExpedientes);
-        } catch (Exception e) {
-            System.out.println("No se pudo determinar la ruta del ejecutable: " + e.getMessage());
-            rutaGeneralExpedientes = "C:\\RutaPorDefecto\\Expedientes"; // Ruta fallback opcional
-        }
-    }
-
 
     private static String nombreCarpetaObtenido = "";
     private static String nombreExpedienteObtenido = "";
@@ -124,6 +152,7 @@ public class ManejadorArchivos {
     private static List<String> rutasArchivosSeleccionados = new ArrayList<>();
     private static final String ARCHIVO_CONFIG = "config.txt";
     private static int contadorArchivosRenombrados = 0;
+    
     //-------------------------------------------------------------------------------------------------------------------------------
     
     /*
@@ -144,30 +173,44 @@ public class ManejadorArchivos {
     public static String getRutaCarpeta(){
         return rutaCarpeta;
     }
-    
-    public static void setRutaCarpeta(String nuevaRuta) {
-        rutaCarpeta = nuevaRuta;
-        // Guardamos la nueva ruta en el archivo
-        ConfigUtil.guardarRuta(rutaCarpeta);
+    public static void setRutaCarpeta(String _rutaCarpeta){
+        rutaCarpeta = _rutaCarpeta;
     }
+    
+    
     public static int getUltimaFila(){
         return ultimaFila;
     }
     public static int getFilaIngresada(){
         return filaIngresada;
     }
+    
+    // Métodos de acceso
+    public static void setNombreExpediente(String nombre) {
+        nombreExpediente = nombre;
+    }
+
+    public static String getNombreExpediente() {
+        return nombreExpediente;
+    }
     public static void setRutaCarpetaPrincipal(String ruta) {
         rutaCarpetaPrincipal = ruta;
-        ConfigUtil.guardarRuta(ruta); // <- Guarda automáticamente
+        ConfigUtil.guardarRutaPrincipal(ruta);
     }
 
     public static String getRutaCarpetaPrincipal() {
-        if (rutaCarpetaPrincipal == null) {
-            String rutaGuardada = ConfigUtil.cargarRuta();
-            rutaCarpetaPrincipal = (rutaGuardada != null) ? rutaGuardada : "C:\\Users"; // valor por defecto
-        }
         return rutaCarpetaPrincipal;
     }
+
+    public static void setRutaCarpetaGeneral(String ruta) {
+        rutaCarpetaGeneral = ruta;
+        ConfigUtil.guardarRutaGeneral(ruta);
+    }
+
+    public static String getRutaCarpetaGeneral() {
+        return rutaCarpetaGeneral;
+    }
+    
     public static String getNombreCarpetaObtenido(){
         return nombreCarpetaObtenido;
     }
@@ -208,9 +251,7 @@ public class ManejadorArchivos {
     public static void setContadorArchivosRenombrados(int _contadorArchivosRenombrados){
         contadorArchivosRenombrados = _contadorArchivosRenombrados;
     }
-    public static String getRutaGeneralExpedientes(){
-        return rutaGeneralExpedientes;
-    }
+
     //--------------------------------------------------------------------------------------------------------------------------------
     
     /*
@@ -1027,11 +1068,11 @@ public class ManejadorArchivos {
             File carpetaSeleccionada = fileChooser.getSelectedFile();
             rutaCarpetaPrincipal = carpetaSeleccionada.getAbsolutePath();
 
-            ConfigUtil.guardarRuta(rutaCarpetaPrincipal); // Guarda en config.txt
+            // Guardar usando el método correcto
+            ConfigUtil.guardarRutaPrincipal(rutaCarpetaPrincipal);
             System.out.println("Ruta seleccionada y guardada: " + rutaCarpetaPrincipal);
         } else {
-            System.out.println("No se seleccionó ninguna carpeta.");
-            rutaCarpetaPrincipal = null;
+            System.out.println("No se seleccionó una nueva carpeta general.");
         }
     }
 
@@ -1401,8 +1442,7 @@ public class ManejadorArchivos {
         }
     }   
     
-    public static void renombrarArchivoConNumero(String rutaArchivo, int numero) {
-        
+    public static void renombrarArchivoConNumero(String rutaArchivo, String numeroConPunto) {
         File archivo = new File(rutaArchivo);
 
         if (!archivo.exists() || !archivo.isFile()) {
@@ -1415,10 +1455,10 @@ public class ManejadorArchivos {
             String nombreArchivo = archivo.getName();
 
             // Elimina cualquier número al inicio del nombre original
-            String nombreSinNumero = nombreArchivo.replaceFirst("^\\d+\\s+", "");
+            String nombreSinNumero = nombreArchivo.replaceFirst("^\\d+(\\.\\d+)?\\s+", "");
 
             // Construye el nuevo nombre anteponiendo el número
-            String nuevoNombre = numero + " " + nombreSinNumero;
+            String nuevoNombre = numeroConPunto + " " + nombreSinNumero;
 
             // Crea el nuevo archivo con la nueva ruta y nombre
             File nuevoArchivo = new File(archivo.getParent(), nuevoNombre);
@@ -1426,19 +1466,14 @@ public class ManejadorArchivos {
             // Mueve (renombra) el archivo
             Files.move(archivo.toPath(), nuevoArchivo.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-            // Actualiza la fecha de modificación al momento actual
             nuevoArchivo.setLastModified(System.currentTimeMillis());
-
-            // Muestra la ruta completa del archivo renombrado
             System.out.println("Archivo renombrado: " + nuevoArchivo.getAbsolutePath());
 
-            // Incrementa el contador global
             contadorArchivosRenombrados++;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al renombrar archivo:\n" + e.getMessage(),
                                           "Error", JOptionPane.ERROR_MESSAGE);
         }
-
     }
 
     
@@ -1825,6 +1860,72 @@ public class ManejadorArchivos {
     }
 }
     
+    public static void cargarArchivosOrdenNombre(String rutaCarpeta, DefaultListModel<String> modeloNombres, DefaultListModel<String> modeloRutas) {
+        File carpeta = new File(rutaCarpeta);
+        if (!carpeta.isDirectory()) {
+            JOptionPane.showMessageDialog(null, "La ruta no es válida.");
+            return;
+        }
+
+        // Limpia los modelos
+        modeloNombres.clear();
+        modeloRutas.clear();
+
+        String[] orden = {"REC", "IDE", "EMI", "ARC", "APE", "SEG", "AGR", "CON"};
+        Map<String, List<File>> carpetasPorClave = new LinkedHashMap<>();
+        List<File> otrasCarpetas = new ArrayList<>();
+
+        for (File sub : carpeta.listFiles()) {
+            if (sub.isDirectory()) {
+                boolean coincide = false;
+                for (String clave : orden) {
+                    if (sub.getName().toUpperCase().contains(clave)) {
+                        carpetasPorClave.computeIfAbsent(clave, k -> new ArrayList<>()).add(sub);
+                        coincide = true;
+                        break;
+                    }
+                }
+                if (!coincide) {
+                    otrasCarpetas.add(sub);
+                }
+            }
+        }
+
+        // Archivos desde carpetas ordenadas
+        for (String clave : orden) {
+            List<File> subcarpetas = carpetasPorClave.get(clave);
+            if (subcarpetas != null) {
+                for (File sub : subcarpetas) {
+                    for (File archivo : sub.listFiles()) {
+                        if (archivo.isFile()) {
+                            modeloNombres.addElement(archivo.getName());
+                            modeloRutas.addElement(archivo.getAbsolutePath());
+                        }
+                    }
+                }
+            }
+        }
+
+        // Archivos de otras subcarpetas
+        for (File sub : otrasCarpetas) {
+            for (File archivo : sub.listFiles()) {
+                if (archivo.isFile()) {
+                    modeloNombres.addElement(archivo.getName());
+                    modeloRutas.addElement(archivo.getAbsolutePath());
+                }
+            }
+        }
+
+        // Archivos directamente en la carpeta raíz
+        for (File archivo : carpeta.listFiles()) {
+            if (archivo.isFile()) {
+                modeloNombres.addElement(archivo.getName());
+                modeloRutas.addElement(archivo.getAbsolutePath());
+            }
+        }
+    }
+
+
     public static void aplicarColorALista(JList<String> lista) {
         lista.setCellRenderer(new DefaultListCellRenderer() {
             @Override
@@ -2338,161 +2439,685 @@ public class ManejadorArchivos {
     //---------------------->
     
     //Interfaz Buscar Informacion
-    public static void seleccionarCarpetaGeneralExpedientes(JTextField txtMostrarRuta){
-        JFileChooser chooser = new JFileChooser(rutaGeneralExpedientes);//Se empieza a buscar desde "rutaCarpetaPrincipal"
-        chooser.setDialogTitle("Selecciona una carpeta");
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setAcceptAllFileFilterUsed(false);
-
-        int seleccion = chooser.showOpenDialog(null);
-
-        if (seleccion == JFileChooser.APPROVE_OPTION) {
-            File carpetaSeleccionada = chooser.getSelectedFile();
-            rutaGeneralExpedientes = carpetaSeleccionada.getAbsolutePath(); // Aqui guarda la ruta del RD
-            txtMostrarRuta.setText(rutaGeneralExpedientes); // Muestra la ruta en el JTextField ingresado comp parametro
-        }
-    }
-    
-    //Tiene un metodo auxiliar llamado "buscarRecursivamente"
+    // Método de búsqueda
     public static void buscarCarpetasEnGeneral(
-            String nombre,
-            String rd,
-            String dni,
-            DefaultListModel<String> modeloNombres,
-            DefaultListModel<String> modeloRutas,
-            JList<String> jListCarpetas) {
+        String rutaGeneral,
+        String nombre,
+        String expediente,
+        String dni,
+        DefaultListModel<String> modeloNombres,
+        DefaultListModel<String> modeloRutas,
+        JList<String> jListCarpetas) {
 
         modeloNombres.clear();
         modeloRutas.clear();
 
-        File carpetaRaiz = new File(rutaGeneralExpedientes);
+        // Cambia esta ruta a la raíz donde quieres empezar a buscar
+        File carpetaRaiz = new File(rutaGeneral);
 
         if (!carpetaRaiz.exists() || !carpetaRaiz.isDirectory()) {
-            JOptionPane.showMessageDialog(null, "Ruta no válida: " + rutaGeneralExpedientes);
+            JOptionPane.showMessageDialog(null, "Ruta no válida: " + carpetaRaiz.getAbsolutePath());
             return;
         }
 
-        // Llamar al método recursivo que busca carpetas
-        buscarRecursivamente(carpetaRaiz, nombre, rd, dni, modeloNombres, modeloRutas);
+        buscarRecursivamente(
+            carpetaRaiz,
+            normalizarLocal(nombre),
+            normalizarLocal(expediente),
+            normalizarLocal(dni),
+            modeloNombres,
+            modeloRutas
+        );
 
-        // Establecer el modelo de nombres en el JList
-        jListCarpetas.setModel(modeloNombres);
+        // El modelo ya está vinculado, no es necesario setearlo de nuevo
     }
 
-    
-    //Metodo Auxiliar de "buscarCarpetasEnGeneral"
+    // Método auxiliar de búsqueda recursiva
     private static void buscarRecursivamente(
-            File carpeta,
-            String nombre,
-            String rd,
-            String dni,
-            DefaultListModel<String> modeloNombres,
-            DefaultListModel<String> modeloRutas) {
+        File carpetaActual,
+        String nombre,
+        String expediente,
+        String dni,
+        DefaultListModel<String> modeloNombres,
+        DefaultListModel<String> modeloRutas) {
 
-        File[] archivos = carpeta.listFiles();
+        File[] archivos = carpetaActual.listFiles();
         if (archivos == null) return;
 
         for (File archivo : archivos) {
             if (archivo.isDirectory()) {
-                String nombreCarpeta = archivo.getName().toLowerCase();
+                String nombreCarpeta = normalizarLocal(archivo.getName());
 
-                boolean coincideNombre = nombre.isEmpty() || nombreCarpeta.contains(nombre);
-                boolean coincideRd     = rd.isEmpty()     || nombreCarpeta.contains(rd);
-                boolean coincideDni    = dni.isEmpty()    || nombreCarpeta.contains(dni);
 
-                if (coincideNombre && coincideRd && coincideDni) {
-                    modeloNombres.addElement(archivo.getName());
-                    modeloRutas.addElement(archivo.getAbsolutePath());
+                // Solo procesar carpetas que contengan "exp" en el nombre
+                if (nombreCarpeta.contains("exp")) {
+                    boolean coincideNombre = nombre.isEmpty() || nombreCarpeta.contains(nombre);
+                    boolean coincideExpediente = expediente.isEmpty() || nombreCarpeta.contains(expediente);
+                    boolean coincideDni = dni.isEmpty() || nombreCarpeta.contains(dni);
+
+                    if (coincideNombre && coincideExpediente && coincideDni) {
+                        modeloNombres.addElement(archivo.getName());
+                        modeloRutas.addElement(archivo.getAbsolutePath());
+                    }
                 }
 
-                // Búsqueda recursiva
-                buscarRecursivamente(archivo, nombre, rd, dni, modeloNombres, modeloRutas);
+                // Seguir recorriendo recursivamente
+                buscarRecursivamente(archivo, nombre, expediente, dni, modeloNombres, modeloRutas);
             }
         }
     }
     
     
-    //-----
-    public static void cargarEstructura(
-            String rutaBase,
-            JComboBox<String> jcbAnios,
-            JComboBox<String> jcbMeses,
-            JComboBox<String> jcbExpedientes,
-            JComboBox<String> jcbEtapas
-    ) {
-        File baseDir = new File(rutaBase);
-        if (!baseDir.exists() || !baseDir.isDirectory()) {
-            JOptionPane.showMessageDialog(null, "Ruta inválida");
+    //NOrmalizar la busqueda:
+    private static String normalizarLocal(String texto) {
+        if (texto == null) return "";
+        String textoNormalizado = Normalizer.normalize(texto, Normalizer.Form.NFD);
+        return textoNormalizado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "")
+                               .replace('ñ', 'n')
+                               .replace('Ñ', 'n')
+                               .toLowerCase();
+    }
+    
+    
+    
+    public static void analizarCarpetaSeleccionada(
+        int indiceSeleccionado,
+        DefaultListModel<String> modeloRutasOrigen,
+        DefaultListModel<String> modeloNombresDestino,
+        DefaultListModel<String> modeloRutasDestino) {
+
+        String rutaBase = modeloRutasOrigen.getElementAt(indiceSeleccionado);
+        File carpetaBase = new File(rutaBase);
+
+        // Palabras clave en orden de prioridad
+        String[] ordenBusqueda = {"REC", "IDE", "EMI", "ARC", "APE", "SEG", "AGR", "CON"};
+
+        // Limpiar el modelo destino
+        modeloNombresDestino.clear();
+        modeloRutasDestino.clear();
+
+        // Lista para almacenar los archivos encontrados en orden
+        List<File> archivosOrdenados = new ArrayList<>();
+
+        // Incluir carpeta base si coincide con alguna clave
+        for (String clave : ordenBusqueda) {
+            if (carpetaBase.getName().toUpperCase().contains(clave)) {
+                agregarArchivosRecursivos(carpetaBase, archivosOrdenados);
+                break; // Ya fue procesada, no repetirla
+            }
+        }
+
+        // Buscar subcarpetas que coincidan con las claves
+        for (String clave : ordenBusqueda) {
+            File[] subCarpetas = carpetaBase.listFiles((File f) ->
+                    f.isDirectory() && f.getName().toUpperCase().contains(clave)
+            );
+
+            if (subCarpetas != null) {
+                for (File sub : subCarpetas) {
+                    agregarArchivosRecursivos(sub, archivosOrdenados);
+                }
+            }
+        }
+
+        // Agregar los archivos encontrados al modelo destino
+        for (File archivo : archivosOrdenados) {
+            modeloNombresDestino.addElement(archivo.getName());
+            modeloRutasDestino.addElement(archivo.getAbsolutePath());
+        }
+    }
+
+    private static void agregarArchivosRecursivos(File carpeta, List<File> lista) {
+        File[] archivos = carpeta.listFiles();
+        if (archivos == null) return;
+
+        for (File f : archivos) {
+            if (f.isDirectory()) {
+                agregarArchivosRecursivos(f, lista);
+            } else {
+                String nombre = f.getName();
+                String nombreLower = nombre.toLowerCase();
+
+                // Omitir archivos Word
+                if (nombreLower.endsWith(".doc") || nombreLower.endsWith(".docx")) {
+                    continue;
+                }
+
+                // Omitir archivos que contienen "EXP" y guardar el nombre
+                if (nombre.toUpperCase().contains("EXP")) {
+                    nombreExpediente = nombre; // ✅ Se guarda aquí directamente
+                    continue;
+                }
+
+                lista.add(f);
+            }
+        }
+    }
+
+
+
+    public static void fusionarArchivos(String rutaDestino, String nombreArchivo, DefaultListModel<String> modeloRutas) {
+        // Validaciones
+        if (modeloRutas == null || modeloRutas.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No hay archivos PDF en la lista.");
             return;
         }
 
-        // Limpiar todos los combos
-        jcbAnios.removeAllItems();
-        jcbMeses.removeAllItems();
-        jcbExpedientes.removeAllItems();
-        jcbEtapas.removeAllItems();
-
-        // Paso 1: Llenar jcbAnios desde ruta base
-        File[] carpetasNivel1 = baseDir.listFiles(File::isDirectory);
-        if (carpetasNivel1 == null) return;
-
-        for (File carpeta : carpetasNivel1) {
-            jcbAnios.addItem(carpeta.getName());
+        if (rutaDestino == null || rutaDestino.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "La ruta de destino está vacía.");
+            return;
         }
 
-        // Paso 2: Listener para llenar jcbMeses
-        jcbAnios.addActionListener(e -> {
-            jcbMeses.removeAllItems();
-            jcbExpedientes.removeAllItems();
-            jcbEtapas.removeAllItems();
+        if (nombreArchivo == null || nombreArchivo.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "El nombre del archivo está vacío.");
+            return;
+        }
 
-            String seleccionNivel1 = (String) jcbAnios.getSelectedItem();
-            if (seleccionNivel1 == null) return;
+        File carpetaDestino = new File(rutaDestino);
+        if (!carpetaDestino.exists() || !carpetaDestino.isDirectory()) {
+            JOptionPane.showMessageDialog(null, "La carpeta de destino no existe o no es válida.");
+            return;
+        }
 
-            File carpetaNivel1 = new File(baseDir, seleccionNivel1);
-            File[] carpetasNivel2 = carpetaNivel1.listFiles(File::isDirectory);
-            if (carpetasNivel2 == null) return;
-
-            for (File carpeta : carpetasNivel2) {
-                jcbMeses.addItem(carpeta.getName());
+        // Crear lista de archivos PDF válidos
+        List<File> archivosPDF = new ArrayList<>();
+        for (int i = 0; i < modeloRutas.getSize(); i++) {
+            File archivo = new File(modeloRutas.get(i));
+            if (archivo.exists() && archivo.getName().toLowerCase().endsWith(".pdf")) {
+                archivosPDF.add(archivo);
             }
-        });
+        }
 
-        // Paso 3: Listener para llenar jcbExpedientes
-        jcbMeses.addActionListener(e -> {
-            jcbExpedientes.removeAllItems();
-            jcbEtapas.removeAllItems();
+        if (archivosPDF.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No se encontraron archivos PDF válidos en la lista.");
+            return;
+        }
 
-            String seleccionNivel1 = (String) jcbAnios.getSelectedItem();
-            String seleccionNivel2 = (String) jcbMeses.getSelectedItem();
-            if (seleccionNivel1 == null || seleccionNivel2 == null) return;
-
-            File carpetaNivel2 = new File(baseDir + File.separator + seleccionNivel1 + File.separator + seleccionNivel2);
-            File[] carpetasNivel3 = carpetaNivel2.listFiles(File::isDirectory);
-            if (carpetasNivel3 == null) return;
-
-            for (File carpeta : carpetasNivel3) {
-                jcbExpedientes.addItem(carpeta.getName());
+        // Intentar fusionar
+        try {
+            PDFMergerUtility merger = new PDFMergerUtility();
+            for (File archivo : archivosPDF) {
+                System.out.println("Agregando: " + archivo.getAbsolutePath());
+                merger.addSource(archivo);
             }
-        });
 
-        // Paso 4: Listener para llenar jcbEtapas
-        jcbExpedientes.addActionListener(e -> {
-            jcbEtapas.removeAllItems();
+            File archivoSalida = new File(carpetaDestino, nombreArchivo + ".pdf");
+            merger.setDestinationFileName(archivoSalida.getAbsolutePath());
+            merger.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
 
-            String seleccionNivel1 = (String) jcbAnios.getSelectedItem();
-            String seleccionNivel2 = (String) jcbMeses.getSelectedItem();
-            String seleccionNivel3 = (String) jcbExpedientes.getSelectedItem();
-            if (seleccionNivel1 == null || seleccionNivel2 == null || seleccionNivel3 == null) return;
+            JOptionPane.showMessageDialog(null, "PDF fusionado correctamente:\n" + archivoSalida.getAbsolutePath());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error al fusionar PDFs: " + ex.getMessage());
+        }
+    }
+    public static void fusionarArchivosConInteraccion(DefaultListModel<String> modeloRutas, String rutaSugerida, String nombreSugeridoParametro, Component parent) {
 
-            File carpetaNivel3 = new File(baseDir + File.separator + seleccionNivel1 + File.separator + seleccionNivel2 + File.separator + seleccionNivel3);
-            File[] carpetasNivel4 = carpetaNivel3.listFiles(File::isDirectory);
-            if (carpetasNivel4 == null) return;
+        if (modeloRutas == null || modeloRutas.isEmpty()) {
+            JOptionPane.showMessageDialog(parent, "No hay archivos PDF en la lista.");
+            return;
+        }
 
-            for (File carpeta : carpetasNivel4) {
-                jcbEtapas.addItem(carpeta.getName());
+        String nombreSugerido = "PDF_Fusionado";
+        if (nombreSugeridoParametro != null && !nombreSugeridoParametro.trim().isEmpty()) {
+            nombreSugerido = nombreSugeridoParametro;
+        } else {
+            for (int i = 0; i < modeloRutas.size(); i++) {
+                String nombreArchivo = new File(modeloRutas.get(i)).getName();
+                if (nombreArchivo.toUpperCase().contains("EXP")) {
+                    int punto = nombreArchivo.lastIndexOf('.');
+                    if (punto > 0) {
+                        nombreSugerido = nombreArchivo.substring(0, punto);
+                    } else {
+                        nombreSugerido = nombreArchivo;
+                    }
+                    break;
+                }
             }
-        });
+        }
+
+        if (rutaSugerida == null || rutaSugerida.trim().isEmpty()) {
+            rutaSugerida = System.getProperty("user.home");
+        }
+
+        File dir = new File(rutaSugerida);
+        if (!dir.exists() || !dir.isDirectory()) {
+            System.out.println("Ruta inválida para JFileChooser: " + rutaSugerida + ". Usando carpeta usuario.");
+            rutaSugerida = System.getProperty("user.home");
+        }
+
+        JFileChooser chooser = new JFileChooser(rutaSugerida);
+        chooser.setDialogTitle("Selecciona la carpeta de destino");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+
+        int seleccion = chooser.showOpenDialog(parent);
+        if (seleccion != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File carpetaDestino = chooser.getSelectedFile();
+        if (!carpetaDestino.exists() || !carpetaDestino.isDirectory()) {
+            JOptionPane.showMessageDialog(parent, "La carpeta seleccionada no es válida.");
+            return;
+        }
+
+        // Paso 4: Confirmar o cambiar nombre
+        String nombreFinal = JOptionPane.showInputDialog(null,
+                "El archivo fusionado se guardará como:", nombreSugerido);
+
+        if (nombreFinal == null || nombreFinal.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nombre de archivo no válido.");
+            return;
+        }
+
+        // Paso 5: Crear lista de archivos PDF válidos
+        List<File> archivosPDF = new ArrayList<>();
+        for (int i = 0; i < modeloRutas.getSize(); i++) {
+            File archivo = new File(modeloRutas.get(i));
+            if (archivo.exists() && archivo.getName().toLowerCase().endsWith(".pdf")) {
+                archivosPDF.add(archivo);
+            }
+        }
+
+        if (archivosPDF.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No se encontraron archivos PDF válidos en la lista.");
+            return;
+        }
+
+        // Paso 6: Fusionar PDFs
+        try {
+            PDFMergerUtility merger = new PDFMergerUtility();
+            for (File archivo : archivosPDF) {
+                System.out.println("Agregando: " + archivo.getAbsolutePath());
+                merger.addSource(archivo);
+            }
+
+            File archivoSalida = new File(carpetaDestino, nombreFinal + ".pdf");
+            merger.setDestinationFileName(archivoSalida.getAbsolutePath());
+            merger.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+
+            // === FOLIAR EL PDF RESULTANTE ===
+            try (PDDocument document = PDDocument.load(archivoSalida)) {
+                agregarFolio(document);
+                document.save(archivoSalida);
+            }
+
+
+            JOptionPane.showMessageDialog(null, "PDF fusionado correctamente:\n" + archivoSalida.getAbsolutePath());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error al fusionar PDFs: " + ex.getMessage());
+        }
+    }
+    
+    private static void agregarFolio(PDDocument document) throws IOException {
+        int totalPages = document.getNumberOfPages();
+        float margin = 40;
+
+        for (int i = 0; i < totalPages; i++) {
+            PDPage page = document.getPage(i);
+            PDRectangle mediaBox = page.getMediaBox();
+            int rotation = page.getRotation();
+
+            float x = 0, y = 0;
+
+            switch (rotation) {
+                case 90:
+                    // Para rotación 90, la esquina inferior derecha visible queda en (width - margin, margin)
+                    x = mediaBox.getWidth() - margin;
+                    y = margin;
+                    break;
+                case 180:
+                    // Rotado 180, invertido
+                    x = margin;
+                    y = mediaBox.getHeight() - margin;
+                    break;
+                case 270:
+                    // Rotación 270
+                    x = margin;
+                    y = mediaBox.getHeight() - margin;
+                    break;
+                default:
+                    // Rotación 0, esquina inferior derecha
+                    x = mediaBox.getWidth() - margin;
+                    y = margin;
+                    break;
+            }
+
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, true, true)) {
+                contentStream.beginText();
+                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 10);
+
+                // Ajustar matriz para rotación
+                switch (rotation) {
+                    case 90:
+                        contentStream.setTextMatrix(0, 1, -1, 0, x, y);
+                        break;
+                    case 180:
+                        contentStream.setTextMatrix(-1, 0, 0, -1, x, y);
+                        break;
+                    case 270:
+                        contentStream.setTextMatrix(0, -1, 1, 0, x, y);
+                        break;
+                    default:
+                        contentStream.setTextMatrix(1, 0, 0, 1, x, y);
+                        break;
+                }
+
+                contentStream.showText("Folio: " + (i + 1));
+                contentStream.endText();
+            }
+        }
+    }
+    
+    //api web
+    public void conectar(String usuario, String contraseña) {
+        sardine = SardineFactory.begin(usuario, contraseña);
+    }
+    // En ManejadorArchivos.java
+    public InputStream descargarArchivo(String urlArchivo) throws IOException {
+        return sardine.get(urlArchivo);
+    }
+    
+    public Map<String, String> buscarArchivosOrdenados(String urlCarpeta) throws Exception {
+        Map<String, String> archivosOrdenados = new LinkedHashMap<>();
+
+        // Orden de prioridad
+        String[] ordenPrioridad = {"REC", "IDE", "EMI", "ARC", "APE", "SEC", "AGR", "CON"};
+
+        // Map para almacenar archivos agrupados por prefijo
+        Map<String, Map<String, String>> archivosPorPrefijo = new LinkedHashMap<>();
+        for (String prefijo : ordenPrioridad) {
+            archivosPorPrefijo.put(prefijo, new LinkedHashMap<>());
+        }
+
+        Map<String, String> archivosOtros = new LinkedHashMap<>(); // Para archivos sin prefijo
+
+        // Listar contenido de carpeta base
+        List<DavResource> recursosBase = sardine.list(urlCarpeta);
+
+        for (DavResource res : recursosBase) {
+            if (res.isDirectory()) {
+                String nombreCarpeta = res.getName();
+                if (nombreCarpeta == null) continue;
+
+                String urlSubcarpeta = urlCarpeta;
+                if (!urlSubcarpeta.endsWith("/")) urlSubcarpeta += "/";
+                urlSubcarpeta += URLEncoder.encode(nombreCarpeta, "UTF-8").replace("+", "%20");
+
+                Map<String, String> archivosSub = buscarArchivosEnSubcarpeta(urlSubcarpeta);
+
+                List<String> nombresTemp = new ArrayList<>();
+                List<String> rutasTemp = new ArrayList<>();
+
+                // Clasificar por prefijo flexible
+                boolean agregado = false;
+                for (String prefijo : ordenPrioridad) {
+                    if (nombreCarpeta.toUpperCase().contains(prefijo)) {
+                        archivosPorPrefijo.get(prefijo).putAll(archivosSub);
+                        agregado = true;
+                        break;
+                    }
+                }
+
+                if (!agregado) {
+                    archivosOtros.putAll(archivosSub); // Si no coincide con ningún prefijo
+                }
+
+            } else {
+                // Archivos sueltos
+                String nombreArchivo = res.getName();
+                if (nombreArchivo == null) continue;
+
+                String ruta = urlCarpeta;
+                if (!ruta.endsWith("/")) ruta += "/";
+                ruta += URLEncoder.encode(nombreArchivo, "UTF-8").replace("+", "%20");
+
+                archivosOtros.put(nombreArchivo, ruta);
+            }
+        }
+
+        // Añadir archivos en orden de prefijo
+        for (String prefijo : ordenPrioridad) {
+            archivosOrdenados.putAll(archivosPorPrefijo.get(prefijo));
+        }
+
+        // Finalmente, añadir los que no tienen coincidencias
+        archivosOrdenados.putAll(archivosOtros);
+
+        return archivosOrdenados;
+    }
+    
+    
+    
+    
+    private Map<String, String> buscarArchivosEnSubcarpeta(String urlCarpeta) throws Exception {
+        Map<String, String> archivos = new LinkedHashMap<>();
+
+        List<DavResource> recursos;
+        try {
+            recursos = sardine.list(urlCarpeta);
+        } catch (Exception e) {
+            return archivos;
+        }
+
+        for (DavResource res : recursos) {
+            if (res.isDirectory()) {
+                String subUrl = urlCarpeta;
+                if (!subUrl.endsWith("/")) subUrl += "/";
+                subUrl += URLEncoder.encode(res.getName(), "UTF-8").replace("+", "%20");
+
+                archivos.putAll(buscarArchivosEnSubcarpeta(subUrl)); // Recursivo
+            } else {
+                String nombre = res.getName();
+                if (nombre == null) continue;
+
+                String rutaCompleta = urlCarpeta;
+                if (!rutaCompleta.endsWith("/")) rutaCompleta += "/";
+                rutaCompleta += URLEncoder.encode(nombre, "UTF-8").replace("+", "%20");
+
+                archivos.put(nombre, rutaCompleta);
+            }
+        }
+
+        return archivos;
     }
 
+
+    // Transforma URL Nextcloud en URL WebDAV usable
+    public String transformarLink(String linkNextcloud) throws Exception {
+        if (!linkNextcloud.contains("dir=")) {
+            throw new Exception("URL inválida. No contiene 'dir='.");
+        }
+
+        // Extraer parte después de dir=
+        String ruta = linkNextcloud.substring(linkNextcloud.indexOf("dir=") + 4);
+        int ampersandIndex = ruta.indexOf("&");
+        if (ampersandIndex != -1) {
+            ruta = ruta.substring(0, ampersandIndex);
+        }
+
+        // Decodificar (por si hay %20)
+        ruta = java.net.URLDecoder.decode(ruta, "UTF-8");
+
+        // Codificar parte por parte correctamente
+        String[] partes = ruta.split("/");
+        StringBuilder url = new StringBuilder("https://drive.mimp.gob.pe/remote.php/webdav");
+
+        for (String parte : partes) {
+            if (parte.isEmpty()) continue;
+            url.append("/");
+            url.append(java.net.URLEncoder.encode(parte, "UTF-8").replace("+", "%20"));
+        }
+
+        return url.toString();
+    }
+
+
+
+    public Map<String, String> buscarSubcarpetas(String urlWebDAV, String palabraClave) throws Exception {
+        Map<String, String> resultados = new LinkedHashMap<>();
+
+        List<DavResource> carpetasNivel1 = sardine.list(urlWebDAV);
+
+        for (DavResource carpeta : carpetasNivel1) {
+            if (!carpeta.isDirectory()) continue;
+
+            String nombreCarpeta = carpeta.getName();
+            if (nombreCarpeta == null || nombreCarpeta.isEmpty()) continue;
+
+            String urlNivel2 = urlWebDAV;
+            if (!urlNivel2.endsWith("/")) urlNivel2 += "/";
+            urlNivel2 += URLEncoder.encode(nombreCarpeta, "UTF-8").replace("+", "%20");
+
+            try {
+                List<DavResource> subcarpetas = sardine.list(urlNivel2);
+
+                for (DavResource sub : subcarpetas) {
+                    if (!sub.isDirectory()) continue;
+
+                    String nombreSub = sub.getName();
+                    if (nombreSub == null || nombreSub.isEmpty()) continue;
+
+                    System.out.println("Comparando: " + nombreSub + " vs. " + palabraClave);
+
+                    if (normalizar(nombreSub).contains(normalizar(palabraClave))) {
+                        // En lugar de agregar un String mixto, agrega nombre y ruta separados
+                        String rutaSubcarpeta = urlNivel2;
+                        if (!rutaSubcarpeta.endsWith("/")) rutaSubcarpeta += "/";
+                        rutaSubcarpeta += URLEncoder.encode(nombreSub, "UTF-8").replace("+", "%20");
+
+                        resultados.put(nombreSub, rutaSubcarpeta);
+                    }
+
+                }
+
+            } catch (Exception e) {
+                continue;
+            }
+        }
+
+        return resultados;
+    }
+
+    
+    
+    public String normalizar(String texto) {
+        return java.text.Normalizer.normalize(texto, java.text.Normalizer.Form.NFD)
+                    .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                    .replaceAll("[^a-zA-Z0-9]", "") // quita guiones, etc.
+                    .toLowerCase();
+    }
+
+
+
+
+    private void buscarRecursivamente(String url, String palabraClave, List<String> resultados) throws Exception {
+        List<DavResource> recursos;
+        try {
+            recursos = sardine.list(url);
+        } catch (Exception e) {
+            // Si no se puede listar (sin permisos, etc.), se ignora
+            return;
+        }
+
+        for (DavResource res : recursos) {
+            if (!res.isDirectory()) continue;
+
+            String nombre = res.getName();
+            if (nombre == null || nombre.equals("")) continue;
+
+            if (nombre.toLowerCase().contains(palabraClave)) {
+                resultados.add(nombre + " (en: " + url + ")");
+            }
+
+            // Llamada recursiva a la subcarpeta
+            String subcarpetaUrl = url;
+            if (!subcarpetaUrl.endsWith("/")) subcarpetaUrl += "/";
+            subcarpetaUrl += java.net.URLEncoder.encode(nombre, "UTF-8").replace("+", "%20");
+
+            buscarRecursivamente(subcarpetaUrl, palabraClave, resultados);
+        }
+    }
+
+    
+
+    public Map<String, String> listarArchivos(String urlCarpeta) throws Exception {
+        Map<String, String> archivos = new LinkedHashMap<>();
+        List<DavResource> recursos = sardine.list(urlCarpeta);
+
+        for (DavResource res : recursos) {
+            if (!res.isDirectory()) {
+                String nombre = res.getName();
+                if (nombre == null) continue;
+
+                if (!nombre.toLowerCase().endsWith(".doc") && !nombre.toLowerCase().endsWith(".docx")) {
+                    String rutaCompleta = urlCarpeta;
+                    if (!rutaCompleta.endsWith("/")) rutaCompleta += "/";
+                    rutaCompleta += java.net.URLEncoder.encode(nombre, "UTF-8").replace("+", "%20");
+
+                    archivos.put(nombre, rutaCompleta);
+                }
+            }
+        }
+
+        return archivos;
+    }
+
+
+    public List<String> buscarEnSubnivelesDirectos(String urlWebDAV, String palabraClave) throws Exception {
+        List<String> resultados = new ArrayList<>();
+
+        // Paso 1: Listar carpetas "enero", "febrero", etc.
+        List<DavResource> nivel1 = sardine.list(urlWebDAV);
+
+        for (DavResource carpetaMes : nivel1) {
+            if (!carpetaMes.isDirectory()) continue;
+
+            String nombreMes = carpetaMes.getName();
+            if (nombreMes == null || nombreMes.equals("")) continue;
+
+            // Armar URL de esa carpeta mes
+            String urlMes = urlWebDAV;
+            if (!urlMes.endsWith("/")) urlMes += "/";
+            urlMes += java.net.URLEncoder.encode(nombreMes, "UTF-8").replace("+", "%20");
+
+            // Paso 2: Buscar solo en las subcarpetas de esta
+            try {
+                List<DavResource> nivel2 = sardine.list(urlMes);
+
+                for (DavResource sub : nivel2) {
+                    if (sub.isDirectory() && sub.getName().toLowerCase().contains(palabraClave.toLowerCase())) {
+                        resultados.add(sub.getName() + " (en: " + urlMes + ")");
+                        return resultados; // ❗ Ya se encontró, no seguir buscando
+                    }
+                }
+            } catch (Exception e) {
+                // Puede fallar si no hay permisos en esa carpeta
+                continue;
+            }
+        }
+
+        return resultados; // Si no se encontró en ninguna
+    }
+    
+    public static File convertirImagenAPdf(File imagen) throws IOException {
+        PDDocument document = new PDDocument();
+        PDPage page = new PDPage();
+        document.addPage(page);
+
+        PDImageXObject pdImage = PDImageXObject.createFromFile(imagen.getAbsolutePath(), document);
+        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+        contentStream.drawImage(pdImage, 20, 100, page.getMediaBox().getWidth() - 40, page.getMediaBox().getHeight() - 200);
+        contentStream.close();
+
+        File pdfTemp = File.createTempFile("imagen_", ".pdf");
+        document.save(pdfTemp);
+        document.close();
+        return pdfTemp;
+    }
+
+
+    
 }

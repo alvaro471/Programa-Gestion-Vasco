@@ -1,27 +1,118 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
+    
 package view;
 
+import java.awt.Desktop;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
+import java.awt.image.BufferedImage;
+import java.awt.print.PrinterJob;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.printing.PDFPageable;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import persistencia.AutomatizadorMIMP;
+import persistencia.ConfigUtil;
+import persistencia.CredencialesUtil;
 import persistencia.ManejadorArchivos;
 
-/**
- *
- * @author user
- */
 public class interfazBuscarInformacion extends javax.swing.JFrame {
 
+    String rutaGeneral;
     DefaultListModel<String> modeloListaCarpetas1Nombres = new DefaultListModel<>();
     DefaultListModel<String> modeloListaCarpetas1Rutas = new DefaultListModel<>();
-    
+
+    DefaultListModel<String> modeloListaArchivosNombres = new DefaultListModel<>();
+    DefaultListModel<String> modeloListaArchivosRutas = new DefaultListModel<>();
+    private AutomatizadorMIMP autoGlobal = new AutomatizadorMIMP();
+    private ManejadorArchivos manejador = new ManejadorArchivos();
+    String linkWeb;
+    String usuario;
+    String clave;
+    String rutaGuardadaPrincipal;
+    String rutaGuardadaGeneral = ConfigUtil.cargarRutaGeneral();
+    String[] credenciales = CredencialesUtil.cargarCredenciales();
+    String nombreExpedienteLocal = "";
+
+
     public interfazBuscarInformacion() {
         initComponents();
+        setLocationRelativeTo(null);
+        setLayout(new GridBagLayout());
+
+        jScrollPane1.setPreferredSize(new Dimension(707, 193));
+        jScrollPane2.setPreferredSize(new Dimension(379, 479));
+        rutaGuardadaPrincipal = ConfigUtil.cargarRutaPrincipal();
+        if (rutaGuardadaPrincipal != null) {
+            ManejadorArchivos.setRutaCarpetaPrincipal(rutaGuardadaPrincipal);
+            System.out.println("Ruta principal cargada desde config_principal.txt: " + rutaGuardadaPrincipal);
+        } else {
+            System.out.println("No hay ruta principal guardada. Se usará la ruta por defecto.");
+        }
+        JListCarpetas.setModel(modeloListaCarpetas1Nombres);
+        JListArchivos.setModel(modeloListaArchivosNombres);
+
         txtNombre.setEnabled(jcbNombre.isSelected());
-        txtRd.setEnabled(jcbRd.isSelected());
+        txtExpediente.setEnabled(jcbObtenerExpediente.isSelected());
         txtDni.setEnabled(jcbDni.isSelected());
+        txtUrlCarpeta.setEnabled(false);
+        txtCorreo.setEnabled(false);
+        jpfContrasena.setEnabled(false);
+        btnBuscarWeb.setEnabled(false);
+        txtUrlCarpeta.setPreferredSize(new Dimension(203, 24));
+        txtUrlCarpeta.setMaximumSize(new Dimension(203, 24));
+        txtUrlCarpeta.setMinimumSize(new Dimension(203, 24));
+
+
+
+
+        
+        if (credenciales != null) {
+            txtCorreo.setText(credenciales[0]);
+            jpfContrasena.setText(credenciales[1]);
+            txtUrlCarpeta.setText(credenciales[2]);
+        }
+        
     }
 
     /**
@@ -34,39 +125,52 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel5 = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        txtCarpetaGeneral = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         JListCarpetas = new javax.swing.JList<>();
-        jLabel3 = new javax.swing.JLabel();
-        txtRuta = new javax.swing.JTextField();
         jButton3 = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
-        jButton4 = new javax.swing.JButton();
         jcbNombre = new javax.swing.JCheckBox();
         txtNombre = new javax.swing.JTextField();
-        jcbRd = new javax.swing.JCheckBox();
-        txtRd = new javax.swing.JTextField();
-        jcbDni = new javax.swing.JCheckBox();
-        txtDni = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
-        jLabel8 = new javax.swing.JLabel();
-        jcbAnios = new javax.swing.JComboBox<>();
-        jLabel9 = new javax.swing.JLabel();
-        jcbMeses = new javax.swing.JComboBox<>();
+        jcbObtenerExpediente = new javax.swing.JCheckBox();
+        jcbDni = new javax.swing.JCheckBox();
+        txtExpediente = new javax.swing.JTextField();
+        txtDni = new javax.swing.JTextField();
+        btnAbrirCarpeta = new javax.swing.JButton();
+        jLabel7 = new javax.swing.JLabel();
+        txtRutaCarpetaGeneral = new javax.swing.JTextField();
+        btnBuscarCarpetaGeneral = new javax.swing.JButton();
+        txtRutaMostrar = new javax.swing.JTextField();
+        btnLimpiarJListCarpetas = new javax.swing.JButton();
+        btnRefrescar = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        txtUrlCarpeta = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jcbExpediente = new javax.swing.JComboBox<>();
-        jcbEtapas = new javax.swing.JComboBox<>();
+        txtCorreo = new javax.swing.JTextField();
+        jpfContrasena = new javax.swing.JPasswordField();
         jLabel6 = new javax.swing.JLabel();
-        jButton5 = new javax.swing.JButton();
+        jCheckBox1 = new javax.swing.JCheckBox();
+        btnBuscarWeb = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        btnImprimir = new javax.swing.JButton();
+        btnVisualizar = new javax.swing.JButton();
+        btnGuardar = new javax.swing.JButton();
+        btnCrearConsolidado = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        JListArchivos = new javax.swing.JList<>();
+        btnArriba = new javax.swing.JButton();
+        btnAbajo = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
+        jButton9 = new javax.swing.JButton();
 
         jLabel5.setText("jLabel5");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setText("Seleccionar Carpeta Principal:");
+        jScrollPane1.setPreferredSize(new java.awt.Dimension(699, 193));
 
         JListCarpetas.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
@@ -75,9 +179,7 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(JListCarpetas);
 
-        jLabel3.setText("RUTA:");
-
-        jButton3.setText("REGRESAR");
+        jButton3.setText("MENU PRINCIPAL");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);
@@ -87,31 +189,10 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
         jLabel4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLabel4.setText("BUSCAR PDF");
 
-        jButton4.setText("EXAMINAR");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
-            }
-        });
-
         jcbNombre.setText("Nombre");
         jcbNombre.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jcbNombreActionPerformed(evt);
-            }
-        });
-
-        jcbRd.setText("RD");
-        jcbRd.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jcbRdActionPerformed(evt);
-            }
-        });
-
-        jcbDni.setText("DNI");
-        jcbDni.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jcbDniActionPerformed(evt);
             }
         });
 
@@ -123,176 +204,379 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
             }
         });
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jcbObtenerExpediente.setText("N Expediente");
+        jcbObtenerExpediente.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jcbObtenerExpedienteActionPerformed(evt);
+            }
+        });
 
-        jLabel8.setText("Expediente:");
+        jcbDni.setText("DNI");
+        jcbDni.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jcbDniActionPerformed(evt);
+            }
+        });
 
-        jLabel9.setText("Mes:");
+        btnAbrirCarpeta.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        btnAbrirCarpeta.setText("ABRIR");
+        btnAbrirCarpeta.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAbrirCarpetaActionPerformed(evt);
+            }
+        });
 
-        jLabel2.setText("Expediente Unico:");
+        jLabel7.setText("Buscar Carpeta General: ");
 
-        jLabel6.setText("Etapas");
+        btnBuscarCarpetaGeneral.setText("EXAMINAR");
+        btnBuscarCarpetaGeneral.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBuscarCarpetaGeneralActionPerformed(evt);
+            }
+        });
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(43, 43, 43)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6)
-                    .addComponent(jcbEtapas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jcbExpediente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2)
-                    .addComponent(jcbMeses, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel9)
-                    .addComponent(jcbAnios, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8))
-                .addContainerGap(370, Short.MAX_VALUE))
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        btnLimpiarJListCarpetas.setText("LIMPIAR");
+        btnLimpiarJListCarpetas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLimpiarJListCarpetasActionPerformed(evt);
+            }
+        });
+
+        btnRefrescar.setText("REFRESCAR");
+        btnRefrescar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefrescarActionPerformed(evt);
+            }
+        });
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        jLabel1.setText("Ingrese el Link de la carpeta general:");
+
+        jLabel2.setText("Usuario");
+
+        jLabel6.setText("Contraseña");
+
+        jCheckBox1.setText("Web");
+        jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox1ActionPerformed(evt);
+            }
+        });
+
+        btnBuscarWeb.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        btnBuscarWeb.setText("BUSCAR");
+        btnBuscarWeb.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBuscarWebActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel8)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jcbAnios, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(39, 39, 39)
-                .addComponent(jLabel9)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jcbMeses, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(44, 44, 44)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jcbExpediente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(45, 45, 45)
-                .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jcbEtapas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtUrlCarpeta))
+                        .addGap(46, 46, 46)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addComponent(txtCorreo, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(33, 33, 33)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel6)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jpfContrasena, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(42, 42, 42)
+                                .addComponent(btnBuscarWeb))))
+                    .addComponent(jCheckBox1))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        jButton5.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        jButton5.setText("CARGAR");
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jCheckBox1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtCorreo)
+                            .addComponent(txtUrlCarpeta)))
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(btnBuscarWeb)
+                        .addGroup(jPanel3Layout.createSequentialGroup()
+                            .addComponent(jLabel6)
+                            .addGap(18, 18, 18)
+                            .addComponent(jpfContrasena, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(32, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(19, 19, 19)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(txtRutaMostrar, javax.swing.GroupLayout.PREFERRED_SIZE, 572, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnAbrirCarpeta)
+                        .addGap(67, 79, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel4)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnRefrescar)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnLimpiarJListCarpetas)
+                        .addGap(18, 18, 18)
                         .addComponent(jButton3)
-                        .addGap(36, 36, 36))
+                        .addGap(39, 39, 39))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                    .addComponent(jLabel3)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(txtRuta))
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jcbNombre)
-                                        .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
-                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jcbRd)
-                                        .addComponent(txtRd, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGap(29, 29, 29)
-                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jcbDni)
-                                        .addComponent(txtDni, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGap(40, 40, 40)
-                                    .addComponent(jButton1)))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel1)
-                                    .addComponent(txtCarpetaGeneral, javax.swing.GroupLayout.PREFERRED_SIZE, 278, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButton4)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(12, 12, 12))))
+                                    .addComponent(jcbObtenerExpediente)
+                                    .addComponent(txtExpediente, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(78, 78, 78)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jcbNombre)
+                                    .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(56, 56, 56)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jcbDni)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(txtDni, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(29, 29, 29)
+                                        .addComponent(jButton1))))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addGap(18, 18, 18)
+                                .addComponent(txtRutaCarpetaGeneral, javax.swing.GroupLayout.PREFERRED_SIZE, 372, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnBuscarCarpetaGeneral))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 707, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(13, 13, 13)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton3)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel4)
-                        .addComponent(jButton5)))
-                .addGap(34, 34, 34)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(txtCarpetaGeneral, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jButton4))
-                                .addGap(22, 22, 22)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jcbNombre)
-                                    .addComponent(jcbDni))
-                                .addGap(4, 4, 4)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtDni, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jButton1)))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jcbRd)
-                                .addGap(4, 4, 4)
-                                .addComponent(txtRd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(txtRuta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel4)
+                    .addComponent(jButton3)
+                    .addComponent(btnLimpiarJListCarpetas)
+                    .addComponent(btnRefrescar))
+                .addGap(18, 18, 18)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(txtRutaCarpetaGeneral, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnBuscarCarpetaGeneral))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jcbNombre)
+                    .addComponent(jcbObtenerExpediente)
+                    .addComponent(jcbDni))
+                .addGap(4, 4, 4)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtExpediente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtDni, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtRutaMostrar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnAbrirCarpeta, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        btnImprimir.setText("IMPRIMIR");
+        btnImprimir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnImprimirActionPerformed(evt);
+            }
+        });
+
+        btnVisualizar.setText("VISUALIZAR");
+        btnVisualizar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVisualizarActionPerformed(evt);
+            }
+        });
+
+        btnGuardar.setText("GUARDAR");
+        btnGuardar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuardarActionPerformed(evt);
+            }
+        });
+
+        btnCrearConsolidado.setText("CREAR CONSOLIDADO");
+        btnCrearConsolidado.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCrearConsolidadoActionPerformed(evt);
+            }
+        });
+
+        JListArchivos.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                JListArchivosValueChanged(evt);
+            }
+        });
+        jScrollPane2.setViewportView(JListArchivos);
+
+        btnArriba.setText("ARRIBA");
+        btnArriba.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnArribaActionPerformed(evt);
+            }
+        });
+
+        btnAbajo.setText("ABAJO");
+        btnAbajo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAbajoActionPerformed(evt);
+            }
+        });
+
+        jButton6.setText("BORRAR");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
+        jButton9.setText("BORRAR TODO");
+        jButton9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton9ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(btnVisualizar)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnImprimir)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnGuardar)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnCrearConsolidado))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(34, 34, 34)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnArriba)
+                            .addComponent(btnAbajo)
+                            .addComponent(jButton6)
+                            .addComponent(jButton9))))
+                .addContainerGap(42, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(24, 24, 24)
+                        .addComponent(btnArriba)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnAbajo)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton6)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton9))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 479, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnImprimir)
+                    .addComponent(btnVisualizar)
+                    .addComponent(btnGuardar)
+                    .addComponent(btnCrearConsolidado))
+                .addGap(0, 24, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1337, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel4Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(21, 21, 21)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addContainerGap()))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 569, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel4Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel4Layout.createSequentialGroup()
+                            .addGap(4, 4, 4)
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addContainerGap()))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        ManejadorArchivos.seleccionarCarpetaGeneralExpedientes(txtCarpetaGeneral);
-    }//GEN-LAST:event_jButton4ActionPerformed
-
-    private void JListCarpetas(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_JListCarpetas
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         
-        if (!evt.getValueIsAdjusting()) {
-            int index = JListCarpetas.getSelectedIndex(); // <-- este es el índice seleccionado
-            if (index != -1 && index < modeloListaCarpetas1Rutas.size()) {
-                String rutaCompleta = modeloListaCarpetas1Rutas.get(index); // <-- obtener la ruta real
-                File archivo = new File(rutaCompleta);
-                String nombreArchivo = archivo.getName();
-                txtRuta.setText(rutaCompleta);
-            }
-        }
-    }//GEN-LAST:event_JListCarpetas
+        String nombre = jcbNombre.isSelected() ? txtNombre.getText().trim().toLowerCase() : "";
+        String expediente = jcbObtenerExpediente.isSelected() ? txtExpediente.getText().trim().toLowerCase() : "";
+        String dni = jcbDni.isSelected() ? txtDni.getText().trim().toLowerCase() : "";
+        
+        ManejadorArchivos.buscarCarpetasEnGeneral(rutaGeneral, nombre, expediente, dni, modeloListaCarpetas1Nombres, modeloListaCarpetas1Rutas, JListCarpetas);
+        
+        
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jcbNombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbNombreActionPerformed
+        txtNombre.setEnabled(jcbNombre.isSelected());
+    }//GEN-LAST:event_jcbNombreActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // Crear una instancia del segundo JFrame
@@ -305,37 +589,886 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_jButton3ActionPerformed
 
-    private void jcbNombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbNombreActionPerformed
-        txtNombre.setEnabled(jcbNombre.isSelected());
+    private void JListCarpetas(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_JListCarpetas
+        if (!evt.getValueIsAdjusting()) {
+                int index = JListCarpetas.getSelectedIndex();
+                if (index != -1 && index < modeloListaCarpetas1Rutas.size()) {
+                    String rutaSeleccionada = modeloListaCarpetas1Rutas.get(index);
+                    txtRutaMostrar.setText(rutaSeleccionada);
+                }
+        }
+    }//GEN-LAST:event_JListCarpetas
 
-    }//GEN-LAST:event_jcbNombreActionPerformed
-
-    private void jcbRdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbRdActionPerformed
-        txtRd.setEnabled(jcbRd.isSelected());
-    }//GEN-LAST:event_jcbRdActionPerformed
+    private void jcbObtenerExpedienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbObtenerExpedienteActionPerformed
+        txtExpediente.setEnabled(jcbObtenerExpediente.isSelected());
+    }//GEN-LAST:event_jcbObtenerExpedienteActionPerformed
 
     private void jcbDniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbDniActionPerformed
         txtDni.setEnabled(jcbDni.isSelected());
     }//GEN-LAST:event_jcbDniActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        
-        String nombre = jcbNombre.isSelected() ? txtNombre.getText().trim().toLowerCase() : "";
-        String rd     = jcbRd.isSelected()     ? txtRd.getText().trim().toLowerCase()     : "";
-        String dni    = jcbDni.isSelected()    ? txtDni.getText().trim().toLowerCase()    : "";
+    private void btnAbrirCarpetaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAbrirCarpetaActionPerformed
+    if (jCheckBox1.isSelected()) {
+        int indexSeleccionado = JListCarpetas.getSelectedIndex();
+        if (indexSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Por favor selecciona una carpeta en la lista.");
+            return;
+        }
 
-        ManejadorArchivos.buscarCarpetasEnGeneral(
-            nombre,
-            rd,
-            dni,
-            modeloListaCarpetas1Nombres,
-            modeloListaCarpetas1Rutas,
-            JListCarpetas
-        );
+        try {
+            List<String> nombresTemp = new ArrayList<>();
+            List<String> rutasTemp = new ArrayList<>();
+
+            String urlCarpeta = modeloListaCarpetas1Rutas.getElementAt(indexSeleccionado);
+
+            if (!urlCarpeta.endsWith("/")) urlCarpeta += "/";
+
+            manejador.conectar(usuario, clave);
+
+            Map<String, String> archivos = manejador.buscarArchivosOrdenados(urlCarpeta);
+
+            modeloListaArchivosNombres.clear();
+            modeloListaArchivosRutas.clear();
+
+            // PRESERVA ORDEN:
+            archivos.forEach((nombreArchivo, ruta) -> {
+                if (nombreArchivo.toLowerCase().endsWith(".doc") || nombreArchivo.toLowerCase().endsWith(".docx")) return;
+
+                if (nombreArchivo.toUpperCase().contains("EXP")) {
+                    ManejadorArchivos.setNombreExpediente(nombreArchivo);
+                    System.out.println("Archivo expediente omitido y guardado para uso posterior: " + nombreArchivo);
+                    return;
+                }
+
+                modeloListaArchivosNombres.addElement(nombreArchivo);
+                modeloListaArchivosRutas.addElement(ruta);
+            });
+
+
+            String nombreExpedienteLocal = null;
+
+            for (Map.Entry<String, String> entry : archivos.entrySet()) {
+                String nombreArchivo = entry.getKey();
+                String nombreArchivoLower = nombreArchivo.toLowerCase();
+
+                if (nombreArchivoLower.endsWith(".doc") || nombreArchivoLower.endsWith(".docx")) {
+                    continue;  // Ignora DOCs
+                }
+
+                if (nombreArchivo.toUpperCase().contains("EXP")) {
+                    nombreExpedienteLocal = nombreArchivo;
+                    continue;  // Guarda pero omite agregar
+                }
+
+                nombresTemp.add(nombreArchivo);
+                rutasTemp.add(entry.getValue());
+            }
+
+            // 🔁 Limpia y llena los modelos SIN DESORDENAR
+            modeloListaArchivosNombres.clear();
+            modeloListaArchivosRutas.clear();
+
+            for (int i = 0; i < nombresTemp.size(); i++) {
+                modeloListaArchivosNombres.addElement(nombresTemp.get(i));
+                modeloListaArchivosRutas.addElement(rutasTemp.get(i));
+            }
+
+            JListArchivos.setModel(modeloListaArchivosNombres);
+
+            if (nombreExpedienteLocal != null) {
+                ManejadorArchivos.setNombreExpediente(nombreExpedienteLocal);
+                System.out.println("Archivo expediente omitido y guardado para uso posterior: " + nombreExpedienteLocal);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar archivos: " + e.getMessage());
+            e.printStackTrace();
+        }
+    } else {
+        int indice = JListCarpetas.getSelectedIndex();
+        if (indice >= 0) {
+            ManejadorArchivos.analizarCarpetaSeleccionada(
+                indice,
+                modeloListaCarpetas1Rutas,
+                modeloListaArchivosNombres,
+                modeloListaArchivosRutas
+            );
+
+            if (ManejadorArchivos.nombreExpediente != null) {
+                System.out.println("Archivo EXP encontrado y omitido: " + ManejadorArchivos.nombreExpediente);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Seleccione una carpeta primero.");
+        }
+    }
+    }//GEN-LAST:event_btnAbrirCarpetaActionPerformed
+
+    private void JListArchivosValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_JListArchivosValueChanged
+        if (!evt.getValueIsAdjusting()) {
+            int index = JListArchivos.getSelectedIndex();
+            if (index != -1 && index < modeloListaArchivosRutas.size()) {
+                String rutaArchivo = modeloListaArchivosRutas.get(index);
+                
+            }
+        }
+    }//GEN-LAST:event_JListArchivosValueChanged
+
+    private void btnVisualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVisualizarActionPerformed
+        if (jCheckBox1.isSelected()) {
+            int index = JListArchivos.getSelectedIndex();
+            if (index == -1) {
+                JOptionPane.showMessageDialog(this, "Selecciona un archivo.");
+                return;
+            }
+
+            String nombre = modeloListaArchivosNombres.get(index);
+            String url = modeloListaArchivosRutas.get(index);
+
+            try {
+                File tempFile = File.createTempFile("ver_", "_" + nombre);
+                tempFile.deleteOnExit();
+
+                try (InputStream in = manejador.descargarArchivo(url);
+                     OutputStream out = new FileOutputStream(tempFile)) {
+                    byte[] buffer = new byte[8192];
+                    int len;
+                    while ((len = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, len);
+                    }
+                }
+
+                String nombreLower = nombre.toLowerCase();
+                if (nombreLower.endsWith(".pdf") || nombreLower.endsWith(".docx")) {
+                    // Mostrar con tu visor personalizado
+                    SwingUtilities.invokeLater(() -> new VisualizarPDF(tempFile.getAbsolutePath()).setVisible(true));
+                } else if (nombreLower.endsWith(".jpg") || nombreLower.endsWith(".jpeg")
+                        || nombreLower.endsWith(".png") || nombreLower.endsWith(".bmp")
+                        || nombreLower.endsWith(".gif")) {
+                    // Abrir con visor de imágenes del sistema
+                    if (Desktop.isDesktopSupported()) {
+                        Desktop.getDesktop().open(tempFile);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Tu sistema no soporta abrir imágenes desde Java.");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Formato no soportado para visualizar.");
+                }
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error al visualizar archivo: " + e.getMessage());
+            }
+
+        }
+        else{
+            int index = JListArchivos.getSelectedIndex();
+            if (index != -1 && index < modeloListaArchivosRutas.size()) {
+                String rutaCompleta = modeloListaArchivosRutas.get(index);
+
+                if (rutaCompleta.toLowerCase().endsWith(".pdf")) {
+                    // Abrir visor interno para PDF
+                    VisualizarPDF visor = new VisualizarPDF(rutaCompleta);
+                    visor.setVisible(true);
+
+                } else if (rutaCompleta.toLowerCase().endsWith(".docx")) {
+                    try {
+                        File archivo = new File(rutaCompleta);
+                        if (archivo.exists()) {
+                            Desktop.getDesktop().open(archivo);
+                        } else {
+                            JOptionPane.showMessageDialog(this, "El archivo de Word no existe.");
+                        }
+                    } catch (IOException e) {
+                        JOptionPane.showMessageDialog(this, "Error al abrir el archivo de Word: " + e.getMessage());
+                    }
+
+                } else if (rutaCompleta.toLowerCase().endsWith(".jpg") || 
+                           rutaCompleta.toLowerCase().endsWith(".jpeg") || 
+                           rutaCompleta.toLowerCase().endsWith(".png") || 
+                           rutaCompleta.toLowerCase().endsWith(".gif")) {
+                    try {
+                        File archivo = new File(rutaCompleta);
+                        if (archivo.exists()) {
+                            Desktop.getDesktop().open(archivo);
+                        } else {
+                            JOptionPane.showMessageDialog(this, "La imagen no existe.");
+                        }
+                    } catch (IOException e) {
+                        JOptionPane.showMessageDialog(this, "Error al abrir la imagen: " + e.getMessage());
+                    }
+
+                } else {
+                    JOptionPane.showMessageDialog(this, "Archivo no soportado. Solo se permiten PDF, Word (.docx) o imágenes.");
+                }
+
+            } else {
+                JOptionPane.showMessageDialog(this, "No has seleccionado ningún archivo.");
+            }
+        }
         
-        //Cargar los CheckBox
-        ManejadorArchivos.cargarEstructura(ManejadorArchivos.getRutaGeneralExpedientes(), jcbAnios, jcbMeses, jcbExpediente, jcbEtapas);
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnVisualizarActionPerformed
+
+    private void btnCrearConsolidadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearConsolidadoActionPerformed
+        if (jCheckBox1.isSelected()) {
+        JFileChooser chooser = new JFileChooser();
+        File carpeta = new File(rutaGuardadaGeneral);
+        if (carpeta.exists() && carpeta.isDirectory()) {
+            chooser.setCurrentDirectory(carpeta);
+        }
+
+        chooser.setDialogTitle("Guardar PDF unido");
+
+        String nombreExpediente = ManejadorArchivos.getNombreExpediente();
+        if (nombreExpediente == null || nombreExpediente.trim().isEmpty()) {
+            nombreExpediente = "PDF_Unido";
+        }
+
+        chooser.setSelectedFile(new File(nombreExpediente));
+        int opcion = chooser.showSaveDialog(this);
+        if (opcion != JFileChooser.APPROVE_OPTION) return;
+
+        File destino = chooser.getSelectedFile();
+        PDFMergerUtility merger = new PDFMergerUtility();
+
+        try {
+            merger.setDestinationFileName(destino.getAbsolutePath());
+
+            for (int i = 0; i < modeloListaArchivosNombres.getSize(); i++) {
+                String nombre = modeloListaArchivosNombres.get(i);
+                String url = modeloListaArchivosRutas.get(i);
+
+                if (nombre == null || url == null || nombre.trim().isEmpty() || url.trim().isEmpty()) continue;
+                if (!nombre.toLowerCase().endsWith(".pdf")) {
+                
+                // Convertir imagen a PDF si es PNG o JPG
+                if (nombre.toLowerCase().endsWith(".jpg") || nombre.toLowerCase().endsWith(".jpeg") || nombre.toLowerCase().endsWith(".png")) {
+                    InputStream in = manejador.descargarArchivo(url);
+                    File imagenTemp = File.createTempFile("imagen_", "_" + nombre);
+                    imagenTemp.deleteOnExit();
+
+                    try (OutputStream out = new FileOutputStream(imagenTemp)) {
+                        byte[] buffer = new byte[8192];
+                        int len;
+                        while ((len = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, len);
+                        }
+                    }
+
+                    // Convertir imagen a PDF
+                    File pdfImagen = manejador.convertirImagenAPdf(imagenTemp);
+                    merger.addSource(pdfImagen);
+                }
+
+                continue; // si no es PDF ni imagen soportada, omitir
+            }
+
+
+                InputStream in = manejador.descargarArchivo(url);
+                File temp = File.createTempFile("pdfmerge_", "_" + nombre);
+                temp.deleteOnExit();
+
+                try (OutputStream out = new FileOutputStream(temp)) {
+                    byte[] buffer = new byte[8192];
+                    int len;
+                    while ((len = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, len);
+                    }
+                }
+
+                merger.addSource(temp);
+            }
+
+            merger.mergeDocuments(null);
+
+            // 📝 Agregar folios (solo una vez, sin duplicar)
+            try (PDDocument document = PDDocument.load(destino)) {
+                int totalPages = document.getNumberOfPages();
+
+                for (int i = 0; i < totalPages; i++) {
+                    PDPage page = document.getPage(i);
+                    PDRectangle mediaBox = page.getMediaBox();
+                    int rotation = page.getRotation();
+
+                    float margin = 40;
+                    float x = mediaBox.getWidth() - margin;
+                    float y = margin;
+
+                    try (PDPageContentStream contentStream = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, true, true)) {
+                        contentStream.beginText();
+                        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 10);
+
+                        switch (rotation) {
+                            case 90:
+                                contentStream.setTextMatrix(0, 1, -1, 0, x, y);
+                                break;
+                            case 180:
+                                contentStream.setTextMatrix(-1, 0, 0, -1, x, y);
+                                break;
+                            case 270:
+                                contentStream.setTextMatrix(0, -1, 1, 0, x, y);
+                                break;
+                            default:
+                                contentStream.setTextMatrix(1, 0, 0, 1, x, y);
+                                break;
+                        }
+
+                        contentStream.showText("Folio: " + (i + 1));
+                        contentStream.endText();
+                    }
+                }
+
+                document.save(destino);
+            }
+
+            JOptionPane.showMessageDialog(this, "PDF unido guardado en: " + destino.getAbsolutePath());
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error uniendo PDFs: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+    } else {
+        if (modeloListaArchivosRutas.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay archivos para consolidar.");
+            return;
+        }
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Guardar PDF unido");
+        chooser.setSelectedFile(new File(ManejadorArchivos.getNombreExpediente() != null ? ManejadorArchivos.getNombreExpediente() : "PDF_Unido"));
+        int opcion = chooser.showSaveDialog(this);
+        if (opcion != JFileChooser.APPROVE_OPTION) return;
+
+        File destino = chooser.getSelectedFile();
+        PDFMergerUtility merger = new PDFMergerUtility();
+        merger.setDestinationFileName(destino.getAbsolutePath());
+
+        try {
+            for (int i = 0; i < modeloListaArchivosRutas.size(); i++) {
+                String ruta = modeloListaArchivosRutas.get(i);
+                String nombre = modeloListaArchivosNombres.get(i).toLowerCase();
+
+                File archivoTemp;
+                if (nombre.endsWith(".pdf")) {
+                    archivoTemp = new File(ruta);
+                } else if (nombre.endsWith(".png") || nombre.endsWith(".jpg") || nombre.endsWith(".jpeg")) {
+                    archivoTemp = convertirImagenAPdf(new File(ruta));
+                } else {
+                    continue; // ignorar otros formatos
+                }
+
+                merger.addSource(archivoTemp);
+            }
+
+            merger.mergeDocuments(null);
+
+            try (PDDocument document = PDDocument.load(destino)) {
+                agregarFolio(document);
+                document.save(destino);
+            }
+
+            JOptionPane.showMessageDialog(this, "PDF unido guardado en: " + destino.getAbsolutePath());
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error uniendo archivos: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+    }//GEN-LAST:event_btnCrearConsolidadoActionPerformed
+
+    private void btnImprimirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImprimirActionPerformed
+        if (jCheckBox1.isSelected()) {
+            int index = JListArchivos.getSelectedIndex();
+            if (index == -1) {
+                JOptionPane.showMessageDialog(this, "Selecciona un archivo para imprimir.");
+                return;
+            }
+
+            String nombre = modeloListaArchivosNombres.get(index);
+            String urlArchivo = modeloListaArchivosRutas.get(index);
+
+            try {
+                // Crear archivo temporal
+                File tempFile = File.createTempFile("imp_", "_" + nombre);
+                tempFile.deleteOnExit();
+
+                // Descargar el archivo desde el servidor
+                try (InputStream in = manejador.descargarArchivo(urlArchivo);
+                     OutputStream out = new FileOutputStream(tempFile)) {
+                    byte[] buffer = new byte[8192];
+                    int len;
+                    while ((len = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, len);
+                    }
+                }
+
+                // Verifica si es PDF
+                if (nombre.toLowerCase().endsWith(".pdf")) {
+                    // Imprimir usando PDFBox
+                    try (PDDocument doc = PDDocument.load(tempFile)) {
+                        PrinterJob job = PrinterJob.getPrinterJob();
+                        job.setPageable(new PDFPageable(doc)); // De PDFBox
+
+                        if (job.printDialog()) {
+                            job.print();
+                        }
+                    }
+                } else {
+                    // Si no es PDF, intenta imprimir con el programa por defecto del sistema
+                    Desktop.getDesktop().print(tempFile);
+                }
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error al imprimir: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        else{
+            int index = JListArchivos.getSelectedIndex();
+            if (index == -1) {
+                JOptionPane.showMessageDialog(this, "Selecciona un archivo para imprimir.");
+                return;
+            }
+
+            String rutaArchivo = modeloListaArchivosRutas.get(index);
+
+            if (!rutaArchivo.toLowerCase().endsWith(".pdf")) {
+                JOptionPane.showMessageDialog(this, "Solo se pueden imprimir archivos PDF.");
+                return;
+            }
+
+            try (org.apache.pdfbox.pdmodel.PDDocument document = org.apache.pdfbox.pdmodel.PDDocument.load(new File(rutaArchivo))) {
+                // Crear el trabajo de impresión
+                PrinterJob job = PrinterJob.getPrinterJob();
+
+                // Establecer el diálogo de impresión
+                if (job.printDialog()) {
+                    job.setPageable(new org.apache.pdfbox.printing.PDFPageable(document)); // PDFPageable permite impresión directa
+                    job.print(); // Enviar a la impresora
+                }
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error al imprimir el archivo: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_btnImprimirActionPerformed
+
+    private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
+        boolean activar = jCheckBox1.isSelected();
+        
+        txtUrlCarpeta.setEnabled(activar);
+        txtCorreo.setEnabled(activar);
+        jpfContrasena.setEnabled(activar);
+        btnBuscarWeb.setEnabled(activar);
+        btnBuscarCarpetaGeneral.setEnabled(!jCheckBox1.isSelected());
+        txtRutaCarpetaGeneral.setEnabled(!jCheckBox1.isSelected());
+        txtRutaCarpetaGeneral.setText("");
+        jButton1.setEnabled(!jCheckBox1.isSelected());
+        
+                
+    }//GEN-LAST:event_jCheckBox1ActionPerformed
+
+    private void btnBuscarCarpetaGeneralActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarCarpetaGeneralActionPerformed
+        JFileChooser selector = new JFileChooser();
+
+        selector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        selector.setCurrentDirectory(obtenerDirectorioBase());
+        selector.setDialogTitle("Selecciona una carpeta");
+
+        int resultado = selector.showOpenDialog(this); // 'this' es el JFrame
+        
+        if (resultado == JFileChooser.APPROVE_OPTION) {
+            File carpetaSeleccionada = selector.getSelectedFile();
+            rutaGeneral = carpetaSeleccionada.getAbsolutePath();
+            txtRutaCarpetaGeneral.setText(rutaGeneral);
+            ManejadorArchivos.setRutaCarpetaGeneral(rutaGeneral);
+        }else{
+            txtRutaCarpetaGeneral.setText(ManejadorArchivos.getRutaCarpetaGeneral());
+            rutaGeneral = ManejadorArchivos.getRutaCarpetaGeneral();
+        }
+    }//GEN-LAST:event_btnBuscarCarpetaGeneralActionPerformed
+
+    private void btnLimpiarJListCarpetasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarJListCarpetasActionPerformed
+        
+        modeloListaCarpetas1Nombres.clear();
+        modeloListaCarpetas1Rutas.clear();
+        modeloListaArchivosNombres.clear();
+        modeloListaArchivosRutas.clear();
+        txtRutaCarpetaGeneral.setText("");
+        txtDni.setText("");
+        txtNombre.setText("");
+        txtExpediente.setText("");
+    }//GEN-LAST:event_btnLimpiarJListCarpetasActionPerformed
+
+    private void btnRefrescarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefrescarActionPerformed
+        String nombre = jcbNombre.isSelected() ? txtNombre.getText().trim().toLowerCase() : "";
+        String expediente = jcbObtenerExpediente.isSelected() ? txtExpediente.getText().trim().toLowerCase() : "";
+        String dni = jcbDni.isSelected() ? txtDni.getText().trim().toLowerCase() : "";
+        
+        ManejadorArchivos.buscarCarpetasEnGeneral(rutaGeneral, nombre, expediente, dni, modeloListaCarpetas1Nombres, modeloListaCarpetas1Rutas, JListCarpetas);
+    }//GEN-LAST:event_btnRefrescarActionPerformed
+
+    private void btnArribaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnArribaActionPerformed
+        int[] indices = JListArchivos.getSelectedIndices();
+
+        if (indices.length == 0 || indices[0] == 0) return;
+
+        for (int i = 0; i < indices.length; i++) {
+            int index = indices[i];
+            if (index > 0 && !contains(indices, index - 1)) {
+                // Intercambiar en modelo visual (nombres)
+                String nombre = modeloListaArchivosNombres.get(index);
+                modeloListaArchivosNombres.set(index, modeloListaArchivosNombres.get(index - 1));
+                modeloListaArchivosNombres.set(index - 1, nombre);
+
+                // Intercambiar en modelo lógico (rutas)
+                String ruta = modeloListaArchivosRutas.get(index);
+                modeloListaArchivosRutas.set(index, modeloListaArchivosRutas.get(index - 1));
+                modeloListaArchivosRutas.set(index - 1, ruta);
+
+                indices[i]--; // Actualizar índice seleccionado
+            }
+        }
+
+        JListArchivos.setSelectedIndices(indices);
+    }//GEN-LAST:event_btnArribaActionPerformed
+
+    private void btnAbajoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAbajoActionPerformed
+        int[] indices = JListArchivos.getSelectedIndices();
+
+        if (indices.length == 0 || indices[indices.length - 1] >= modeloListaArchivosNombres.size() - 1) return;
+
+        for (int i = indices.length - 1; i >= 0; i--) {
+            int index = indices[i];
+            if (index < modeloListaArchivosNombres.size() - 1 && !contains(indices, index + 1)) {
+                // Intercambiar en modelo visual (nombres)
+                String nombre = modeloListaArchivosNombres.get(index);
+                modeloListaArchivosNombres.set(index, modeloListaArchivosNombres.get(index + 1));
+                modeloListaArchivosNombres.set(index + 1, nombre);
+
+                // Intercambiar en modelo lógico (rutas)
+                String ruta = modeloListaArchivosRutas.get(index);
+                modeloListaArchivosRutas.set(index, modeloListaArchivosRutas.get(index + 1));
+                modeloListaArchivosRutas.set(index + 1, ruta);
+
+                indices[i]++; // Actualizar índice seleccionado
+            }
+        }
+
+        JListArchivos.setSelectedIndices(indices);
+    }//GEN-LAST:event_btnAbajoActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        int[] indices = JListArchivos.getSelectedIndices();
+
+        if (indices.length > 0) {
+            int confirmacion = JOptionPane.showConfirmDialog(this, "¿Estás seguro de eliminar los archivos seleccionados de la lista?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+
+            if (confirmacion == JOptionPane.YES_OPTION) {
+                // Eliminar en orden inverso para evitar errores por desplazamiento
+                for (int i = indices.length - 1; i >= 0; i--) {
+                    int index = indices[i];
+
+                    modeloListaArchivosNombres.remove(index);
+                    modeloListaArchivosRutas.remove(index);
+                    ManejadorArchivos.eliminarRuta(index); // Mantiene tu lógica existente
+                }
+
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona uno o más archivos para eliminar.");
+        }
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
+        if (modeloListaArchivosNombres.getSize() == 0) {
+            JOptionPane.showMessageDialog(this, "La lista ya está vacía.");
+            return;
+        }
+
+        int confirmacion = JOptionPane.showConfirmDialog(this, "¿Estás seguro de eliminar todos los archivos de la lista?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+
+        if (confirmacion == JOptionPane.YES_OPTION) {
+            // Limpiar el modelo visual
+            modeloListaArchivosNombres.clear();
+            modeloListaArchivosRutas.clear();
+
+            // Limpiar el modelo lógico
+            ManejadorArchivos.eliminarTodasLasRutas();  // Este método deberías crearlo si no existe
+        }
+    }//GEN-LAST:event_jButton9ActionPerformed
+
+    private void btnBuscarWebActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarWebActionPerformed
+        if (jcbObtenerExpediente.isSelected() || jcbNombre.isSelected() || jcbDni.isSelected()) {
+            linkWeb = txtUrlCarpeta.getText().trim();
+            usuario = txtCorreo.getText().trim();
+            char[] contrasenaChars = jpfContrasena.getPassword();
+            clave = new String(contrasenaChars);
+            CredencialesUtil.guardarCredenciales(usuario, clave, linkWeb);
+
+            try {
+                manejador.conectar(usuario, clave);
+                String urlWebDAV = manejador.transformarLink(linkWeb);
+
+                String palabraClave = "";
+                if (jcbObtenerExpediente.isSelected()) {
+                    palabraClave = txtExpediente.getText().trim();
+                } else if (jcbNombre.isSelected()) {
+                    palabraClave = txtNombre.getText().trim();
+                } else if (jcbDni.isSelected()) {
+                    palabraClave = txtDni.getText().trim();
+                }
+
+                if (palabraClave.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Por favor, ingrese una palabra clave válida.");
+                    return;
+                }
+
+                // Ahora buscarSubcarpetas devuelve Map<String,String> nombre->ruta
+                Map<String, String> resultados = manejador.buscarSubcarpetas(urlWebDAV, palabraClave);
+
+                modeloListaCarpetas1Nombres.clear();
+                modeloListaCarpetas1Rutas.clear();
+
+                for (Map.Entry<String, String> entry : resultados.entrySet()) {
+                    String nombre = entry.getKey();   // solo nombre para mostrar
+                    String ruta = entry.getValue();   // url codificada correcta
+
+                    // Extrae subruta desde el WebDAV base para mostrar ubicación relativa
+                    String rutaRelativa = ruta.replaceFirst(Pattern.quote(urlWebDAV), "");
+                    rutaRelativa = java.net.URLDecoder.decode(rutaRelativa, "UTF-8");
+
+                    // Opción A: mostrar "nombre (en: ruta relativa)"
+                    String textoVisible = nombre + " (en: " + rutaRelativa + ")";
+
+                    // Opción B (más minimalista): mostrar solo la ruta relativa
+                    // String textoVisible = rutaRelativa;
+
+                    modeloListaCarpetas1Nombres.addElement(textoVisible);
+                    modeloListaCarpetas1Rutas.addElement(ruta); // sigue guardando la ruta real
+
+                }
+
+                if (resultados.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "No se encontraron carpetas que coincidan con la palabra clave.");
+                }
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+                System.out.println("Error: " + e);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Por favor, ingrese el NÚMERO DE EXPEDIENTE, NOMBRE o DNI");
+        }
+    }//GEN-LAST:event_btnBuscarWebActionPerformed
+
+    private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
+        if (jCheckBox1.isSelected()) {
+            int index = JListArchivos.getSelectedIndex();
+            if (index == -1) {
+                JOptionPane.showMessageDialog(this, "Selecciona un archivo.");
+                return;
+            }
+
+            String nombre = modeloListaArchivosNombres.get(index);
+            String urlArchivo = modeloListaArchivosRutas.get(index);
+
+            JFileChooser chooser = new JFileChooser();
+            File carpeta = new File(rutaGuardadaGeneral);
+            if (carpeta.exists() && carpeta.isDirectory()) {
+                chooser.setCurrentDirectory(carpeta);
+            } else {
+                System.out.println("Ruta inválida, abriendo carpeta por defecto.");
+            }
+            chooser.setSelectedFile(new File(nombre));
+            int opcion = chooser.showSaveDialog(this);
+
+            if (opcion == JFileChooser.APPROVE_OPTION) {
+                File destino = chooser.getSelectedFile();
+                try (InputStream in = manejador.descargarArchivo(urlArchivo);
+                     OutputStream out = new FileOutputStream(destino)) {
+                    byte[] buffer = new byte[8192];
+                    int len;
+                    while ((len = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, len);
+                    }
+                    JOptionPane.showMessageDialog(this, "Descargado en: " + destino.getAbsolutePath());
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(this, "Error al descargar: " + e.getMessage());
+                }
+            }
+        }    
+        else{
+            int index = JListArchivos.getSelectedIndex();
+            if (index == -1) {
+                JOptionPane.showMessageDialog(this, "Selecciona un archivo para copiar.");
+                return;
+            }
+
+            String rutaOrigen = modeloListaArchivosRutas.get(index);
+            File archivoOrigen = new File(rutaOrigen);
+
+            // Selector de carpeta destino
+            String rutaSeleccionada = modeloListaCarpetas1Rutas.getElementAt(0);  // o .get(0)
+            JFileChooser selectorCarpeta = new JFileChooser(rutaSeleccionada);
+            selectorCarpeta.setDialogTitle("Selecciona la carpeta de destino");
+            selectorCarpeta.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            selectorCarpeta.setAcceptAllFileFilterUsed(false);
+
+            int resultado = selectorCarpeta.showOpenDialog(this);
+
+            if (resultado == JFileChooser.APPROVE_OPTION) {
+                File carpetaDestino = selectorCarpeta.getSelectedFile();
+                File archivoDestino = new File(carpetaDestino, archivoOrigen.getName());
+
+                try {
+                    Files.copy(archivoOrigen.toPath(), archivoDestino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    JOptionPane.showMessageDialog(this, "Archivo copiado exitosamente a:\n" + archivoDestino.getAbsolutePath());
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this, "Error al copiar el archivo: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }//GEN-LAST:event_btnGuardarActionPerformed
+
+    private String encodeURL(String url) throws UnsupportedEncodingException, MalformedURLException {
+        URL u = new URL(url);
+        String[] partes = u.getPath().split("/");
+        StringBuilder pathEncoded = new StringBuilder();
+        for (String parte : partes) {
+            if (!parte.isEmpty()) {
+                pathEncoded.append("/").append(URLEncoder.encode(parte, "UTF-8").replace("+", "%20"));
+            }
+        }
+        return u.getProtocol() + "://" + u.getHost() + pathEncoded.toString();
+    }
+
+    
+    
+    public static String construirUrlCodificada(String baseUrl, String rutaRelativa) throws UnsupportedEncodingException {
+        // Quita slash final para evitar dobles barras
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+
+        // Divide la ruta relativa en segmentos por "/"
+        String[] segmentos = rutaRelativa.split("/");
+
+        // Construye la ruta codificando cada segmento
+        StringBuilder rutaCodificada = new StringBuilder();
+        for (String segmento : segmentos) {
+            if (!segmento.isEmpty()) {
+                rutaCodificada.append("/");
+                rutaCodificada.append(java.net.URLEncoder.encode(segmento, "UTF-8").replace("+", "%20"));
+            }
+        }
+
+        // Une baseUrl con la ruta codificada
+        return baseUrl + rutaCodificada.toString();
+    }
+
+    
+    private boolean contains(int[] array, int value) {
+        for (int i : array) {
+            if (i == value) return true;
+        }
+        return false;
+    }
+    
+    private File obtenerDirectorioBase() {
+        try {
+            return new File(
+                new File(interfazBuscarInformacion.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new File("."); // Directorio actual como fallback
+        }
+    }
+    private void agregarFolio(PDDocument document) throws IOException {
+        int totalPages = document.getNumberOfPages();
+        float margin = 40;
+
+        for (int i = 0; i < totalPages; i++) {
+            PDPage page = document.getPage(i);
+            PDRectangle mediaBox = page.getMediaBox();
+            int rotation = page.getRotation();
+
+            float x = 0, y = 0;
+
+            switch (rotation) {
+                case 90:
+                    // Para rotación 90, la esquina inferior derecha visible queda en (width - margin, margin)
+                    x = mediaBox.getWidth() - margin;
+                    y = margin;
+                    break;
+                case 180:
+                    // Rotado 180, invertido
+                    x = margin;
+                    y = mediaBox.getHeight() - margin;
+                    break;
+                case 270:
+                    // Rotación 270
+                    x = margin;
+                    y = mediaBox.getHeight() - margin;
+                    break;
+                default:
+                    // Rotación 0, esquina inferior derecha
+                    x = mediaBox.getWidth() - margin;
+                    y = margin;
+                    break;
+            }
+
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, true, true)) {
+                contentStream.beginText();
+                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 10);
+
+                // Ajustar matriz para rotación
+                switch (rotation) {
+                    case 90:
+                        contentStream.setTextMatrix(0, 1, -1, 0, x, y);
+                        break;
+                    case 180:
+                        contentStream.setTextMatrix(-1, 0, 0, -1, x, y);
+                        break;
+                    case 270:
+                        contentStream.setTextMatrix(0, -1, 1, 0, x, y);
+                        break;
+                    default:
+                        contentStream.setTextMatrix(1, 0, 0, 1, x, y);
+                        break;
+                }
+
+                contentStream.showText("Folio: " + (i + 1));
+                contentStream.endText();
+            }
+        }
+    }
+    
+
+    private File convertirImagenAPdf(File imagen) throws IOException {
+        BufferedImage bimg = ImageIO.read(imagen);
+        PDDocument doc = new PDDocument();
+        PDPage page = new PDPage(new PDRectangle(bimg.getWidth(), bimg.getHeight()));
+        doc.addPage(page);
+
+        PDImageXObject pdImage = LosslessFactory.createFromImage(doc, bimg);
+        try (PDPageContentStream contentStream = new PDPageContentStream(doc, page)) {
+            contentStream.drawImage(pdImage, 0, 0);
+        }
+
+        File tempPdf = File.createTempFile("imagen_", ".pdf");
+        doc.save(tempPdf);
+        doc.close();
+        tempPdf.deleteOnExit();
+        return tempPdf;
+    }
+
+
+    
 
     /**
      * @param args the command line arguments
@@ -373,33 +1506,46 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JList<String> JListArchivos;
     private javax.swing.JList<String> JListCarpetas;
+    private javax.swing.JButton btnAbajo;
+    private javax.swing.JButton btnAbrirCarpeta;
+    private javax.swing.JButton btnArriba;
+    private javax.swing.JButton btnBuscarCarpetaGeneral;
+    private javax.swing.JButton btnBuscarWeb;
+    private javax.swing.JButton btnCrearConsolidado;
+    private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnImprimir;
+    private javax.swing.JButton btnLimpiarJListCarpetas;
+    private javax.swing.JButton btnRefrescar;
+    private javax.swing.JButton btnVisualizar;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton9;
+    private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JComboBox<String> jcbAnios;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JCheckBox jcbDni;
-    private javax.swing.JComboBox<String> jcbEtapas;
-    private javax.swing.JComboBox<String> jcbExpediente;
-    private javax.swing.JComboBox<String> jcbMeses;
     private javax.swing.JCheckBox jcbNombre;
-    private javax.swing.JCheckBox jcbRd;
-    private javax.swing.JTextField txtCarpetaGeneral;
+    private javax.swing.JCheckBox jcbObtenerExpediente;
+    private javax.swing.JPasswordField jpfContrasena;
+    private javax.swing.JTextField txtCorreo;
     private javax.swing.JTextField txtDni;
+    private javax.swing.JTextField txtExpediente;
     private javax.swing.JTextField txtNombre;
-    private javax.swing.JTextField txtRd;
-    private javax.swing.JTextField txtRuta;
+    private javax.swing.JTextField txtRutaCarpetaGeneral;
+    private javax.swing.JTextField txtRutaMostrar;
+    private javax.swing.JTextField txtUrlCarpeta;
     // End of variables declaration//GEN-END:variables
 }

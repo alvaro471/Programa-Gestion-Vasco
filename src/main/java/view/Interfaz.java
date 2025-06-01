@@ -4,6 +4,7 @@
  */
 package view;
 
+import java.awt.FlowLayout;
 import java.io.File;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -26,15 +27,18 @@ public class Interfaz extends javax.swing.JFrame {
     public Interfaz() {
         initComponents();
         setLocationRelativeTo(null);
+        setLayout(new FlowLayout(FlowLayout.CENTER)); // <-- AQUÍ
         ((AbstractDocument) txtDni.getDocument()).setDocumentFilter(new FiltroNumericoLimitado(8));
         ((AbstractDocument) txtAnio.getDocument()).setDocumentFilter(new FiltroNumericoLimitado4numeros(4));
         jCheckBoxEstadoAutocompletado.setSelected(false); // Asegurar que inicie desmarcado
         actualizarEstadoComponentesAutocompletado(false); // Aplicar configuración inicial
 
-        String rutaGuardada = ConfigUtil.cargarRuta();
-        if (rutaGuardada != null) {
-            ManejadorArchivos.setRutaCarpetaPrincipal(rutaGuardada);
-            System.out.println("Ruta cargada desde config.txt: " + rutaGuardada);
+        String rutaGuardadaPrincipal = ConfigUtil.cargarRutaPrincipal();
+        if (rutaGuardadaPrincipal != null) {
+            ManejadorArchivos.setRutaCarpetaPrincipal(rutaGuardadaPrincipal);
+            System.out.println("Ruta principal cargada desde config_principal.txt: " + rutaGuardadaPrincipal);
+        } else {
+            System.out.println("No hay ruta principal guardada. Se usará la ruta por defecto.");
         }
         // Asegurar estado inicial correcto
         actualizarEstadoComponentesAutocompletado(jCheckBoxEstadoAutocompletado.isSelected());
@@ -67,6 +71,11 @@ public class Interfaz extends javax.swing.JFrame {
             return text.matches("\\d*") && (currentLength + text.length()) <= maxLength;
         }
     }
+    
+    
+    
+    
+    //TxtDni
     public class FiltroNumericoLimitado extends DocumentFilter {
         private int maxLength;
 
@@ -77,7 +86,10 @@ public class Interfaz extends javax.swing.JFrame {
         @Override
         public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
             if (string == null) return;
-            if (esValido(fb.getDocument().getLength(), string)) {
+
+            // Verificar si el texto es válido antes de insertar
+            if (esValido(fb.getDocument().getLength(), string, fb)) {
+                System.out.println("Insertando: " + string);
                 super.insertString(fb, offset, string, attr);
             }
         }
@@ -85,15 +97,40 @@ public class Interfaz extends javax.swing.JFrame {
         @Override
         public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
             if (text == null) return;
-            if (esValido(fb.getDocument().getLength() - length, text)) {
+
+            // Verificar si el texto es válido antes de reemplazar
+            if (esValido(fb.getDocument().getLength() - length, text, fb)) {
+                System.out.println("Reemplazando con: " + text);
                 super.replace(fb, offset, length, text, attrs);
             }
         }
 
-        private boolean esValido(int currentLength, String text) {
-            return text.matches("\\d*") && (currentLength + text.length()) <= maxLength;
+        private boolean esValido(int currentLength, String text, FilterBypass fb) throws BadLocationException {
+            System.out.println("Texto insertado: " + text);
+
+            // Permitir solo letras (hasta 2 letras) y números (hasta 8 dígitos en total)
+            boolean esLetraValida = text.matches("[a-zA-Z]");  // Permitir solo una letra
+            boolean esNumeroValido = text.matches("\\d");      // Permitir solo un número
+
+            // Verificamos que la longitud no exceda el máximo
+            boolean longitudValida = (currentLength + text.length()) <= maxLength;
+
+            // Contar cuántas letras y cuántos números hay en el texto actual del campo
+            long letras = fb.getDocument().getText(0, fb.getDocument().getLength()).chars().filter(Character::isLetter).count();
+            long numeros = fb.getDocument().getText(0, fb.getDocument().getLength()).chars().filter(Character::isDigit).count();
+
+            // Permitir solo si hay hasta 2 letras y hasta 8 números en total
+            boolean validacionLetras = (letras + (esLetraValida ? 1 : 0)) <= 2;
+            boolean validacionNumeros = (numeros + (esNumeroValido ? 1 : 0)) <= 8;
+
+            // Validamos si la longitud es válida y si cumple con el máximo de letras y números
+            return (validacionLetras && validacionNumeros && longitudValida);
         }
     }
+
+
+//..........
+    
     // Corrección de estados al cargar la interfaz, luego de que todo esté inicializado
     private void actualizarEstadoComponentesAutocompletado(boolean seleccionado) {
         // Comportamiento para carpeta
@@ -186,8 +223,7 @@ public class Interfaz extends javax.swing.JFrame {
         jButton6 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        Registrar.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLabel1.setText("Proyecto Carpeta Unica - Archivo Unico");
@@ -352,7 +388,7 @@ public class Interfaz extends javax.swing.JFrame {
         });
 
         jButton1.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        jButton1.setText("Regresar");
+        jButton1.setText("MENU PRINCIPAL");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -421,7 +457,7 @@ public class Interfaz extends javax.swing.JFrame {
                                 .addComponent(jCheckBoxEstadoAutocompletado)
                                 .addGap(30, 30, 30)
                                 .addComponent(jButton3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 23, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jButton1))
                             .addGroup(RegistrarLayout.createSequentialGroup()
                                 .addGap(2, 2, 2)
@@ -561,16 +597,7 @@ public class Interfaz extends javax.swing.JFrame {
                         .addContainerGap())))
         );
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(Registrar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(Registrar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
+        getContentPane().add(Registrar, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -586,12 +613,12 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_btnBuscarExcelActionPerformed
 
     private void btnRegistrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegistrarActionPerformed
-        nombreExpediente = "EXP_" + txtCaso.getText().toUpperCase() + "_" + txtAnio.getText() + "_" +
+        nombreExpediente = "EXP_" + "RD_" + txtCaso.getText().toUpperCase() + "_" + txtAnio.getText() + "_" +
                        txtApellidoPaterno.getText().toUpperCase() +
                        txtApellidoMaterno.getText().toUpperCase() +
                        txtPrimerNombre.getText().toUpperCase() +
                        txtSegundoNombre.getText().toUpperCase() + "_" +
-                       txtDni.getText();
+                       txtDni.getText().toUpperCase();
 
         String nombreCarpeta = nombreExpediente;
 
@@ -603,7 +630,7 @@ public class Interfaz extends javax.swing.JFrame {
             txtApellidoMaterno.getText().toUpperCase(),
             txtPrimerNombre.getText().toUpperCase(),
             txtSegundoNombre.getText().toUpperCase(),
-            txtDni.getText(),
+            txtDni.getText().toUpperCase(),
             (String) jcbMes.getSelectedItem(),
             txtAnio.getText(),
             nombreCarpeta,
@@ -621,7 +648,7 @@ public class Interfaz extends javax.swing.JFrame {
         );
 
         if (ManejadorArchivos.getCondicionFila().equals("vacio")) {
-            ManejadorArchivos.crearCarpetaConSubcarpetas(ManejadorArchivos.getRutaCarpetaPrincipal(), nombreCarpeta, txtDni.getText());
+            ManejadorArchivos.crearCarpetaConSubcarpetas(ManejadorArchivos.getRutaCarpetaPrincipal(), nombreCarpeta, txtDni.getText().toUpperCase());
             /*
             ManejadorArchivos.procesarCarpeta(ManejadorArchivos.getRutaCarpetaPrincipal(), txtDni.getText());
             ManejadorArchivos.renombrarCarpeta(ManejadorArchivos.getRutaCarpeta(), nombreCarpeta);
@@ -656,22 +683,22 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void btnCrearSubcarpetasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearSubcarpetasActionPerformed
-        String nombreCarpeta = "EXP_" + txtCaso.getText() + "_" + txtAnio.getText() + "_" + 
+        String nombreCarpeta = "EXP_" + "RD_" + txtCaso.getText() + "_" + txtAnio.getText() + "_" + 
             txtApellidoPaterno.getText().toUpperCase() + 
             txtApellidoMaterno.getText().toUpperCase() + 
             txtPrimerNombre.getText().toUpperCase() + 
             txtSegundoNombre.getText().toUpperCase() + 
-            "_" + txtDni.getText();
+            "_" + txtDni.getText().toUpperCase();
 
-        String expediente = "EXP_" + txtCaso.getText().toUpperCase() + "_" + txtAnio.getText() + "_" + 
+        String expediente = "EXP_" + "RD_" + txtCaso.getText().toUpperCase() + "_" + txtAnio.getText() + "_" + 
                 txtApellidoPaterno.getText().toUpperCase() + 
                 txtApellidoMaterno.getText().toUpperCase() + 
                 txtPrimerNombre.getText().toUpperCase() + 
                 txtSegundoNombre.getText().toUpperCase() + 
-                "_" + txtDni.getText();
+                "_" + txtDni.getText().toUpperCase();
 
         ManejadorArchivos.renombrarArchivoMerged(ManejadorArchivos.getRutaCarpeta(), expediente);
-        ManejadorArchivos.procesarCarpeta(ManejadorArchivos.getRutaCarpeta(), txtDni.getText());
+        ManejadorArchivos.procesarCarpeta(ManejadorArchivos.getRutaCarpeta(), txtDni.getText().toUpperCase());
 
         boolean renombrado = ManejadorArchivos.renombrarCarpeta(ManejadorArchivos.getRutaCarpeta(), nombreCarpeta);
         if (renombrado) {
@@ -679,6 +706,7 @@ public class Interfaz extends javax.swing.JFrame {
             File nuevaCarpeta = new File(new File(ManejadorArchivos.getRutaCarpeta()).getParent(), nombreCarpeta);
             ManejadorArchivos.setRutaCarpeta(nuevaCarpeta.getAbsolutePath());
         }
+        ManejadorArchivos.moverArchivosCoincidentes(ManejadorArchivos.getRutaCarpeta());
     }//GEN-LAST:event_btnCrearSubcarpetasActionPerformed
 
     private void jCheckBoxEstadoAutocompletadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxEstadoAutocompletadoActionPerformed
