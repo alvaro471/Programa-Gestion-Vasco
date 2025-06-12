@@ -64,11 +64,10 @@ public class AutomatizadorMIMP {
         ));
         botonLogin.click();
 
-        // ⚡ Opción combinada: esperar un momento corto antes de minimizar
         try {
-            Thread.sleep(1000); // Espera 1 segundo (rápido pero seguro)
+            Thread.sleep(1000);
             if (!headless) {
-                minimizarChromeViaPowerShell();  // Usa tu método que ya está funcionando
+                minimizarChromeViaPowerShell();
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -86,17 +85,15 @@ public class AutomatizadorMIMP {
         nombres.clear();
         rutas.clear();
 
-        String urlRaiz = driver.getCurrentUrl(); // Guardamos el URL inicial
+        String urlRaiz = driver.getCurrentUrl();
 
         List<WebElement> carpetasPrincipales = driver.findElements(By.cssSelector("tr[data-type='dir']"));
         int totalCarpetas = carpetasPrincipales.size();
 
         for (int i = 0; i < totalCarpetas; i++) {
-            // Volvemos al directorio raíz antes de cada iteración
             driver.get(urlRaiz);
             Thread.sleep(1000);
 
-            // Reobtener la lista actualizada de carpetas
             carpetasPrincipales = driver.findElements(By.cssSelector("tr[data-type='dir']"));
 
             WebElement carpetaPrincipal = carpetasPrincipales.get(i);
@@ -111,14 +108,8 @@ public class AutomatizadorMIMP {
             driver.get(rutaPrincipal);
             Thread.sleep(1500);
 
-            // ⚠️ Aquí llamamos al método para forzar la carga de todo el contenido
             cargarTodoElContenidoConScroll();
 
-            // Entramos a la carpeta principal
-            /*driver.get(rutaPrincipal);
-            Thread.sleep(1500);*/
-
-            // Revisamos solo las subcarpetas de primer nivel dentro de esta
             List<WebElement> subCarpetas = driver.findElements(By.cssSelector("tr[data-type='dir']"));
             for (WebElement subCarpeta : subCarpetas) {
                 String nombreSubCarpeta = subCarpeta.getAttribute("data-file").toLowerCase();
@@ -136,10 +127,9 @@ public class AutomatizadorMIMP {
                 }
             }
 
-            // Si no encontró, continuará con la siguiente carpeta principal en el bucle
         }
 
-        return false; // Si no se encontró en ninguna carpeta
+        return false;
     }
 
 
@@ -148,7 +138,6 @@ public class AutomatizadorMIMP {
         List<WebElement> carpetas = driver.findElements(By.cssSelector("tr[data-type='dir']"));
         int totalCarpetas = carpetas.size();
 
-        // Itera sobre todas las carpetas visibles en este nivel
         for (int i = 0; i < totalCarpetas; i++) {
             carpetas = driver.findElements(By.cssSelector("tr[data-type='dir']"));
             WebElement carpeta = carpetas.get(i);
@@ -157,25 +146,20 @@ public class AutomatizadorMIMP {
             String pathCarpeta = carpeta.getAttribute("data-path");
             String idCarpeta = carpeta.getAttribute("data-id");
 
-            // Construimos la URL para acceder a la carpeta
             String ruta = "https://drive.mimp.gob.pe/apps/files/files?dir=" +
                     pathCarpeta + "/" + carpeta.getAttribute("data-file") +
                     "&fileid=" + idCarpeta;
 
-            // Verificamos si el nombre de la carpeta contiene el nombre buscado
             if (nombreCarpeta.contains(nombreBusqueda)) {
-                // Si encontramos una carpeta que coincide, la añadimos a la lista
+
                 nombres.addElement(carpeta.getAttribute("data-file"));
                 rutas.addElement(ruta);
 
-                // Retornamos inmediatamente ya que ya encontramos la carpeta
                 return true;
             }
 
-            // Si no encontramos la carpeta en este nivel, seguimos con la siguiente sin entrar en subcarpetas
         }
 
-        // Si no encontramos la carpeta en ninguna de las carpetas actuales, retornamos falso
         return false;
     }
 
@@ -185,7 +169,7 @@ public class AutomatizadorMIMP {
         driver.get(rutaCarpeta);
 
         try {
-            cargarTodoElContenidoConScroll(); // ← muy importante
+            cargarTodoElContenidoConScroll();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -199,7 +183,6 @@ public class AutomatizadorMIMP {
             String nombreArchivo = archivo.getAttribute("data-file");
             if (nombreArchivo == null) continue;
 
-            // ❌ Ignorar archivos de Word
             if (nombreArchivo.toLowerCase().endsWith(".doc") || nombreArchivo.toLowerCase().endsWith(".docx")) {
                 continue;
             }
@@ -214,7 +197,7 @@ public class AutomatizadorMIMP {
             rutasArchivos.addElement(ruta);
         }
 
-        System.out.println("✅ Archivos encontrados: " + nombresArchivos.size());
+        System.out.println("Archivos encontrados: " + nombresArchivos.size());
     }
 
 
@@ -236,7 +219,7 @@ public class AutomatizadorMIMP {
         );
 
         if (!existeContenedor) {
-            System.out.println("⚠️ Contenedor con scroll no encontrado: " + selector);
+            System.out.println("Contenedor con scroll no encontrado: " + selector);
             return;
         }
 
@@ -264,12 +247,12 @@ public class AutomatizadorMIMP {
             }
         }
 
-        System.out.println("✅ Scroll automático completado.");
+        System.out.println("Scroll automático completado.");
         List<WebElement> carpetas = driver.findElements(By.cssSelector("tr[data-type='dir']"));
-        System.out.println("🔍 Carpetas visibles después del scroll: " + carpetas.size());
+        System.out.println("Carpetas visibles después del scroll: " + carpetas.size());
 
         for (WebElement carpeta : carpetas) {
-            System.out.println("📁 Carpeta: " + carpeta.getAttribute("data-file"));
+            System.out.println("Carpeta: " + carpeta.getAttribute("data-file"));
         }
 
     }
@@ -284,10 +267,6 @@ public class AutomatizadorMIMP {
         ));
         botonDescarga.click();
 
-        // En vez de confiar en el navegador, podrías usar Apache Commons IO para descargar directamente
-        // FileUtils.copyURLToFile(new URL(url), destino);
-
-        // Nota: si es descarga automática del navegador, configura download dir en ChromeOptions
     }
 
     public void abrirCarpetaPorNombreExactoEnVistaActual(
@@ -295,7 +274,7 @@ public class AutomatizadorMIMP {
         DefaultListModel<String> nombresArchivos,
         DefaultListModel<String> rutasArchivos
     ) throws InterruptedException {
-        cargarTodoElContenidoConScroll(); // Asegura que todo se haya cargado
+        cargarTodoElContenidoConScroll();
 
         List<WebElement> carpetas = driver.findElements(By.cssSelector("tr[data-type='dir']"));
 
@@ -311,54 +290,50 @@ public class AutomatizadorMIMP {
                     "&fileid=" + id;
 
                 driver.get(ruta);
-                Thread.sleep(1500); // da tiempo para cargar
+                Thread.sleep(1500);
 
                 obtenerArchivosDeRuta(ruta, nombresArchivos, rutasArchivos);
                 return;
             }
         }
 
-        throw new RuntimeException("❌ No se encontró la carpeta con nombre exacto: " + nombreExacto);
+        throw new RuntimeException("No se encontró la carpeta con nombre exacto: " + nombreExacto);
     }
 
     public void descargarArchivo(String nombreArchivo) {
         try {
-            // Asegurar que el driver está inicializado
             if (driver == null) {
-                System.out.println("⚠️ El driver no está inicializado.");
+                System.out.println("El driver no está inicializado.");
                 return;
             }
 
-            // Buscar la fila del archivo por nombre
             WebDriverWait waitLocal = new WebDriverWait(driver, Duration.ofSeconds(10));
             WebElement filaArchivo = waitLocal.until(ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//tr[td//span[@class='innernametext' and contains(text(),'" + nombreArchivo + "')]]")
             ));
 
-            // Clic en los tres puntos
             WebElement botonOpciones = filaArchivo.findElement(By.cssSelector("a.action-menu"));
             botonOpciones.click();
 
-            // Esperar a que aparezca el menú y hacer clic en “Descargar”
             WebElement opcionDescargar = waitLocal.until(ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//ul[contains(@class,'action-menu')]//a[contains(@data-action,'Download')]")
             ));
             opcionDescargar.click();
 
-            System.out.println("✅ Descarga iniciada para: " + nombreArchivo);
+            System.out.println("Descarga iniciada para: " + nombreArchivo);
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("❌ Error al intentar descargar el archivo: " + nombreArchivo);
+            System.out.println("Error al intentar descargar el archivo: " + nombreArchivo);
         }
     }
     
     public void descargarArchivoDirecto(String url, String destino) {
         try (InputStream in = new URL(url).openStream()) {
             Files.copy(in, Paths.get(destino), StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("✅ Archivo descargado a: " + destino);
+            System.out.println("Archivo descargado a: " + destino);
         } catch (IOException e) {
-            System.out.println("❌ Error al descargar desde URL: " + url);
+            System.out.println("Error al descargar desde URL: " + url);
             e.printStackTrace();
         }
     }
@@ -369,7 +344,7 @@ public class AutomatizadorMIMP {
         }
 
         try {
-            cargarTodoElContenidoConScroll(); // ⚠️ Asegura que todos los archivos estén visibles
+            cargarTodoElContenidoConScroll();
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
             List<WebElement> elementos = wait.until(
@@ -390,7 +365,7 @@ public class AutomatizadorMIMP {
             }
 
             if (filaArchivo == null) {
-                System.out.println("❌ No se encontró el archivo en la tabla: " + nombreArchivoSeleccionado);
+                System.out.println("No se encontró el archivo en la tabla: " + nombreArchivoSeleccionado);
                 return;
             }
 
@@ -401,11 +376,11 @@ public class AutomatizadorMIMP {
                 By.cssSelector("li.action-download-container > a.action-download")));
             opcionDescargar.click();
 
-            System.out.println("✅ Descarga iniciada para: " + nombreArchivoSeleccionado);
+            System.out.println("Descarga iniciada para: " + nombreArchivoSeleccionado);
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("❌ Error al intentar descargar el archivo: " + nombreArchivoSeleccionado);
+            System.out.println("Error al intentar descargar el archivo: " + nombreArchivoSeleccionado);
         }
     }
     
@@ -416,7 +391,7 @@ public class AutomatizadorMIMP {
         DefaultListModel<String> nombresArchivos,
         DefaultListModel<String> rutasArchivos
     ) throws InterruptedException {
-        cargarTodoElContenidoConScroll(); // Asegura que todo se haya cargado
+        cargarTodoElContenidoConScroll();
 
         List<WebElement> carpetas = driver.findElements(By.cssSelector("tr[data-type='dir']"));
 
@@ -424,7 +399,6 @@ public class AutomatizadorMIMP {
         String mejorCoincidenciaRuta = null;
         int mejorScore = Integer.MIN_VALUE;
 
-        // Normaliza el nombre buscado
         String nombreBuscadoNormalizado = normalizarTexto(nombreBuscado);
 
         for (WebElement carpeta : carpetas) {
@@ -449,20 +423,20 @@ public class AutomatizadorMIMP {
         }
 
         if (mejorCoincidenciaRuta != null && mejorScore > 0) {
-            System.out.println("📁 Abriendo carpeta más parecida: " + mejorCoincidenciaNombre + " (score: " + mejorScore + ")");
+            System.out.println("?Abriendo carpeta más parecida: " + mejorCoincidenciaNombre + " (score: " + mejorScore + ")");
             driver.get(mejorCoincidenciaRuta);
             Thread.sleep(1500);
             obtenerArchivosDeRuta(mejorCoincidenciaRuta, nombresArchivos, rutasArchivos);
         } else {
-            System.out.println("❌ Ninguna coincidencia con score suficiente. Score más alto: " + mejorScore);
-            throw new RuntimeException("❌ No se encontró ninguna carpeta parecida a: " + nombreBuscado +
+            System.out.println("Ninguna coincidencia con score suficiente. Score más alto: " + mejorScore);
+            throw new RuntimeException("No se encontró ninguna carpeta parecida a: " + nombreBuscado +
             ". Total carpetas visibles: " + carpetas.size());
 
         }
 
-        System.out.println("🔍 Carpetas encontradas en vista actual: " + carpetas.size());
+        System.out.println("Carpetas encontradas en vista actual: " + carpetas.size());
         for (WebElement carpeta : carpetas) {
-            System.out.println("📁 Carpeta DOM: [" + carpeta.getAttribute("data-file") + "]");
+            System.out.println("Carpeta DOM: [" + carpeta.getAttribute("data-file") + "]");
         }
         
 
@@ -482,20 +456,20 @@ public class AutomatizadorMIMP {
     public String normalizarTexto(String texto) {
         return texto
             .toLowerCase()
-            .replaceAll("(?i)\\.pdf$", "")  // quita extensión .pdf si la tiene
-            .replaceAll("[^a-z0-9áéíóúñ ]", "") // remueve caracteres especiales (opcional)
-            .replaceAll("\\s+", " ") // normaliza espacios
+            .replaceAll("(?i)\\.pdf$", "")
+            .replaceAll("[^a-z0-9áéíóúñ ]", "")
+            .replaceAll("\\s+", " ")
             .trim();
     }
 
     public void abrirArchivoPorNombre(String nombreArchivoSeleccionado) {
         if (nombreArchivoSeleccionado == null || nombreArchivoSeleccionado.isEmpty()) {
-            System.out.println("⚠️ No hay archivo seleccionado.");
+            System.out.println("No hay archivo seleccionado.");
             return;
         }
 
         try {
-            cargarTodoElContenidoConScroll(); // Asegura que todos los archivos estén visibles
+            cargarTodoElContenidoConScroll();
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
             List<WebElement> elementos = wait.until(
@@ -514,20 +488,19 @@ public class AutomatizadorMIMP {
             }
 
             if (filaArchivo == null) {
-                System.out.println("❌ No se encontró el archivo en la tabla: " + nombreArchivoSeleccionado);
+                System.out.println("No se encontró el archivo en la tabla: " + nombreArchivoSeleccionado);
                 return;
             }
 
-            // Simula doble clic sobre la fila del archivo (abre el archivo en la misma pestaña)
-            filaArchivo.click(); // primer clic
-            Thread.sleep(100);    // pequeña pausa
-            filaArchivo.click(); // segundo clic
+            filaArchivo.click();
+            Thread.sleep(100);
+            filaArchivo.click();
 
-            System.out.println("✅ Archivo abierto: " + nombreArchivoSeleccionado);
+            System.out.println("Archivo abierto: " + nombreArchivoSeleccionado);
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("❌ Error al intentar abrir el archivo: " + nombreArchivoSeleccionado);
+            System.out.println("Error al intentar abrir el archivo: " + nombreArchivoSeleccionado);
         }
     }
 
@@ -541,12 +514,11 @@ public class AutomatizadorMIMP {
             String title = Native.toString(windowText).toLowerCase();
             System.out.println("Ventana detectada: '" + title + "'");
 
-            // Solo tomar ventanas visibles con texto que contenga 'chrome'
             if (title.contains("chrome") && user32.IsWindowVisible(hWnd)) {
                 chromeWindow[0] = hWnd;
-                return false; // Detener búsqueda
+                return false;
             }
-            return true; // Seguir buscando
+            return true;
         }, null);
 
         if (chromeWindow[0] != null) {
@@ -554,7 +526,7 @@ public class AutomatizadorMIMP {
             boolean result = user32.ShowWindow(chromeWindow[0], WinUser.SW_MINIMIZE);
             System.out.println("ShowWindow result: " + result);
         } else {
-            System.out.println("❌ No se encontró ventana de Chrome para minimizar.");
+            System.out.println("No se encontró ventana de Chrome para minimizar.");
         }
     }
 
@@ -566,7 +538,7 @@ public class AutomatizadorMIMP {
                     "[Native.Win32]::ShowWindowAsync($_, 6) }\"";
 
             Runtime.getRuntime().exec(script);
-            System.out.println("✔️ PowerShell ejecutado para minimizar Chrome.");
+            System.out.println("PowerShell ejecutado para minimizar Chrome.");
         } catch (IOException e) {
             e.printStackTrace();
         }

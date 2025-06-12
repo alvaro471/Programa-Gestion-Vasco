@@ -90,7 +90,7 @@ public class interfazEnumerar2 extends javax.swing.JFrame {
             this.revalidate();
             this.repaint();
         } else {
-            System.out.println("❌ Carpeta NO encontrada o NO es directorio.");
+            System.out.println("Carpeta NO encontrada o NO es directorio.");
         }
     }
 

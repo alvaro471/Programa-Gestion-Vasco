@@ -27,7 +27,7 @@ public class Interfaz extends javax.swing.JFrame {
     public Interfaz() {
         initComponents();
         setLocationRelativeTo(null);
-        setLayout(new FlowLayout(FlowLayout.CENTER)); // <-- AQUÍ
+        setLayout(new FlowLayout(FlowLayout.CENTER));
         ((AbstractDocument) txtDni.getDocument()).setDocumentFilter(new FiltroNumericoLimitado(8));
         ((AbstractDocument) txtAnio.getDocument()).setDocumentFilter(new FiltroNumericoLimitado4numeros(4));
         jCheckBoxEstadoAutocompletado.setSelected(false); // Asegurar que inicie desmarcado
@@ -128,8 +128,6 @@ public class Interfaz extends javax.swing.JFrame {
         }
     }
 
-
-//..........
     
     // Corrección de estados al cargar la interfaz, luego de que todo esté inicializado
     private void actualizarEstadoComponentesAutocompletado(boolean seleccionado) {
@@ -226,7 +224,7 @@ public class Interfaz extends javax.swing.JFrame {
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLabel1.setText("Proyecto Carpeta Unica - Archivo Unico");
+        jLabel1.setText("PROYECTO CARPETA UNICA            ");
 
         jLabel2.setText("Caso");
 
@@ -667,6 +665,8 @@ public class Interfaz extends javax.swing.JFrame {
         txtDni.setText("");
         txtAnio.setText("");
         txtCarpetaExpediente.setText("");
+        ManejadorArchivos.setRutaCarpeta("");
+        
         
     }//GEN-LAST:event_jButton4ActionPerformed
 

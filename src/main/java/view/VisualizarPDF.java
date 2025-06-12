@@ -66,7 +66,7 @@ public class VisualizarPDF extends javax.swing.JFrame {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 try {
                     if (documento != null) {
-                        documento.close(); // Libera el archivo PDF si está abierto
+                        documento.close();
                     }
                 } catch (Exception ex) {
                     System.out.println("Error al cerrar PDF: " + ex.getMessage());
@@ -78,13 +78,12 @@ public class VisualizarPDF extends javax.swing.JFrame {
         int ancho = (int) (screenSize.width * 0.6);
         int alto = (int) (screenSize.height * 0.8);
         setSize(ancho, alto);
-        setLocationRelativeTo(null); // Centrar
+        setLocationRelativeTo(null);
 
-        // Verificar el tipo de archivo
         if (rutaArchivoPDF.toLowerCase().endsWith(".pdf")) {
-            inicializarPDF(); // Cargar como PDF
+            inicializarPDF();
         } else if (rutaArchivoPDF.toLowerCase().endsWith(".docx")) {
-            inicializarWord(); // Cargar como Word
+            inicializarWord();
         } else {
             JOptionPane.showMessageDialog(this, "Tipo de archivo no soportado.");
         }
@@ -96,13 +95,13 @@ public class VisualizarPDF extends javax.swing.JFrame {
             
             txtPaginasTotales = new JTextField("Páginas: " + documento.getNumberOfPages());
             txtPaginasTotales.setEditable(false);
-            txtPaginasTotales.setOpaque(false); // transparente
-            txtPaginasTotales.setBorder(null);  // sin borde
-            txtPaginasTotales.setForeground(Color.DARK_GRAY); // color de texto visible
+            txtPaginasTotales.setOpaque(false);
+            txtPaginasTotales.setBorder(null);
+            txtPaginasTotales.setForeground(Color.DARK_GRAY);
             txtPaginasTotales.setFont(new Font("Arial", Font.PLAIN, 14));
             
-            inicializarVisorLazy(); // Lazy loading de páginas PDF
-            configurarBotones();    // Solo botón Cerrar
+            inicializarVisorLazy();
+            configurarBotones();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error al abrir el PDF: " + e.getMessage());
         }

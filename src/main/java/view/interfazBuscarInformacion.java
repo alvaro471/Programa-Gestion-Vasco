@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.image.BufferedImage;
+import java.awt.print.Book;
+import java.awt.print.PageFormat;
 import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,6 +18,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,6 +47,8 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.printing.PDFPageable;
+import org.apache.pdfbox.printing.PDFPrintable;
+import org.apache.pdfbox.printing.Scaling;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -154,6 +159,7 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         jCheckBox1 = new javax.swing.JCheckBox();
         btnBuscarWeb = new javax.swing.JButton();
+        jcbAgregarExp = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         btnImprimir = new javax.swing.JButton();
         btnVisualizar = new javax.swing.JButton();
@@ -165,6 +171,9 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
         btnAbajo = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
         jButton9 = new javax.swing.JButton();
+        btnRenombrarArchivo = new javax.swing.JButton();
+        brnExtraerPaginas = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         jLabel5.setText("jLabel5");
 
@@ -187,7 +196,7 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
         });
 
         jLabel4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLabel4.setText("BUSCAR PDF");
+        jLabel4.setText("BUSCAR EXPEDIENTE");
 
         jcbNombre.setText("Nombre");
         jcbNombre.addActionListener(new java.awt.event.ActionListener() {
@@ -321,6 +330,8 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
                 .addContainerGap(32, Short.MAX_VALUE))
         );
 
+        jcbAgregarExp.setText("AGREGAR EXP");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -331,11 +342,6 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(19, 19, 19)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtRutaMostrar, javax.swing.GroupLayout.PREFERRED_SIZE, 572, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnAbrirCarpeta)
-                        .addGap(67, 79, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -346,30 +352,37 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
                         .addComponent(jButton3)
                         .addGap(39, 39, 39))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jcbObtenerExpediente)
-                                    .addComponent(txtExpediente, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(78, 78, 78)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jcbNombre)
-                                    .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(56, 56, 56)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jcbDni)
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(txtDni, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(29, 29, 29)
-                                        .addComponent(jButton1))))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel7)
+                                .addComponent(txtRutaMostrar, javax.swing.GroupLayout.PREFERRED_SIZE, 506, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(txtRutaCarpetaGeneral, javax.swing.GroupLayout.PREFERRED_SIZE, 372, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(btnAbrirCarpeta)
                                 .addGap(18, 18, 18)
-                                .addComponent(btnBuscarCarpetaGeneral))
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 707, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                                .addComponent(jcbAgregarExp))
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jcbObtenerExpediente)
+                                        .addComponent(txtExpediente, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGap(78, 78, 78)
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jcbNombre)
+                                        .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGap(56, 56, 56)
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jcbDni)
+                                        .addGroup(jPanel1Layout.createSequentialGroup()
+                                            .addComponent(txtDni, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGap(29, 29, 29)
+                                            .addComponent(jButton1))))
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jLabel7)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(txtRutaCarpetaGeneral, javax.swing.GroupLayout.PREFERRED_SIZE, 372, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(btnBuscarCarpetaGeneral))
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 707, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 34, Short.MAX_VALUE))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -401,10 +414,11 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtRutaMostrar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnAbrirCarpeta, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnAbrirCarpeta, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jcbAgregarExp))
+                .addContainerGap(11, Short.MAX_VALUE))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -472,6 +486,27 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
             }
         });
 
+        btnRenombrarArchivo.setText("CAMBIAR NOMBRE");
+        btnRenombrarArchivo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRenombrarArchivoActionPerformed(evt);
+            }
+        });
+
+        brnExtraerPaginas.setText("EXTRAER PAGINAS");
+        brnExtraerPaginas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                brnExtraerPaginasActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("CONSOLIDAR SELECCION");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -494,8 +529,11 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
                             .addComponent(btnArriba)
                             .addComponent(btnAbajo)
                             .addComponent(jButton6)
-                            .addComponent(jButton9))))
-                .addContainerGap(42, Short.MAX_VALUE))
+                            .addComponent(jButton9)
+                            .addComponent(btnRenombrarArchivo)
+                            .addComponent(brnExtraerPaginas)
+                            .addComponent(jButton2))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -509,7 +547,13 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(jButton6)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton9))
+                        .addComponent(jButton9)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnRenombrarArchivo)
+                        .addGap(18, 18, 18)
+                        .addComponent(brnExtraerPaginas)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton2))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 479, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -526,18 +570,18 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1337, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
             .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel4Layout.createSequentialGroup()
                     .addContainerGap()
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(21, 21, 21)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addContainerGap()))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(32, 32, 32)))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 569, Short.MAX_VALUE)
+            .addGap(0, 572, Short.MAX_VALUE)
             .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel4Layout.createSequentialGroup()
                     .addContainerGap()
@@ -553,7 +597,7 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 1369, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -565,12 +609,27 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         
+        /*
         String nombre = jcbNombre.isSelected() ? txtNombre.getText().trim().toLowerCase() : "";
         String expediente = jcbObtenerExpediente.isSelected() ? txtExpediente.getText().trim().toLowerCase() : "";
         String dni = jcbDni.isSelected() ? txtDni.getText().trim().toLowerCase() : "";
         
-        ManejadorArchivos.buscarCarpetasEnGeneral(rutaGeneral, nombre, expediente, dni, modeloListaCarpetas1Nombres, modeloListaCarpetas1Rutas, JListCarpetas);
         
+        ManejadorArchivos.buscarCarpetasEnGeneral(rutaGeneral, nombre, expediente, dni, modeloListaCarpetas1Nombres, modeloListaCarpetas1Rutas, JListCarpetas);
+        */
+        String nombre = jcbNombre.isSelected() ? txtNombre.getText().trim().toLowerCase() : "";
+        String expediente = jcbObtenerExpediente.isSelected() ? txtExpediente.getText().trim().toLowerCase() : "";
+        String dni = jcbDni.isSelected() ? txtDni.getText().trim().toLowerCase() : "";
+
+        ManejadorArchivos.buscarCarpetasSinProfundizarEnEXP(
+            rutaGeneral,
+            nombre,
+            expediente,
+            dni,
+            modeloListaCarpetas1Nombres,
+            modeloListaCarpetas1Rutas,
+            JListCarpetas
+        );
         
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -609,6 +668,8 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
 
     private void btnAbrirCarpetaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAbrirCarpetaActionPerformed
     if (jCheckBox1.isSelected()) {
+        boolean incluirExp = jcbAgregarExp.isSelected(); // ✅ usa el mismo JCheckBox
+
         int indexSeleccionado = JListCarpetas.getSelectedIndex();
         if (indexSeleccionado == -1) {
             JOptionPane.showMessageDialog(this, "Por favor selecciona una carpeta en la lista.");
@@ -636,9 +697,15 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
 
                 if (nombreArchivo.toUpperCase().contains("EXP")) {
                     ManejadorArchivos.setNombreExpediente(nombreArchivo);
-                    System.out.println("Archivo expediente omitido y guardado para uso posterior: " + nombreArchivo);
-                    return;
+
+                    if (!incluirExp) {
+                        System.out.println("Archivo expediente omitido y guardado para uso posterior: " + nombreArchivo);
+                        return;
+                    } else {
+                        System.out.println("Archivo expediente incluido: " + nombreArchivo);
+                    }
                 }
+
 
                 modeloListaArchivosNombres.addElement(nombreArchivo);
                 modeloListaArchivosRutas.addElement(ruta);
@@ -657,8 +724,14 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
 
                 if (nombreArchivo.toUpperCase().contains("EXP")) {
                     nombreExpedienteLocal = nombreArchivo;
-                    continue;  // Guarda pero omite agregar
+
+                    if (!incluirExp) {
+                        continue;  // omitir
+                    } else {
+                        System.out.println("Archivo expediente incluido: " + nombreArchivo);
+                    }
                 }
+
 
                 nombresTemp.add(nombreArchivo);
                 rutasTemp.add(entry.getValue());
@@ -687,11 +760,13 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
     } else {
         int indice = JListCarpetas.getSelectedIndex();
         if (indice >= 0) {
+            boolean incluirExp = jcbAgregarExp.isSelected();
             ManejadorArchivos.analizarCarpetaSeleccionada(
                 indice,
                 modeloListaCarpetas1Rutas,
                 modeloListaArchivosNombres,
-                modeloListaArchivosRutas
+                modeloListaArchivosRutas,
+                incluirExp
             );
 
             if (ManejadorArchivos.nombreExpediente != null) {
@@ -809,43 +884,64 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
 
     private void btnCrearConsolidadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearConsolidadoActionPerformed
         if (jCheckBox1.isSelected()) {
-        JFileChooser chooser = new JFileChooser();
-        File carpeta = new File(rutaGuardadaGeneral);
-        if (carpeta.exists() && carpeta.isDirectory()) {
-            chooser.setCurrentDirectory(carpeta);
-        }
+            JFileChooser chooser = new JFileChooser();
+            File carpeta = new File(rutaGuardadaGeneral);
+            if (carpeta.exists() && carpeta.isDirectory()) {
+                chooser.setCurrentDirectory(carpeta);
+            }
 
-        chooser.setDialogTitle("Guardar PDF unido");
+            chooser.setDialogTitle("Guardar PDF unido");
 
-        String nombreExpediente = ManejadorArchivos.getNombreExpediente();
-        if (nombreExpediente == null || nombreExpediente.trim().isEmpty()) {
-            nombreExpediente = "PDF_Unido";
-        }
+            String nombreExpediente = ManejadorArchivos.getNombreExpediente();
+            if (nombreExpediente == null || nombreExpediente.trim().isEmpty()) {
+                nombreExpediente = "PDF_Unido";
+            }
 
-        chooser.setSelectedFile(new File(nombreExpediente));
-        int opcion = chooser.showSaveDialog(this);
-        if (opcion != JFileChooser.APPROVE_OPTION) return;
+            chooser.setSelectedFile(new File(nombreExpediente));
+            int opcion = chooser.showSaveDialog(this);
+            if (opcion != JFileChooser.APPROVE_OPTION) return;
 
-        File destino = chooser.getSelectedFile();
-        PDFMergerUtility merger = new PDFMergerUtility();
+            File destino = chooser.getSelectedFile();
+            PDFMergerUtility merger = new PDFMergerUtility();
 
-        try {
-            merger.setDestinationFileName(destino.getAbsolutePath());
+            try {
+                merger.setDestinationFileName(destino.getAbsolutePath());
 
-            for (int i = 0; i < modeloListaArchivosNombres.getSize(); i++) {
-                String nombre = modeloListaArchivosNombres.get(i);
-                String url = modeloListaArchivosRutas.get(i);
+                for (int i = 0; i < modeloListaArchivosNombres.getSize(); i++) {
+                    String nombre = modeloListaArchivosNombres.get(i);
+                    String url = modeloListaArchivosRutas.get(i);
 
-                if (nombre == null || url == null || nombre.trim().isEmpty() || url.trim().isEmpty()) continue;
-                if (!nombre.toLowerCase().endsWith(".pdf")) {
-                
-                // Convertir imagen a PDF si es PNG o JPG
-                if (nombre.toLowerCase().endsWith(".jpg") || nombre.toLowerCase().endsWith(".jpeg") || nombre.toLowerCase().endsWith(".png")) {
+                    if (nombre == null || url == null || nombre.trim().isEmpty() || url.trim().isEmpty()) continue;
+                    if (!nombre.toLowerCase().endsWith(".pdf")) {
+
+                    // Convertir imagen a PDF si es PNG o JPG
+                    if (nombre.toLowerCase().endsWith(".jpg") || nombre.toLowerCase().endsWith(".jpeg") || nombre.toLowerCase().endsWith(".png")) {
+                        InputStream in = manejador.descargarArchivo(url);
+                        File imagenTemp = File.createTempFile("imagen_", "_" + nombre);
+                        imagenTemp.deleteOnExit();
+
+                        try (OutputStream out = new FileOutputStream(imagenTemp)) {
+                            byte[] buffer = new byte[8192];
+                            int len;
+                            while ((len = in.read(buffer)) != -1) {
+                                out.write(buffer, 0, len);
+                            }
+                        }
+
+                        // Convertir imagen a PDF
+                        File pdfImagen = manejador.convertirImagenAPdf(imagenTemp);
+                        merger.addSource(pdfImagen);
+                    }
+
+                    continue; // si no es PDF ni imagen soportada, omitir
+                }
+
+
                     InputStream in = manejador.descargarArchivo(url);
-                    File imagenTemp = File.createTempFile("imagen_", "_" + nombre);
-                    imagenTemp.deleteOnExit();
+                    File temp = File.createTempFile("pdfmerge_", "_" + nombre);
+                    temp.deleteOnExit();
 
-                    try (OutputStream out = new FileOutputStream(imagenTemp)) {
+                    try (OutputStream out = new FileOutputStream(temp)) {
                         byte[] buffer = new byte[8192];
                         int len;
                         while ((len = in.read(buffer)) != -1) {
@@ -853,126 +949,105 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
                         }
                     }
 
-                    // Convertir imagen a PDF
-                    File pdfImagen = manejador.convertirImagenAPdf(imagenTemp);
-                    merger.addSource(pdfImagen);
+                    merger.addSource(temp);
                 }
 
-                continue; // si no es PDF ni imagen soportada, omitir
-            }
+                merger.mergeDocuments(null);
 
+                // 📝 Agregar folios (solo una vez, sin duplicar)
+                try (PDDocument document = PDDocument.load(destino)) {
+                    int totalPages = document.getNumberOfPages();
 
-                InputStream in = manejador.descargarArchivo(url);
-                File temp = File.createTempFile("pdfmerge_", "_" + nombre);
-                temp.deleteOnExit();
+                    for (int i = 0; i < totalPages; i++) {
+                        PDPage page = document.getPage(i);
+                        PDRectangle mediaBox = page.getMediaBox();
+                        int rotation = page.getRotation();
 
-                try (OutputStream out = new FileOutputStream(temp)) {
-                    byte[] buffer = new byte[8192];
-                    int len;
-                    while ((len = in.read(buffer)) != -1) {
-                        out.write(buffer, 0, len);
-                    }
-                }
+                        float margin = 40;
+                        float x = mediaBox.getWidth() - margin - 10;
+                        float y = margin + 5;
 
-                merger.addSource(temp);
-            }
+                        try (PDPageContentStream contentStream = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, true, true)) {
+                            contentStream.beginText();
+                            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 10);
 
-            merger.mergeDocuments(null);
+                            switch (rotation) {
+                                case 90:
+                                    contentStream.setTextMatrix(0, 1, -1, 0, x, y);
+                                    break;
+                                case 180:
+                                    contentStream.setTextMatrix(-1, 0, 0, -1, x, y);
+                                    break;
+                                case 270:
+                                    contentStream.setTextMatrix(0, -1, 1, 0, x, y);
+                                    break;
+                                default:
+                                    contentStream.setTextMatrix(1, 0, 0, 1, x, y);
+                                    break;
+                            }
 
-            // 📝 Agregar folios (solo una vez, sin duplicar)
-            try (PDDocument document = PDDocument.load(destino)) {
-                int totalPages = document.getNumberOfPages();
-
-                for (int i = 0; i < totalPages; i++) {
-                    PDPage page = document.getPage(i);
-                    PDRectangle mediaBox = page.getMediaBox();
-                    int rotation = page.getRotation();
-
-                    float margin = 40;
-                    float x = mediaBox.getWidth() - margin;
-                    float y = margin;
-
-                    try (PDPageContentStream contentStream = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, true, true)) {
-                        contentStream.beginText();
-                        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 10);
-
-                        switch (rotation) {
-                            case 90:
-                                contentStream.setTextMatrix(0, 1, -1, 0, x, y);
-                                break;
-                            case 180:
-                                contentStream.setTextMatrix(-1, 0, 0, -1, x, y);
-                                break;
-                            case 270:
-                                contentStream.setTextMatrix(0, -1, 1, 0, x, y);
-                                break;
-                            default:
-                                contentStream.setTextMatrix(1, 0, 0, 1, x, y);
-                                break;
+                            contentStream.showText("Folio: " + (i + 1));
+                            contentStream.endText();
                         }
-
-                        contentStream.showText("Folio: " + (i + 1));
-                        contentStream.endText();
                     }
+
+                    document.save(destino);
                 }
 
-                document.save(destino);
+                JOptionPane.showMessageDialog(this, "PDF unido guardado en: " + destino.getAbsolutePath());
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error uniendo PDFs: " + e.getMessage());
+                e.printStackTrace();
             }
 
-            JOptionPane.showMessageDialog(this, "PDF unido guardado en: " + destino.getAbsolutePath());
+        } else {
+            if (modeloListaArchivosRutas.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No hay archivos para consolidar.");
+                return;
+            }
 
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error uniendo PDFs: " + e.getMessage());
-            e.printStackTrace();
-        }
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Guardar PDF unido");
+            chooser.setSelectedFile(new File(ManejadorArchivos.getNombreExpediente() != null ? ManejadorArchivos.getNombreExpediente() : "PDF_Unido"));
+            int opcion = chooser.showSaveDialog(this);
+            if (opcion != JFileChooser.APPROVE_OPTION) return;
 
-    } else {
-        if (modeloListaArchivosRutas.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No hay archivos para consolidar.");
-            return;
-        }
+            File destino = chooser.getSelectedFile();
+            PDFMergerUtility merger = new PDFMergerUtility();
+            merger.setDestinationFileName(destino.getAbsolutePath());
 
-        JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Guardar PDF unido");
-        chooser.setSelectedFile(new File(ManejadorArchivos.getNombreExpediente() != null ? ManejadorArchivos.getNombreExpediente() : "PDF_Unido"));
-        int opcion = chooser.showSaveDialog(this);
-        if (opcion != JFileChooser.APPROVE_OPTION) return;
+            try {
+                for (int i = 0; i < modeloListaArchivosRutas.size(); i++) {
+                    String ruta = modeloListaArchivosRutas.get(i);
+                    String nombre = modeloListaArchivosNombres.get(i).toLowerCase();
 
-        File destino = chooser.getSelectedFile();
-        PDFMergerUtility merger = new PDFMergerUtility();
-        merger.setDestinationFileName(destino.getAbsolutePath());
+                    File archivoTemp;
+                    if (nombre.endsWith(".pdf")) {
+                        archivoTemp = new File(ruta);
+                    } else if (nombre.endsWith(".png") || nombre.endsWith(".jpg") || nombre.endsWith(".jpeg")) {
+                        archivoTemp = convertirImagenAPdf(new File(ruta));
+                    } else {
+                        continue; // ignorar otros formatos
+                    }
 
-        try {
-            for (int i = 0; i < modeloListaArchivosRutas.size(); i++) {
-                String ruta = modeloListaArchivosRutas.get(i);
-                String nombre = modeloListaArchivosNombres.get(i).toLowerCase();
-
-                File archivoTemp;
-                if (nombre.endsWith(".pdf")) {
-                    archivoTemp = new File(ruta);
-                } else if (nombre.endsWith(".png") || nombre.endsWith(".jpg") || nombre.endsWith(".jpeg")) {
-                    archivoTemp = convertirImagenAPdf(new File(ruta));
-                } else {
-                    continue; // ignorar otros formatos
+                    merger.addSource(archivoTemp);
                 }
 
-                merger.addSource(archivoTemp);
+                merger.mergeDocuments(null);
+
+                try (PDDocument document = PDDocument.load(destino)) {
+                    agregarFolio(document);
+                    document.save(destino);
+                }
+
+                JOptionPane.showMessageDialog(this, "PDF unido guardado en: " + destino.getAbsolutePath());
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error uniendo archivos: " + e.getMessage());
+                e.printStackTrace();
             }
-
-            merger.mergeDocuments(null);
-
-            try (PDDocument document = PDDocument.load(destino)) {
-                agregarFolio(document);
-                document.save(destino);
-            }
-
-            JOptionPane.showMessageDialog(this, "PDF unido guardado en: " + destino.getAbsolutePath());
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error uniendo archivos: " + e.getMessage());
-            e.printStackTrace();
         }
-    }
 
 
     }//GEN-LAST:event_btnCrearConsolidadoActionPerformed
@@ -1038,20 +1113,29 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
                 return;
             }
 
-            try (org.apache.pdfbox.pdmodel.PDDocument document = org.apache.pdfbox.pdmodel.PDDocument.load(new File(rutaArchivo))) {
-                // Crear el trabajo de impresión
+            try (PDDocument document = PDDocument.load(new File(rutaArchivo))) {
                 PrinterJob job = PrinterJob.getPrinterJob();
 
-                // Establecer el diálogo de impresión
+                // Crear el objeto PDFPrintable
+                PDFPrintable printable = new PDFPrintable(document, Scaling.SHRINK_TO_FIT);
+
+                // Crear un Book (colección de páginas imprimibles)
+                Book book = new Book();
+                PageFormat pageFormat = job.defaultPage();
+                book.append(printable, pageFormat, document.getNumberOfPages());
+
+                job.setPageable(book);
+
+                // Mostrar diálogo de impresión con soporte completo
                 if (job.printDialog()) {
-                    job.setPageable(new org.apache.pdfbox.printing.PDFPageable(document)); // PDFPageable permite impresión directa
-                    job.print(); // Enviar a la impresora
+                    job.print();
                 }
 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error al imprimir el archivo: " + ex.getMessage());
                 ex.printStackTrace();
             }
+
         }
     }//GEN-LAST:event_btnImprimirActionPerformed
 
@@ -1103,11 +1187,27 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
     }//GEN-LAST:event_btnLimpiarJListCarpetasActionPerformed
 
     private void btnRefrescarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefrescarActionPerformed
+        /*
         String nombre = jcbNombre.isSelected() ? txtNombre.getText().trim().toLowerCase() : "";
         String expediente = jcbObtenerExpediente.isSelected() ? txtExpediente.getText().trim().toLowerCase() : "";
         String dni = jcbDni.isSelected() ? txtDni.getText().trim().toLowerCase() : "";
         
         ManejadorArchivos.buscarCarpetasEnGeneral(rutaGeneral, nombre, expediente, dni, modeloListaCarpetas1Nombres, modeloListaCarpetas1Rutas, JListCarpetas);
+        */
+        String nombre = jcbNombre.isSelected() ? txtNombre.getText().trim().toLowerCase() : "";
+        String expediente = jcbObtenerExpediente.isSelected() ? txtExpediente.getText().trim().toLowerCase() : "";
+        String dni = jcbDni.isSelected() ? txtDni.getText().trim().toLowerCase() : "";
+
+        ManejadorArchivos.buscarCarpetasSinProfundizarEnEXP(
+            rutaGeneral,
+            nombre,
+            expediente,
+            dni,
+            modeloListaCarpetas1Nombres,
+            modeloListaCarpetas1Rutas,
+            JListCarpetas
+        );
+        
     }//GEN-LAST:event_btnRefrescarActionPerformed
 
     private void btnArribaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnArribaActionPerformed
@@ -1265,53 +1365,49 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
     }//GEN-LAST:event_btnBuscarWebActionPerformed
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
+        int[] indices = JListArchivos.getSelectedIndices();
+        if (indices.length == 0) {
+            JOptionPane.showMessageDialog(this, "Selecciona uno o más archivos.");
+            return;
+        }
+
         if (jCheckBox1.isSelected()) {
-            int index = JListArchivos.getSelectedIndex();
-            if (index == -1) {
-                JOptionPane.showMessageDialog(this, "Selecciona un archivo.");
-                return;
-            }
-
-            String nombre = modeloListaArchivosNombres.get(index);
-            String urlArchivo = modeloListaArchivosRutas.get(index);
-
+            // Mostrar JFileChooser SOLO UNA VEZ para seleccionar una CARPETA
             JFileChooser chooser = new JFileChooser();
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
             File carpeta = new File(rutaGuardadaGeneral);
             if (carpeta.exists() && carpeta.isDirectory()) {
                 chooser.setCurrentDirectory(carpeta);
             } else {
                 System.out.println("Ruta inválida, abriendo carpeta por defecto.");
             }
-            chooser.setSelectedFile(new File(nombre));
+
             int opcion = chooser.showSaveDialog(this);
 
             if (opcion == JFileChooser.APPROVE_OPTION) {
-                File destino = chooser.getSelectedFile();
-                try (InputStream in = manejador.descargarArchivo(urlArchivo);
-                     OutputStream out = new FileOutputStream(destino)) {
-                    byte[] buffer = new byte[8192];
-                    int len;
-                    while ((len = in.read(buffer)) != -1) {
-                        out.write(buffer, 0, len);
+                File directorioDestino = chooser.getSelectedFile();
+
+                for (int index : indices) {
+                    String nombre = modeloListaArchivosNombres.get(index);
+                    String urlArchivo = modeloListaArchivosRutas.get(index);
+                    File destino = new File(directorioDestino, nombre);
+
+                    try (InputStream in = manejador.descargarArchivo(urlArchivo);
+                         OutputStream out = new FileOutputStream(destino)) {
+                        byte[] buffer = new byte[8192];
+                        int len;
+                        while ((len = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, len);
+                        }
+                        JOptionPane.showMessageDialog(this, "Descargado en: " + destino.getAbsolutePath());
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(this, "Error al descargar: " + e.getMessage());
                     }
-                    JOptionPane.showMessageDialog(this, "Descargado en: " + destino.getAbsolutePath());
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(this, "Error al descargar: " + e.getMessage());
                 }
             }
-        }    
-        else{
-            int index = JListArchivos.getSelectedIndex();
-            if (index == -1) {
-                JOptionPane.showMessageDialog(this, "Selecciona un archivo para copiar.");
-                return;
-            }
-
-            String rutaOrigen = modeloListaArchivosRutas.get(index);
-            File archivoOrigen = new File(rutaOrigen);
-
-            // Selector de carpeta destino
-            String rutaSeleccionada = modeloListaCarpetas1Rutas.getElementAt(0);  // o .get(0)
+        } else {
+            String rutaSeleccionada = modeloListaCarpetas1Rutas.getElementAt(0);
             JFileChooser selectorCarpeta = new JFileChooser(rutaSeleccionada);
             selectorCarpeta.setDialogTitle("Selecciona la carpeta de destino");
             selectorCarpeta.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -1321,18 +1417,363 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
 
             if (resultado == JFileChooser.APPROVE_OPTION) {
                 File carpetaDestino = selectorCarpeta.getSelectedFile();
-                File archivoDestino = new File(carpetaDestino, archivoOrigen.getName());
 
-                try {
-                    Files.copy(archivoOrigen.toPath(), archivoDestino.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    JOptionPane.showMessageDialog(this, "Archivo copiado exitosamente a:\n" + archivoDestino.getAbsolutePath());
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(this, "Error al copiar el archivo: " + ex.getMessage());
-                    ex.printStackTrace();
+                for (int index : indices) {
+                    String rutaOrigen = modeloListaArchivosRutas.get(index);
+                    File archivoOrigen = new File(rutaOrigen);
+                    File archivoDestino = new File(carpetaDestino, archivoOrigen.getName());
+
+                    try {
+                        Files.copy(archivoOrigen.toPath(), archivoDestino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        JOptionPane.showMessageDialog(this, "Archivo copiado exitosamente a:\n" + archivoDestino.getAbsolutePath());
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(this, "Error al copiar el archivo: " + ex.getMessage());
+                        ex.printStackTrace();
+                    }
                 }
             }
         }
+        
     }//GEN-LAST:event_btnGuardarActionPerformed
+
+    private void btnRenombrarArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRenombrarArchivoActionPerformed
+        if (jCheckBox1.isSelected()) {
+            int index = JListArchivos.getSelectedIndex();
+            if (index == -1) {
+                JOptionPane.showMessageDialog(this, "Selecciona un archivo para renombrar.");
+                return;
+            }
+
+            String nombreActual = modeloListaArchivosNombres.get(index);
+            String urlActual = modeloListaArchivosRutas.get(index);
+
+            String nuevoNombre = JOptionPane.showInputDialog(this, "Nuevo nombre para el archivo:", nombreActual);
+            if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) return;
+            nuevoNombre = nuevoNombre.trim();
+
+            try {
+                // Ejecuta renombramiento
+                manejador.nuevoNombreArchivoListaWeb(urlActual, nuevoNombre);
+
+                // Construye nueva URL para actualizar la lista
+                String urlDestino = urlActual.substring(0, urlActual.lastIndexOf('/') + 1) + URLEncoder.encode(nuevoNombre, StandardCharsets.UTF_8.toString());
+                
+                modeloListaArchivosNombres.set(index, nuevoNombre);
+                modeloListaArchivosRutas.set(index, urlDestino);
+                JListArchivos.repaint();
+
+                JOptionPane.showMessageDialog(this, "Archivo renombrado con éxito.");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error al renombrar archivo: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+        
+        }else{
+            int index = JListArchivos.getSelectedIndex();
+            if (index == -1) {
+                JOptionPane.showMessageDialog(this, "Selecciona un archivo para renombrar.");
+                return;
+            }
+
+            String rutaArchivo = modeloListaArchivosRutas.get(index);
+            File archivoActual = new File(rutaArchivo);
+
+            if (!archivoActual.exists()) {
+                JOptionPane.showMessageDialog(this, "El archivo no existe: " + rutaArchivo);
+                return;
+            }
+
+            // Pedir nuevo nombre (solo el nombre, sin ruta)
+            String nuevoNombre = JOptionPane.showInputDialog(this, "Nuevo nombre para el archivo:", archivoActual.getName());
+            if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) return;
+
+            nuevoNombre = nuevoNombre.trim();
+
+            // Crear File con la ruta nueva en la misma carpeta
+            File archivoNuevo = new File(archivoActual.getParentFile(), nuevoNombre);
+
+            if (archivoNuevo.exists()) {
+                JOptionPane.showMessageDialog(this, "Ya existe un archivo con ese nombre.");
+                return;
+            }
+
+            // Intentar renombrar
+            boolean exito = archivoActual.renameTo(archivoNuevo);
+
+            if (exito) {
+                // Actualizar modelos y lista
+                modeloListaArchivosNombres.set(index, nuevoNombre);
+                modeloListaArchivosRutas.set(index, archivoNuevo.getAbsolutePath());
+                JListArchivos.repaint();
+
+                JOptionPane.showMessageDialog(this, "Archivo renombrado con éxito.");
+            } else {
+                JOptionPane.showMessageDialog(this, "No se pudo renombrar el archivo.");
+            }
+
+        }
+    }//GEN-LAST:event_btnRenombrarArchivoActionPerformed
+
+    private void brnExtraerPaginasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_brnExtraerPaginasActionPerformed
+        if (jCheckBox1.isSelected()) {
+            int index = JListArchivos.getSelectedIndex(); 
+        if (index == -1) {
+            JOptionPane.showMessageDialog(this, "Selecciona un archivo PDF para extraer páginas.");
+            return;
+        }
+
+        String urlArchivo = modeloListaArchivosRutas.get(index);
+        String nombreArchivo = modeloListaArchivosNombres.get(index);
+
+        if (!urlArchivo.toLowerCase().endsWith(".pdf")) {
+            JOptionPane.showMessageDialog(this, "Solo se pueden procesar archivos PDF.");
+            return;
+        }
+
+        try {
+            // Crear carpeta temporal para guardar archivo descargado
+            File tempDir = new File(System.getProperty("java.io.tmpdir"));
+            File archivoTemporal = new File(tempDir, nombreArchivo);
+
+            // Descargar desde WebDAV si la ruta es remota
+            if (urlArchivo.startsWith("http://") || urlArchivo.startsWith("https://")) {
+                InputStream in = manejador.descargarArchivo(urlArchivo); // Usa tu clase ManejadorArchivos o Sardine aquí
+                try (OutputStream out = new FileOutputStream(archivoTemporal)) {
+                    byte[] buffer = new byte[8192];
+                    int len;
+                    while ((len = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, len);
+                    }
+                }
+            } else {
+                // Si es ruta local, simplemente usarla
+                archivoTemporal = new File(urlArchivo);
+            }
+
+            // Abrir ventana de extracción
+            ExtraerPaginasPDF extractor = new ExtraerPaginasPDF(archivoTemporal.getAbsolutePath());
+            extractor.setVisible(true);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al procesar archivo: " + e.getMessage());
+        }
+        }
+        else{
+            int index = JListArchivos.getSelectedIndex();
+            if (index == -1) {
+                JOptionPane.showMessageDialog(this, "Selecciona un archivo PDF para extraer páginas.");
+                return;
+            }
+
+            String rutaArchivo = modeloListaArchivosRutas.get(index);
+
+            if (!rutaArchivo.toLowerCase().endsWith(".pdf")) {
+                JOptionPane.showMessageDialog(this, "Solo se pueden procesar archivos PDF.");
+                return;
+            }
+
+            // Abrir la ventana de extracción
+            ExtraerPaginasPDF extractor = new ExtraerPaginasPDF(rutaArchivo);
+            extractor.setVisible(true);
+        }
+    }//GEN-LAST:event_brnExtraerPaginasActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        if (jCheckBox1.isSelected()) {
+            int[] indicesSeleccionados = JListArchivos.getSelectedIndices();
+
+    if (indicesSeleccionados.length == 0) {
+        JOptionPane.showMessageDialog(this, "No hay archivos seleccionados para consolidar.");
+        return;
+    }
+
+    JFileChooser chooser = new JFileChooser();
+    File carpeta = new File(rutaGuardadaGeneral);
+    if (carpeta.exists() && carpeta.isDirectory()) {
+        chooser.setCurrentDirectory(carpeta);
+    }
+
+    chooser.setDialogTitle("Guardar PDF unido");
+
+    String nombreExpediente = ManejadorArchivos.getNombreExpediente();
+    if (nombreExpediente == null || nombreExpediente.trim().isEmpty()) {
+        nombreExpediente = "PDF_Unido";
+    }
+
+    chooser.setSelectedFile(new File(nombreExpediente));
+    int opcion = chooser.showSaveDialog(this);
+    if (opcion != JFileChooser.APPROVE_OPTION) return;
+
+    File destino = chooser.getSelectedFile();
+    PDFMergerUtility merger = new PDFMergerUtility();
+
+    try {
+        merger.setDestinationFileName(destino.getAbsolutePath());
+
+        for (int i = 0; i < modeloListaArchivosNombres.getSize(); i++) {
+            // Verifica si este índice está en los seleccionados
+            boolean esSeleccionado = false;
+            for (int idx : indicesSeleccionados) {
+                if (i == idx) {
+                    esSeleccionado = true;
+                    break;
+                }
+            }
+
+            if (!esSeleccionado) continue;
+
+            String nombre = modeloListaArchivosNombres.get(i);
+            String url = modeloListaArchivosRutas.get(i);
+
+            if (nombre == null || url == null || nombre.trim().isEmpty() || url.trim().isEmpty()) continue;
+
+            if (!nombre.toLowerCase().endsWith(".pdf")) {
+                if (nombre.toLowerCase().endsWith(".jpg") || nombre.toLowerCase().endsWith(".jpeg") || nombre.toLowerCase().endsWith(".png")) {
+                    InputStream in = manejador.descargarArchivo(url);
+                    File imagenTemp = File.createTempFile("imagen_", "_" + nombre);
+                    imagenTemp.deleteOnExit();
+
+                    try (OutputStream out = new FileOutputStream(imagenTemp)) {
+                        byte[] buffer = new byte[8192];
+                        int len;
+                        while ((len = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, len);
+                        }
+                    }
+
+                    File pdfImagen = manejador.convertirImagenAPdf(imagenTemp);
+                    merger.addSource(pdfImagen);
+                }
+
+                continue; // si no es PDF ni imagen soportada, omitir
+            }
+
+            InputStream in = manejador.descargarArchivo(url);
+            File temp = File.createTempFile("pdfmerge_", "_" + nombre);
+            temp.deleteOnExit();
+
+            try (OutputStream out = new FileOutputStream(temp)) {
+                byte[] buffer = new byte[8192];
+                int len;
+                while ((len = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, len);
+                }
+            }
+
+            merger.addSource(temp);
+        }
+
+        merger.mergeDocuments(null);
+
+        // Agregar folios al final
+        try (PDDocument document = PDDocument.load(destino)) {
+            int totalPages = document.getNumberOfPages();
+
+            for (int i = 0; i < totalPages; i++) {
+                PDPage page = document.getPage(i);
+                PDRectangle mediaBox = page.getMediaBox();
+                int rotation = page.getRotation();
+
+                float margin = 40;
+                float x = mediaBox.getWidth() - margin - 10;
+                float y = margin + 5;
+
+                try (PDPageContentStream contentStream = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, true, true)) {
+                    contentStream.beginText();
+                    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 10);
+
+                    switch (rotation) {
+                        case 90:
+                            contentStream.setTextMatrix(0, 1, -1, 0, x, y);
+                            break;
+                        case 180:
+                            contentStream.setTextMatrix(-1, 0, 0, -1, x, y);
+                            break;
+                        case 270:
+                            contentStream.setTextMatrix(0, -1, 1, 0, x, y);
+                            break;
+                        default:
+                            contentStream.setTextMatrix(1, 0, 0, 1, x, y);
+                            break;
+                    }
+
+                    contentStream.showText("Folio: " + (i + 1));
+                    contentStream.endText();
+                }
+            }
+
+            document.save(destino);
+        }
+
+        JOptionPane.showMessageDialog(this, "PDF unido guardado en: " + destino.getAbsolutePath());
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error uniendo archivos: " + e.getMessage());
+        e.printStackTrace();
+    }
+        }
+        else{
+            int[] indicesSeleccionados = JListArchivos.getSelectedIndices();
+
+            if (indicesSeleccionados.length == 0) {
+                JOptionPane.showMessageDialog(this, "No hay archivos seleccionados para consolidar.");
+                return;
+            }
+
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Guardar PDF unido");
+            chooser.setSelectedFile(new File(ManejadorArchivos.getNombreExpediente() != null ? ManejadorArchivos.getNombreExpediente() : "PDF_Unido"));
+            int opcion = chooser.showSaveDialog(this);
+            if (opcion != JFileChooser.APPROVE_OPTION) return;
+
+            File destino = chooser.getSelectedFile();
+            PDFMergerUtility merger = new PDFMergerUtility();
+            merger.setDestinationFileName(destino.getAbsolutePath());
+
+            try {
+                for (int i = 0; i < modeloListaArchivosRutas.size(); i++) {
+                    // Solo añadir si este índice está seleccionado
+                    boolean esSeleccionado = false;
+                    for (int seleccionado : indicesSeleccionados) {
+                        if (i == seleccionado) {
+                            esSeleccionado = true;
+                            break;
+                        }
+                    }
+
+                    if (!esSeleccionado) continue;
+
+                    String ruta = modeloListaArchivosRutas.get(i);
+                    String nombre = modeloListaArchivosNombres.get(i).toLowerCase();
+
+                    File archivoTemp;
+                    if (nombre.endsWith(".pdf")) {
+                        archivoTemp = new File(ruta);
+                    } else if (nombre.endsWith(".png") || nombre.endsWith(".jpg") || nombre.endsWith(".jpeg")) {
+                        archivoTemp = convertirImagenAPdf(new File(ruta));
+                    } else {
+                        continue; // ignorar otros formatos
+                    }
+
+                    merger.addSource(archivoTemp);
+                }
+
+                merger.mergeDocuments(null);
+
+                try (PDDocument document = PDDocument.load(destino)) {
+                    agregarFolio(document);
+                    document.save(destino);
+                }
+
+                JOptionPane.showMessageDialog(this, "PDF unido guardado en: " + destino.getAbsolutePath());
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error uniendo archivos: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     private String encodeURL(String url) throws UnsupportedEncodingException, MalformedURLException {
         URL u = new URL(url);
@@ -1402,23 +1843,23 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
             switch (rotation) {
                 case 90:
                     // Para rotación 90, la esquina inferior derecha visible queda en (width - margin, margin)
-                    x = mediaBox.getWidth() - margin;
-                    y = margin;
+                    x = mediaBox.getWidth() - margin -10;
+                    y = margin + 5;
                     break;
                 case 180:
                     // Rotado 180, invertido
-                    x = margin;
-                    y = mediaBox.getHeight() - margin;
+                    x = margin + 10;
+                    y = mediaBox.getHeight() - margin - 5;
                     break;
                 case 270:
                     // Rotación 270
-                    x = margin;
-                    y = mediaBox.getHeight() - margin;
+                    x = margin + 10;
+                    y = mediaBox.getHeight() - margin - 5;
                     break;
                 default:
                     // Rotación 0, esquina inferior derecha
-                    x = mediaBox.getWidth() - margin;
-                    y = margin;
+                    x = mediaBox.getWidth() - margin - 10;
+                    y = margin + 5;
                     break;
             }
 
@@ -1508,6 +1949,7 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList<String> JListArchivos;
     private javax.swing.JList<String> JListCarpetas;
+    private javax.swing.JButton brnExtraerPaginas;
     private javax.swing.JButton btnAbajo;
     private javax.swing.JButton btnAbrirCarpeta;
     private javax.swing.JButton btnArriba;
@@ -1518,8 +1960,10 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
     private javax.swing.JButton btnImprimir;
     private javax.swing.JButton btnLimpiarJListCarpetas;
     private javax.swing.JButton btnRefrescar;
+    private javax.swing.JButton btnRenombrarArchivo;
     private javax.swing.JButton btnVisualizar;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton9;
@@ -1536,6 +1980,7 @@ public class interfazBuscarInformacion extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JCheckBox jcbAgregarExp;
     private javax.swing.JCheckBox jcbDni;
     private javax.swing.JCheckBox jcbNombre;
     private javax.swing.JCheckBox jcbObtenerExpediente;

@@ -1,6 +1,7 @@
 view\EtapasInterfaz$6.class
 view\Interfaz$8.class
 view\interfazBuscarInformacion$14.class
+view\interfazBuscarInformacion$24.class
 view\interfazEnumerar3$1.class
 persistencia\CredencialesUtil.class
 view\interfazBuscarInformacion$1.class
@@ -29,6 +30,7 @@ view\EtapasInterfaz$12.class
 view\EtapasInterfaz$32.class
 view\interfazEnumerar2$ButtonEditor.class
 view\interfazEnumerar3$15.class
+persistencia\ConectarWebDavManualmente.class
 view\interfazEnumerar$22.class
 view\login.class
 persistencia\ManejadorArchivos$3.class
@@ -57,6 +59,7 @@ view\EtapasInterfaz$28.class
 view\EtapasInterfaz$18.class
 view\interfazEnumerar$11.class
 view\interfazBuscarInformacion$16.class
+view\ExtraerPaginasPDF.class
 view\EtapasInterfaz$8.class
 view\interfazCrearConsolidadoGeneral.class
 view\interfazEnumerar3$17.class
@@ -108,11 +111,13 @@ view\EtapasInterfaz$23.class
 view\EtapasInterfaz$13.class
 view\interfazEnumerar$16.class
 view\interfazEnumerar3$14.class
+view\interfazBuscarInformacion$23.class
 view\Interfaz$10.class
 view\interfazEnumerar3$5.class
 view\interfazBuscarInformacion$15.class
 view\interfazBuscarInformacion$5.class
 view\EtapasInterfaz$20.class
+view\EtapasInterfaz$40.class
 view\interfazCrearConsolidadoGeneral$1.class
 view\login$1.class
 persistencia\ConfigUtil.class
@@ -136,6 +141,7 @@ view\Interfaz$11.class
 view\interfazEnumerar3.class
 view\Interfaz$3.class
 view\EtapasInterfaz$31.class
+view\EtapasInterfaz$41.class
 view\interfazEnumerar$8.class
 view\EtapasInterfaz$38.class
 view\interfazEnumerar3$9.class
@@ -152,6 +158,7 @@ view\InterfazSeleccionar$2.class
 view\EtapasInterfaz$30.class
 view\interfazEnumerar$1.class
 view\interfazEnumerar2$ButtonRenderer.class
+view\interfazBuscarInformacion$25.class
 view\interfazEnumerar$20.class
 persistencia\ManejadorArchivos$1.class
 view\interfazBuscarInformacion$4.class

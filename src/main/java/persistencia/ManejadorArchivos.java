@@ -3,6 +3,8 @@ package persistencia;
 import com.github.sardine.DavResource;
 import com.github.sardine.Sardine;
 import com.github.sardine.SardineFactory;
+import com.github.sardine.impl.SardineException;
+import com.github.sardine.impl.SardineImpl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -93,10 +95,16 @@ import com.google.api.services.drive.model.FileList;
 import java.awt.print.PrinterJob;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.time.Duration;
 import java.util.LinkedHashMap;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
@@ -104,8 +112,17 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import java.util.Base64;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import java.util.Base64;
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import java.net.*;
 
 
 
@@ -119,6 +136,7 @@ public class ManejadorArchivos {
     private static int filaIngresada;
     private static String rutaCarpetaPrincipal;
     private Sardine sardine;
+    private Sardine sardineSinRetry; 
      public static String nombreExpediente = null;
     private static String rutaCarpetaGeneral;
 
@@ -185,7 +203,6 @@ public class ManejadorArchivos {
         return filaIngresada;
     }
     
-    // Métodos de acceso
     public static void setNombreExpediente(String nombre) {
         nombreExpediente = nombre;
     }
@@ -602,7 +619,7 @@ public class ManejadorArchivos {
                             Path destino = subcarpeta3.toPath().resolve(archivo.getName());
                             try {
                                 Files.move(origen, destino, StandardCopyOption.REPLACE_EXISTING);
-                                System.out.println("📄 Word extraído y movido a 3_: " + archivo.getName());
+                                System.out.println("Word extraído y movido a 3_: " + archivo.getName());
                             } catch (IOException e) {
                                 JOptionPane.showMessageDialog(null, "Error moviendo Word desde subcarpeta: " + e.getMessage());
                             }
@@ -645,12 +662,12 @@ public class ManejadorArchivos {
                     if (destino.getName().startsWith(numero + "_")) {
                         Path origen = subcarpeta.toPath();
                         if (subcarpeta.getParentFile().equals(destino.getParentFile())) {
-                            System.out.println("🔁 La carpeta ya está en su ubicación correcta: " + subcarpeta.getName());
+                            System.out.println("La carpeta ya está en su ubicación correcta: " + subcarpeta.getName());
                             continue;
                         }
                         Path destinoCarpeta = destino.toPath().getParent().resolve(subcarpeta.getName());
                         if (subcarpeta.toPath().equals(destinoCarpeta)) {
-                            System.out.println("🚫Evitado intento de mover carpeta dentro de sí misma: " + subcarpeta.getName());
+                            System.out.println("Evitado intento de mover carpeta dentro de sí misma: " + subcarpeta.getName());
                             continue;
                         }
                         try {
@@ -786,13 +803,13 @@ public class ManejadorArchivos {
         // --- Mostrar mensaje final ---
         String mensajeFinal = "";
         if (archivosMovidosEtapas > 0) {
-            mensajeFinal += "✅ Se movieron " + archivosMovidosEtapas + " archivo(s) a las etapas.\n";
+            mensajeFinal += "Se movieron " + archivosMovidosEtapas + " archivo(s) a las etapas.\n";
         }
         if (archivosMovidosSeguimiento > 0) {
-            mensajeFinal += "✅ Se movieron " + archivosMovidosSeguimiento + " archivo(s) desde la carpeta 'seguimiento'.\n";
+            mensajeFinal += "Se movieron " + archivosMovidosSeguimiento + " archivo(s) desde la carpeta 'seguimiento'.\n";
         }
         if (mensajeFinal.isEmpty()) {
-            mensajeFinal = "ℹ️ No se movieron archivos.";
+            mensajeFinal = "No se movieron archivos.";
         }
         JOptionPane.showMessageDialog(null, mensajeFinal);
     }
@@ -810,7 +827,6 @@ public class ManejadorArchivos {
         File[] archivos = carpeta.listFiles();
         if (archivos == null) return archivosMovidos;
 
-        // Detectar números en archivos dentro de la carpeta
         Set<String> numerosDetectados = new HashSet<>();
         for (File archivo : archivos) {
             if (archivo.isFile()) {
@@ -822,7 +838,6 @@ public class ManejadorArchivos {
             }
         }
 
-        // Intentar mover la carpeta completa
         for (String numero : numerosDetectados) {
             for (File destino : subcarpetasDestino) {
                 if (destino.getName().startsWith(numero + "_")) {
@@ -845,9 +860,8 @@ public class ManejadorArchivos {
             }
         }
 
-        // Si no se pudo mover la carpeta, mostrar advertencia
         if (!numerosDetectados.isEmpty()) {
-            String mensaje = "⚠️ No se pudo mover la carpeta '" + carpeta.getName() + "' aunque contiene archivo(s) con número inicial. " +
+            String mensaje = "No se pudo mover la carpeta '" + carpeta.getName() + "' aunque contiene archivo(s) con número inicial. " +
                              "Verifica que exista una subcarpeta destino que comience con ese número.";
             JOptionPane.showMessageDialog(null, mensaje);
         }
@@ -869,26 +883,22 @@ public class ManejadorArchivos {
             return;
         }
 
-        // Mostrar input dialog para nuevo nombre
         String nuevoNombre = JOptionPane.showInputDialog(null,
                             "Ingrese el nuevo nombre del archivo:",
                             archivo.getName());
 
         if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
-            // Cancelado o vacío
             return;
         }
 
         nuevoNombre = nuevoNombre.trim();
 
-        // Validar que el nombre no contenga caracteres inválidos
         if (nuevoNombre.matches(".*[\\\\/:*?\"<>|].*")) {
             JOptionPane.showMessageDialog(null, "El nombre contiene caracteres inválidos.",
                                           "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Mantener la extensión original si el usuario no la pone
         if (!nuevoNombre.contains(".")) {
             String extension = getExtension(archivo.getName());
             if (!extension.isEmpty()) {
@@ -898,7 +908,6 @@ public class ManejadorArchivos {
 
         File nuevoArchivo = new File(archivo.getParent(), nuevoNombre);
 
-        // Si ya existe un archivo con ese nombre, avisar
         if (nuevoArchivo.exists()) {
             JOptionPane.showMessageDialog(null, "Ya existe un archivo con ese nombre.",
                                           "Error", JOptionPane.ERROR_MESSAGE);
@@ -925,7 +934,6 @@ public class ManejadorArchivos {
 
 
 
-    //Pienso, no tiene funcion
     public static void renombrarArchivo(String folderPath, String newFileName) {
         if (folderPath == null || folderPath.isEmpty()) {
             System.out.println("Error: La ruta de la carpeta es nula o vacía.");
@@ -939,7 +947,6 @@ public class ManejadorArchivos {
             return;
         }
 
-        // Buscar archivos PDF o Word en la carpeta
         File[] archivos = folder.listFiles((dir, name) -> 
             name.toLowerCase().endsWith(".pdf") || 
             name.toLowerCase().endsWith(".docx") || 
@@ -951,7 +958,6 @@ public class ManejadorArchivos {
             return;
         }
 
-        // Seleccionar el primer archivo encontrado
         File archivoEncontrado = archivos[0];
 
         if (archivoEncontrado == null) {
@@ -959,27 +965,23 @@ public class ManejadorArchivos {
             return;
         }
 
-        // Obtener la extensión del archivo original
         String extension = "";
         int lastDotIndex = archivoEncontrado.getName().lastIndexOf(".");
         if (lastDotIndex != -1) {
-            extension = archivoEncontrado.getName().substring(lastDotIndex); // Incluye el punto
+            extension = archivoEncontrado.getName().substring(lastDotIndex);
         }
 
-        // Verificar si el nuevo nombre es válido
         if (newFileName == null || newFileName.trim().isEmpty()) {
             System.out.println("Error: El nuevo nombre del archivo no puede ser nulo o vacío.");
             return;
         }
 
-        // Eliminar las primeras 4 letras del nuevo nombre
         if (newFileName.length() > 4) {
             newFileName = newFileName.substring(4);
         } else {
             System.out.println("Advertencia: El nuevo nombre tiene menos de 4 caracteres, no se modificará.");
         }
 
-        // Crear el nuevo archivo con el nombre modificado y misma extensión
         File nuevoArchivo = new File(folder, newFileName + extension);
 
         if (archivoEncontrado.renameTo(nuevoArchivo)) {
@@ -988,7 +990,7 @@ public class ManejadorArchivos {
             System.out.println("Error al renombrar el archivo. Asegúrate de que no esté en uso.");
         }
     }
-    //Introducion 12 valores del String[] a la fila Excel
+
     public static void agregarFilaExcel(String rutaArchivo, String[] valores, String nombreHoja, int numeroFila) {
         if (valores.length != 12) {
             throw new IllegalArgumentException("Se requieren exactamente 12 valores.");
@@ -1056,7 +1058,6 @@ public class ManejadorArchivos {
 
 
     
-    //Busca la carpeta principal de busqueda
     public static void seleccionarCarpetaPrincipal() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -1068,7 +1069,6 @@ public class ManejadorArchivos {
             File carpetaSeleccionada = fileChooser.getSelectedFile();
             rutaCarpetaPrincipal = carpetaSeleccionada.getAbsolutePath();
 
-            // Guardar usando el método correcto
             ConfigUtil.guardarRutaPrincipal(rutaCarpetaPrincipal);
             System.out.println("Ruta seleccionada y guardada: " + rutaCarpetaPrincipal);
         } else {
@@ -1077,7 +1077,7 @@ public class ManejadorArchivos {
     }
 
 
-    //Completa el array de JComponent con elementos en orden de la linea excel
+
     public static void autocompletarPorFilaExcel(String rutaArchivo, String nombreHoja, int numeroFila, JComponent[] campos) {
         try (FileInputStream file = new FileInputStream(new File(rutaArchivo));
              Workbook workbook = new XSSFWorkbook(file)) {
@@ -1117,7 +1117,6 @@ public class ManejadorArchivos {
                             break;
                     }
 
-                    // Depuración: mostrar el valor en consola
                     System.out.println("Celda " + i + ": '" + valor + "'");
 
                     if (!valor.trim().isEmpty()) {
@@ -1131,7 +1130,6 @@ public class ManejadorArchivos {
                     }
                 }
 
-                // Obtenemos nombreCarpetaObtenido
                 if (totalCeldas >= campos.length + 1) {
                     Cell cell11 = row.getCell(campos.length, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
                     nombreCarpetaObtenido = obtenerValorComoString(cell11);
@@ -1139,7 +1137,6 @@ public class ManejadorArchivos {
                     nombreCarpetaObtenido = "";
                 }
 
-                // Obtenemos nombreExpedienteObtenido
                 if (totalCeldas >= campos.length + 2) {
                     Cell cell12 = row.getCell(campos.length + 1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
                     nombreExpedienteObtenido = obtenerValorComoString(cell12);
@@ -1179,8 +1176,6 @@ public class ManejadorArchivos {
     }
 
 
-
-    //Renombra el MERGED
     public static void renombrarArchivoMerged(String rutaCarpeta, String newFileName) {
         File folder = new File(rutaCarpeta);
 
@@ -1189,7 +1184,6 @@ public class ManejadorArchivos {
             return;
         }
 
-        // Buscar cualquier archivo que se llame "merged" con cualquier extensión
         File[] archivos = folder.listFiles((dir, name) -> name.toLowerCase().startsWith("merged") && name.toLowerCase().endsWith(".pdf"));
 
         if (archivos == null || archivos.length == 0) {
@@ -1197,9 +1191,8 @@ public class ManejadorArchivos {
             return;
         }
 
-        File mergedFile = archivos[0]; // Usamos el primero que coincida
+        File mergedFile = archivos[0];
 
-        // Asegurar que el nuevo nombre tenga extensión .pdf
         if (!newFileName.toLowerCase().endsWith(".pdf")) {
             newFileName += ".pdf";
         }
@@ -1207,60 +1200,53 @@ public class ManejadorArchivos {
         File renamedFile = new File(folder, newFileName);
 
         if (mergedFile.renameTo(renamedFile)) {
-            System.out.println("✅ Archivo renombrado con éxito a: " + renamedFile.getName());
+            System.out.println("Archivo renombrado con éxito a: " + renamedFile.getName());
         } else {
-            System.out.println("❌ No se pudo renombrar el archivo.");
+            System.out.println("No se pudo renombrar el archivo.");
         }
     }
 
-    //La cantidad de subcarpetas deberian ser iguales a la cantidad de JTextField(EN QUE ORDEN ESTARA?)
+
     public static void mostrarLlenuraSubcarpetas(String rutaPadre, JTextField[] camposTexto, Color colorVacio, Color colorLleno) {
         File carpetaPadre = new File(rutaPadre);
 
-        // Verifica si la ruta proporcionada es válida y si es una carpeta
         if (!carpetaPadre.exists() || !carpetaPadre.isDirectory()) {
             System.out.println("La ruta proporcionada no es válida.");
             return;
         }
 
-        // Obtiene las subcarpetas de la carpeta principal
+
         File[] subCarpetas = carpetaPadre.listFiles(File::isDirectory);
         if (subCarpetas == null) {
             return;
         }
 
-        // Lista para almacenar carpetas válidas (con nombre numérico o "seguimiento")
         List<File> carpetasFiltradas = new ArrayList<>();
 
-        // Recorre las subcarpetas y filtra las que empiezan con un número o se llaman "seguimiento"
         for (File subCarpeta : subCarpetas) {
             String nombre = subCarpeta.getName();
-            System.out.println("Analizando carpeta: " + nombre);  // DEBUG
+            System.out.println("Analizando carpeta: " + nombre);
 
-            // Verifica si el nombre de la carpeta es numérico o "seguimiento" (ignorando mayúsculas/minúsculas)
+
             if (nombre.matches("^\\d+.*") || nombre.equalsIgnoreCase("seguimiento")) {
                 carpetasFiltradas.add(subCarpeta);
-                System.out.println("   -> Aceptada: " + nombre); // DEBUG
+                System.out.println("   -> Aceptada: " + nombre);
             } else {
-                System.out.println("   -> Rechazada: " + nombre); // DEBUG
+                System.out.println("   -> Rechazada: " + nombre);
             }
         }
 
-        // Recorre las carpetas filtradas y marca los campos de texto con colores
+
         for (int i = 0; i < carpetasFiltradas.size() && i < camposTexto.length; i++) {
             File carpeta = carpetasFiltradas.get(i);
-            // Verifica si la carpeta contiene archivos o subcarpetas
-            File[] archivosYCarpetas = carpeta.listFiles();  // Considera tanto archivos como subcarpetas
+            File[] archivosYCarpetas = carpeta.listFiles();
             boolean tieneContenido = archivosYCarpetas != null && archivosYCarpetas.length > 0;
 
-            // Establece el color del campo de texto según si la carpeta tiene contenido
             camposTexto[i].setBackground(tieneContenido ? colorLleno : colorVacio);
         }
     }
 
 
-
-    //Solo buscar una carpeta,SELLAMA VARIAS VECES
     public static void asignarArchivosEtapas(String rutaPadre, String rutaDestino, String nombreEtapa, JTextField campoDestino) {
         File directorioPadre = new File(rutaPadre);
         if (!directorioPadre.exists() || !directorioPadre.isDirectory()) {
@@ -1284,7 +1270,6 @@ public class ManejadorArchivos {
             return;
         }
 
-        // Preguntar al usuario si desea copiar o mover los archivos
         String[] opciones = {"Mover", "Copiar", "Cancelar"};
         int opcion = JOptionPane.showOptionDialog(null,
                 "¿Deseas mover o copiar los archivos seleccionados?",
@@ -1296,7 +1281,7 @@ public class ManejadorArchivos {
                 opciones[0]);
 
         if (opcion == 2 || opcion == JOptionPane.CLOSED_OPTION) {
-            return; // Cancelar
+            return;
         }
 
         boolean copiar = (opcion == 1);
@@ -1348,12 +1333,6 @@ public class ManejadorArchivos {
             }
         }
 
-        /*
-        // Mostrar solo el nombre de la carpeta destino en el campo de texto
-        if (campoDestino != null) {
-            campoDestino.setText(carpetaDestino.getName());
-        }*/
-        // Mostrar solo la cantidad
         if (campoDestino != null) {
             campoDestino.setText(String.valueOf("Se procesaron: " + archivosProcesados + " archivos"));
         }
@@ -1367,19 +1346,17 @@ public class ManejadorArchivos {
     public static void verificarSeleccion(JCheckBox jcbSeleccionarTodo, JCheckBox checkBox) {
         if (!checkBox.isSelected()) {
             jcbSeleccionarTodo.setSelected(false);
-            return; // Si hay al menos uno desmarcado, salimos
+            return;
         }
         
-        jcbSeleccionarTodo.setSelected(true); // Si llegamos aquí, todos están seleccionados
+        jcbSeleccionarTodo.setSelected(true);
     }
-    //Muestraun mensaje el JOptionPane "Archivos renombrados" y en JTextField "Archivos agregados"
+
     public static void buscarPonerNumeroArchivo(String carpetaInicial, int numero, JTextField textField) {
-        // Configurar JFileChooser para que abra la carpeta inicial
         JFileChooser chooser = new JFileChooser(carpetaInicial);
         chooser.setDialogTitle("Seleccione los archivos a renombrar");
-        chooser.setMultiSelectionEnabled(true); // Permitir selección múltiple
+        chooser.setMultiSelectionEnabled(true);
 
-        // Filtro para mostrar solo archivos con extensiones permitidas
         FileNameExtensionFilter filtro = new FileNameExtensionFilter(
                 "Archivos permitidos (PDF, DOC, DOCX, JPG, JPEG, PNG)",
                 "pdf", "doc", "docx", "jpg", "jpeg", "png");
@@ -1392,11 +1369,8 @@ public class ManejadorArchivos {
             return;
         }
 
-        // Obtener los archivos seleccionados
         File[] archivosSeleccionados = chooser.getSelectedFiles();
         
-        //-------------------------------------------------------
-        // Mapa para almacenar múltiples arrays de archivos con un identificador numérico
         documentosMap = new HashMap<>();
 
         if (resultado == JFileChooser.APPROVE_OPTION) {
@@ -1409,7 +1383,7 @@ public class ManejadorArchivos {
             System.out.println("No se seleccionaron archivos.");
             return;
         }
-        //-------------------------------------------------------
+
         
         if (archivosSeleccionados.length == 0) {
             System.out.println("No se seleccionaron archivos.");
@@ -1418,7 +1392,6 @@ public class ManejadorArchivos {
 
         List<String> rutasRenombradasList = new ArrayList<>();
 
-        // Renombrar archivos seleccionados
         for (File archivo : archivosSeleccionados) {
             try {
                 String nuevoNombre = numero + " " + archivo.getName();
@@ -1432,7 +1405,6 @@ public class ManejadorArchivos {
             }
         }
 
-        // Mostrar lista de archivos renombrados en un cuadro de diálogo
         if (!rutasRenombradasList.isEmpty()) {
             StringBuilder mensaje = new StringBuilder("Archivos renombrados:\n");
             for (String ruta : rutasRenombradasList) {
@@ -1454,16 +1426,13 @@ public class ManejadorArchivos {
         try {
             String nombreArchivo = archivo.getName();
 
-            // Elimina cualquier número al inicio del nombre original
             String nombreSinNumero = nombreArchivo.replaceFirst("^\\d+(\\.\\d+)?\\s+", "");
 
-            // Construye el nuevo nombre anteponiendo el número
             String nuevoNombre = numeroConPunto + " " + nombreSinNumero;
 
-            // Crea el nuevo archivo con la nueva ruta y nombre
             File nuevoArchivo = new File(archivo.getParent(), nuevoNombre);
 
-            // Mueve (renombra) el archivo
+            
             Files.move(archivo.toPath(), nuevoArchivo.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             nuevoArchivo.setLastModified(System.currentTimeMillis());
@@ -1482,22 +1451,20 @@ public class ManejadorArchivos {
         StringBuilder mensaje = new StringBuilder();
 
         for (Map.Entry<Integer, File[]> entry : documentosMap.entrySet()) {
-            int key = entry.getKey();  // Clave del documento
-            File[] archivos = entry.getValue(); // Array de archivos
+            int key = entry.getKey();
+            File[] archivos = entry.getValue();
 
             mensaje.append("Documentos originales cambiados con el indice ").append(key).append(":\n");
             for (File archivo : archivos) {
                 mensaje.append(" - ").append(archivo.getName()).append("\n");
             }
-            mensaje.append("\n"); // Espaciado entre grupos de documentos
+            mensaje.append("\n");
         }
 
         JOptionPane.showMessageDialog(null, mensaje.toString(), "Lista de Documentos", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    
-    //----------------------------------------------------------------------------
-    //Metodo en desarrollo
+
     public static void buscarConverirAPdfs(String rutaInicial, String nombreArchivoFusion) {
     JFileChooser fileChooser = new JFileChooser(rutaInicial);
     fileChooser.setMultiSelectionEnabled(true);
@@ -1510,27 +1477,24 @@ public class ManejadorArchivos {
         File[] archivosSeleccionados = fileChooser.getSelectedFiles();
         List<Pair<Integer, Object>> listaArchivos = new ArrayList<>();
 
-        Pattern pattern = Pattern.compile("^(\\d+)"); // Capturar números al inicio del nombre
+        Pattern pattern = Pattern.compile("^(\\d+)");
 
         for (File archivo : archivosSeleccionados) {
             String fileName = archivo.getName().toLowerCase();
             Matcher matcher = pattern.matcher(fileName);
-            int num = matcher.find() ? Integer.parseInt(matcher.group(1)) : Integer.MAX_VALUE; // Si no hay número, poner un valor alto
-
+            int num = matcher.find() ? Integer.parseInt(matcher.group(1)) : Integer.MAX_VALUE; 
             if (fileName.endsWith(".pdf")) {
-                listaArchivos.add(new Pair<>(num, archivo)); // Guardamos número y archivo
+                listaArchivos.add(new Pair<>(num, archivo));
             } else if (fileName.endsWith(".docx") || fileName.endsWith(".doc") || fileName.endsWith(".png") || fileName.endsWith(".jpeg") || fileName.endsWith(".jpg")) {
                 PDDocument pdfConvertido = convertirA_PDF(archivo);
                 if (pdfConvertido != null) {
-                    listaArchivos.add(new Pair<>(num, pdfConvertido)); // Guardamos número y documento en memoria
+                    listaArchivos.add(new Pair<>(num, pdfConvertido));
                 }
             }
         }
 
-        // Ordenar correctamente según el número extraído del nombre
         listaArchivos.sort(Comparator.comparingInt(Pair::getKey));
 
-        // Fusionar directamente desde listaArchivos sin dividir
         fusionarPDFs(listaArchivos, rutaInicial + "/" + nombreArchivoFusion + ".pdf");
     }
 }
@@ -1594,7 +1558,7 @@ public class ManejadorArchivos {
     contentStream.drawImage(pdImage, xPosition, yPosition, scaledWidth, scaledHeight);
     contentStream.close();
 
-    return pdfDocument; // Se devuelve el documento en memoria
+    return pdfDocument;
 }
     private static void fusionarPDFs(List<Pair<Integer, Object>> listaArchivos, String destino) {
     PDFMergerUtility fusionador = new PDFMergerUtility();
@@ -1609,7 +1573,7 @@ public class ManejadorArchivos {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 doc.save(out);
                 fusionador.addSource(new ByteArrayInputStream(out.toByteArray()));
-                doc.close(); // Cerrar después de agregar
+                doc.close();
             }
         }
 
@@ -1629,9 +1593,9 @@ public class ManejadorArchivos {
             modeloNombres.clear();
             modeloRutas.clear();
 
-            int contadorWord = 1; // Para numerar los archivos Word como 3.1, 3.2, etc.
+            int contadorWord = 1;
 
-            // Archivos de la carpeta principal
+
             File[] archivos = carpeta.listFiles(File::isFile);
             if (archivos != null) {
                 Arrays.sort(archivos, (a, b) -> {
@@ -1686,11 +1650,10 @@ public class ManejadorArchivos {
         }
 
 
-            // Procesar subcarpetas
             File[] subcarpetas = carpeta.listFiles(File::isDirectory);
             for (File subcarpeta : subcarpetas) {
                 if (subcarpeta.getName().equalsIgnoreCase("seguimiento")) {
-                    int[] contadorSeguimiento = {1}; // Para numerar tipo 6.1, 6.2, etc.
+                    int[] contadorSeguimiento = {1};
                     procesarCarpetaSeguimiento(subcarpeta, modeloNombres, modeloRutas, "6", contadorSeguimiento);
                 } else {
                     contadorWord = procesarCarpetaNormal(subcarpeta, modeloNombres, modeloRutas, contadorWord);
@@ -1698,13 +1661,12 @@ public class ManejadorArchivos {
             }
 
             lista.setModel(modeloNombres);
-            aplicarColorALista(lista); // Si ya usás este método para estilizar
+            aplicarColorALista(lista);
         } else {
             JOptionPane.showMessageDialog(null, "La ruta no es válida.");
         }
     }
 
-    //Metodo auxiliar del metodo cargararchivoslista() de arriba
     private static double extraerNumeroInicial(String nombre, String regex) {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(nombre);
@@ -1718,7 +1680,7 @@ public class ManejadorArchivos {
         return Double.MAX_VALUE;
     }
     
-    //Buscar rd para mostrar en JTextField del consolidado "notificacion"
+
     public static void buscarArchivoConRD(String rutaCarpeta, JTextField campoTexto) {
         File carpeta = new File(rutaCarpeta);
 
@@ -1737,7 +1699,7 @@ public class ManejadorArchivos {
                         : nombreSinExtension;
 
                     if (primeros5.toUpperCase().contains("RD")) {
-                        campoTexto.setText(nombre); // Muestra el nombre en el JTextField
+                        campoTexto.setText(nombre);
                         System.out.println("Archivo encontrado: " + nombre);
                         return;
                     }
@@ -1758,7 +1720,6 @@ public class ManejadorArchivos {
                     String nombreArchivo = archivo.getName();
                     String rutaCompleta = archivo.getAbsolutePath();
 
-                    // Obtener extensión
                     String extension = "";
                     int i = nombreArchivo.lastIndexOf('.');
                     if (i > 0) {
@@ -1776,7 +1737,6 @@ public class ManejadorArchivos {
                     modeloRutas.addElement(rutaCompleta);
                     System.out.println("Archivo cargado: " + rutaCompleta);
                 } else if (archivo.isDirectory()) {
-                    // Recursivo si hay más subcarpetas
                     contadorWord = procesarCarpetaNormal(archivo, modeloNombres, modeloRutas, contadorWord);
                 }
             }
@@ -1852,7 +1812,6 @@ public class ManejadorArchivos {
         }
         lista.setModel(modelo);
 
-        // Asegurarse de que no haya un renderer personalizado
         lista.setCellRenderer(new DefaultListCellRenderer());
 
     } else {
@@ -1867,7 +1826,6 @@ public class ManejadorArchivos {
             return;
         }
 
-        // Limpia los modelos
         modeloNombres.clear();
         modeloRutas.clear();
 
@@ -2025,7 +1983,7 @@ public class ManejadorArchivos {
             comboBox.setSelectedItem("8");
         }
         else {
-            comboBox.setSelectedItem(null); // O podrías usar "No identificado" si tenés ese ítem en el combo
+            comboBox.setSelectedItem(null);
         }
     }
 
@@ -2033,45 +1991,37 @@ public class ManejadorArchivos {
     public static void renombrarArchivoSinNumeros(String rutaArchivo) {
         File archivo = new File(rutaArchivo);
 
-        // Verificamos si el archivo existe
         if (!archivo.exists() || !archivo.isFile()) {
             JOptionPane.showMessageDialog(null, "El archivo no existe o no es válido.\nRuta: " + rutaArchivo,
                                           "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Extraemos el nombre del archivo
         String nombreArchivo = archivo.getName();
 
-        // Mostramos el nombre original para depuración
         System.out.println("Nombre original: " + nombreArchivo);
 
-        // Modificamos la expresión regular para eliminar los espacios, números, guiones y puntos hasta la primera letra
-        // Ahora eliminamos todos los espacios al inicio
-        String nuevoNombre = nombreArchivo.replaceAll("^\\s*[\\d\\-\\.]+", "");  // Eliminar espacios + números, guiones y puntos al inicio
 
-        // Eliminamos también cualquier espacio al inicio que quede
-        nuevoNombre = nuevoNombre.replaceAll("^\\s+", "");  // Eliminar cualquier espacio restante al inicio
+        String nuevoNombre = nombreArchivo.replaceAll("^\\s*[\\d\\-\\.]+", "");
 
-        // Mostramos el nuevo nombre para depuración
+        nuevoNombre = nuevoNombre.replaceAll("^\\s+", ""); 
+
+
         System.out.println("Nuevo nombre después de la expresión regular: " + nuevoNombre);
 
-        // Si el nombre no cambió, significa que no había nada para eliminar
+
         if (nombreArchivo.equals(nuevoNombre)) {
             JOptionPane.showMessageDialog(null, "El nombre del archivo ya está correcto, no se realizó ningún cambio.");
             return;
         }
 
-        // Renombramos el archivo
         File nuevoArchivo = new File(archivo.getParent(), nuevoNombre);
 
-        // Verificamos si el archivo con el nuevo nombre ya existe
         if (nuevoArchivo.exists()) {
             JOptionPane.showMessageDialog(null, "El archivo con el nuevo nombre ya existe.");
             return;
         }
 
-        // Intentamos renombrar el archivo
         if (archivo.renameTo(nuevoArchivo)) {
             System.out.println("Archivo renombrado correctamente a: " + nuevoNombre);
         } else {
@@ -2101,8 +2051,6 @@ public class ManejadorArchivos {
                         }
                     }
 
-                    // Si deseas agregar soporte para Word (.docx), avísame y lo añadimos con Apache POI
-
                 } catch (IOException e) {
                     System.err.println("Error al leer archivo: " + archivo.getName());
                     e.printStackTrace();
@@ -2115,7 +2063,6 @@ public class ManejadorArchivos {
     }
     
     public static void cargarArchivosFiltradosPorTextoConPantallaCarga(String rutaCarpeta, String palabraClave, JList<String> lista, JFrame parentFrame) {
-        // Crear un JDialog sencillo como pantalla de carga
         JDialog loadingDialog = new JDialog(parentFrame, "Cargando...", true);
         JLabel label = new JLabel("Buscando archivos, por favor espera...");
         label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -2141,7 +2088,6 @@ public class ManejadorArchivos {
                         }
                     }
                 }
-                // Actualizamos el JList fuera del hilo de fondo
                 SwingUtilities.invokeLater(() -> {
                     lista.setModel(modelo);
                     lista.setCellRenderer(new DefaultListCellRenderer());
@@ -2151,18 +2097,14 @@ public class ManejadorArchivos {
 
             @Override
             protected void done() {
-                loadingDialog.dispose(); // Cierra la pantalla de carga
+                loadingDialog.dispose();
             }
         };
 
         worker.execute();
-        loadingDialog.setVisible(true); // Muestra el diálogo (bloquea hasta que se llame dispose)
+        loadingDialog.setVisible(true);
     }
-    /*String ruta = ManejadorArchivos.getRutaCarpeta();
-    String palabraClave = jTextFieldBusqueda.getText();
-    ManejadorArchivos.cargarArchivosConPantallaCarga(ruta, palabraClave, jList1, this); // 'this' es el JFrame
-    */
-    //NO SE ESTA USANDO
+
     private static boolean contieneTextoPDF(File archivo, String textoBuscado) throws IOException {
         try (PDDocument documento = PDDocument.load(archivo)) {
             PDFTextStripper stripper = new PDFTextStripper();
@@ -2179,7 +2121,6 @@ public class ManejadorArchivos {
     }
 
     
-    //TAMPOCO SE ESTA USANDO
     public static void crearArchivoUnido(String rutaSalida) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(rutaSalida))) {
             for (String ruta : rutasArchivosSeleccionados) {
@@ -2219,7 +2160,6 @@ public class ManejadorArchivos {
             if (!archivo.exists()) continue;
 
             if (nombre.endsWith(".pdf")) {
-                // 🔍 Validar si el PDF es válido antes de agregarlo
                 try (PDDocument doc = PDDocument.load(archivo)) {
                     merger.addSource(archivo);
                 } catch (IOException e) {
@@ -2280,7 +2220,7 @@ public class ManejadorArchivos {
         }
 
         Pattern pattern = Pattern.compile("^\\d+[-_]*");
-        boolean[] cambiosRealizados = {false}; // para poder modificar dentro de la recursión
+        boolean[] cambiosRealizados = {false};
 
         // Recorrido recursivo de carpetas
         LinkedList<File> carpetasPorProcesar = new LinkedList<>();
@@ -2289,7 +2229,6 @@ public class ManejadorArchivos {
         while (!carpetasPorProcesar.isEmpty()) {
             File carpetaActual = carpetasPorProcesar.removeFirst();
 
-            // Procesar archivos
             File[] archivos = carpetaActual.listFiles(File::isFile);
             if (archivos != null) {
                 for (File archivo : archivos) {
@@ -2310,7 +2249,6 @@ public class ManejadorArchivos {
                 }
             }
 
-            // Agregar subcarpetas para procesar después
             File[] subcarpetas = carpetaActual.listFiles(File::isDirectory);
             if (subcarpetas != null) {
                 carpetasPorProcesar.addAll(Arrays.asList(subcarpetas));
@@ -2325,8 +2263,6 @@ public class ManejadorArchivos {
     }
 
 
-
-    //ES reemplazado por el de abajo
     public static void contarYActualizarTiposDeArchivos(
         DefaultListModel<String> modeloLista1Rutas, 
         DefaultListModel<String> modeloLista1Nombres, 
@@ -2338,12 +2274,10 @@ public class ManejadorArchivos {
         int contadorDOC = 0;
         int contadorImagenes = 0;
 
-        // Recorremos todos los archivos seleccionados en el JList1
         for (int i = 0; i < modeloLista1Rutas.size(); i++) {
-            String ruta = modeloLista1Rutas.get(i); // Obtenemos la ruta de cada archivo
-            String extension = obtenerExtensionArchivo(ruta);  // Obtenemos la extensión del archivo
+            String ruta = modeloLista1Rutas.get(i);
+            String extension = obtenerExtensionArchivo(ruta);
 
-            // Comprobamos la extensión y contamos los archivos
             switch (extension.toLowerCase()) {
                 case "pdf":
                     contadorPDF++;
@@ -2359,16 +2293,15 @@ public class ManejadorArchivos {
                 case "gif":
                     contadorImagenes++;
                     break;
-                // Puedes agregar más extensiones si lo necesitas
+
             }
         }
 
-        // Actualizamos los JTextFields con los contadores correspondientes
         textFieldPDF.setText(""+contadorPDF);
         textFieldDOC.setText(""+contadorDOC);
         textFieldImagenes.setText(""+contadorImagenes);
     }
-    //Cambiado por este
+
     public static void insertarOrdenadoPorNumero(DefaultListModel<String> modeloNombres,
                                                  DefaultListModel<String> modeloRutas,
                                                  String nombre, String ruta) {
@@ -2392,7 +2325,7 @@ public class ManejadorArchivos {
             String primeraParte = nombreArchivo.split("[ _]", 2)[0];
             return Double.parseDouble(primeraParte);
         } catch (Exception e) {
-            return 9999.0; // Si no tiene número, va al final
+            return 9999.0;
         }
     }
 
@@ -2407,7 +2340,7 @@ public class ManejadorArchivos {
             return "";
         }
     }
-    // Guarda la ruta en un archivo
+
     public static void guardarRuta(String ruta) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(getRutaArchivoConfig()))) {
             writer.write(ruta);
@@ -2416,12 +2349,12 @@ public class ManejadorArchivos {
         }
     }
 
-    // Carga la ruta desde el archivo (si existe)
+
     public static String cargarRuta() {
         File archivo = new File(getRutaArchivoConfig());
         if (archivo.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
-                return reader.readLine(); // Leer solo la primera línea
+                return reader.readLine();
             } catch (IOException e) {
                 System.out.println("Error al leer la ruta: " + e.getMessage());
             }
@@ -2429,17 +2362,14 @@ public class ManejadorArchivos {
         return null;
     }
 
-    // Devuelve la ruta completa del archivo config.txt junto al .jar
+
     private static String getRutaArchivoConfig() {
-        // Carpeta donde se ejecuta el .jar
         String rutaEjecutable = System.getProperty("user.dir");
         return rutaEjecutable + File.separator + ARCHIVO_CONFIG;
     }
     
-    //---------------------->
-    
-    //Interfaz Buscar Informacion
-    // Método de búsqueda
+
+    /*
     public static void buscarCarpetasEnGeneral(
         String rutaGeneral,
         String nombre,
@@ -2452,7 +2382,6 @@ public class ManejadorArchivos {
         modeloNombres.clear();
         modeloRutas.clear();
 
-        // Cambia esta ruta a la raíz donde quieres empezar a buscar
         File carpetaRaiz = new File(rutaGeneral);
 
         if (!carpetaRaiz.exists() || !carpetaRaiz.isDirectory()) {
@@ -2469,10 +2398,8 @@ public class ManejadorArchivos {
             modeloRutas
         );
 
-        // El modelo ya está vinculado, no es necesario setearlo de nuevo
     }
 
-    // Método auxiliar de búsqueda recursiva
     private static void buscarRecursivamente(
         File carpetaActual,
         String nombre,
@@ -2489,7 +2416,6 @@ public class ManejadorArchivos {
                 String nombreCarpeta = normalizarLocal(archivo.getName());
 
 
-                // Solo procesar carpetas que contengan "exp" en el nombre
                 if (nombreCarpeta.contains("exp")) {
                     boolean coincideNombre = nombre.isEmpty() || nombreCarpeta.contains(nombre);
                     boolean coincideExpediente = expediente.isEmpty() || nombreCarpeta.contains(expediente);
@@ -2501,14 +2427,86 @@ public class ManejadorArchivos {
                     }
                 }
 
-                // Seguir recorriendo recursivamente
                 buscarRecursivamente(archivo, nombre, expediente, dni, modeloNombres, modeloRutas);
             }
         }
     }
+    */
+    // nueva version que busca en cualquier nivel:
+    public static void buscarCarpetasSinProfundizarEnEXP(
+        String rutaGeneral,
+        String nombre,
+        String expediente,
+        String dni,
+        DefaultListModel<String> modeloNombres,
+        DefaultListModel<String> modeloRutas,
+        JList<String> jListCarpetas) {
+
+        modeloNombres.clear();
+        modeloRutas.clear();
+
+        File carpetaRaiz = new File(rutaGeneral);
+
+        if (!carpetaRaiz.exists() || !carpetaRaiz.isDirectory()) {
+            JOptionPane.showMessageDialog(null, "Ruta no válida: " + carpetaRaiz.getAbsolutePath());
+            return;
+        }
+
+        buscarRecursivamenteSinEntrarEnEXP(
+            carpetaRaiz,
+            normalizarLocal(nombre),
+            normalizarLocal(expediente),
+            normalizarLocal(dni),
+            modeloNombres,
+            modeloRutas
+        );
+    }
+
+    private static void buscarRecursivamenteSinEntrarEnEXP(
+        File carpetaActual,
+        String nombre,
+        String expediente,
+        String dni,
+        DefaultListModel<String> modeloNombres,
+        DefaultListModel<String> modeloRutas) {
+
+        File[] archivos = carpetaActual.listFiles();
+        if (archivos == null) return;
+
+        for (File archivo : archivos) {
+            if (archivo.isDirectory()) {
+                String nombreCarpeta = normalizarLocal(archivo.getName());
+
+                if (nombreCarpeta.contains("exp")) {
+                    boolean coincideNombre = nombre.isEmpty() || nombreCarpeta.contains(nombre);
+                    boolean coincideExpediente = expediente.isEmpty() || nombreCarpeta.contains(expediente);
+                    boolean coincideDni = dni.isEmpty() || nombreCarpeta.contains(dni);
+
+                    if (coincideNombre && coincideExpediente && coincideDni) {
+                        modeloNombres.addElement(archivo.getName());
+                        modeloRutas.addElement(archivo.getAbsolutePath());
+                    }
+
+                    // NO entramos dentro de carpetas que ya contienen "exp"
+                    continue;
+                }
+
+                // Solo seguimos buscando si no es una carpeta "exp"
+                buscarRecursivamenteSinEntrarEnEXP(
+                    archivo,
+                    nombre,
+                    expediente,
+                    dni,
+                    modeloNombres,
+                    modeloRutas
+                );
+            }
+        }
+    }
+
     
     
-    //NOrmalizar la busqueda:
+    
     private static String normalizarLocal(String texto) {
         if (texto == null) return "";
         String textoNormalizado = Normalizer.normalize(texto, Normalizer.Form.NFD);
@@ -2520,30 +2518,59 @@ public class ManejadorArchivos {
     
     
     
+    
     public static void analizarCarpetaSeleccionada(
         int indiceSeleccionado,
         DefaultListModel<String> modeloRutasOrigen,
         DefaultListModel<String> modeloNombresDestino,
-        DefaultListModel<String> modeloRutasDestino) {
+        DefaultListModel<String> modeloRutasDestino,
+        boolean incluirExp){
 
         String rutaBase = modeloRutasOrigen.getElementAt(indiceSeleccionado);
         File carpetaBase = new File(rutaBase);
 
-        // Palabras clave en orden de prioridad
         String[] ordenBusqueda = {"REC", "IDE", "EMI", "ARC", "APE", "SEG", "AGR", "CON"};
 
-        // Limpiar el modelo destino
+
         modeloNombresDestino.clear();
         modeloRutasDestino.clear();
 
-        // Lista para almacenar los archivos encontrados en orden
         List<File> archivosOrdenados = new ArrayList<>();
 
-        // Incluir carpeta base si coincide con alguna clave
+        File[] archivosDirectos = carpetaBase.listFiles((File f) -> f.isFile());
+        if (archivosDirectos != null) {
+            for (File archivo : archivosDirectos) {
+                String nombre = archivo.getName();
+                String nombreLower = nombre.toLowerCase();
+
+                System.out.println("Archivo en carpeta base encontrado: " + nombre);
+                
+                if (nombreLower.endsWith(".doc") || nombreLower.endsWith(".docx")) {
+                    continue;
+                }
+
+                if (nombre.toUpperCase().contains("EXP")) {
+                    nombreExpediente = nombre;
+
+                    if (!incluirExp) {
+                        System.out.println("[EXP BASE] Omitido: " + nombre);
+                        continue;
+                    } else {
+                        System.out.println("[EXP BASE] Incluido: " + nombre);
+                    }
+                }
+
+
+                archivosOrdenados.add(archivo);
+            }
+        }
+
+
+
         for (String clave : ordenBusqueda) {
             if (carpetaBase.getName().toUpperCase().contains(clave)) {
-                agregarArchivosRecursivos(carpetaBase, archivosOrdenados);
-                break; // Ya fue procesada, no repetirla
+                agregarArchivosRecursivos(carpetaBase, archivosOrdenados, incluirExp);
+                break;
             }
         }
 
@@ -2555,7 +2582,7 @@ public class ManejadorArchivos {
 
             if (subCarpetas != null) {
                 for (File sub : subCarpetas) {
-                    agregarArchivosRecursivos(sub, archivosOrdenados);
+                    agregarArchivosRecursivos(sub, archivosOrdenados, incluirExp);
                 }
             }
         }
@@ -2567,13 +2594,13 @@ public class ManejadorArchivos {
         }
     }
 
-    private static void agregarArchivosRecursivos(File carpeta, List<File> lista) {
+    private static void agregarArchivosRecursivos(File carpeta, List<File> lista, boolean incluirExp) {
         File[] archivos = carpeta.listFiles();
         if (archivos == null) return;
 
         for (File f : archivos) {
             if (f.isDirectory()) {
-                agregarArchivosRecursivos(f, lista);
+                agregarArchivosRecursivos(f, lista, incluirExp);
             } else {
                 String nombre = f.getName();
                 String nombreLower = nombre.toLowerCase();
@@ -2585,9 +2612,17 @@ public class ManejadorArchivos {
 
                 // Omitir archivos que contienen "EXP" y guardar el nombre
                 if (nombre.toUpperCase().contains("EXP")) {
-                    nombreExpediente = nombre; // ✅ Se guarda aquí directamente
-                    continue;
+                    nombreExpediente = nombre;
+
+                    if (!incluirExp) {
+                        System.out.println("[EXP SUB] Omitido: " + nombre);
+                        continue;
+                    } else {
+                        System.out.println("[EXP SUB] Incluido: " + nombre);
+                    }
                 }
+
+
 
                 lista.add(f);
             }
@@ -2597,7 +2632,6 @@ public class ManejadorArchivos {
 
 
     public static void fusionarArchivos(String rutaDestino, String nombreArchivo, DefaultListModel<String> modeloRutas) {
-        // Validaciones
         if (modeloRutas == null || modeloRutas.isEmpty()) {
             JOptionPane.showMessageDialog(null, "No hay archivos PDF en la lista.");
             return;
@@ -2815,10 +2849,37 @@ public class ManejadorArchivos {
     public void conectar(String usuario, String contraseña) {
         sardine = SardineFactory.begin(usuario, contraseña);
     }
+    
     // En ManejadorArchivos.java
     public InputStream descargarArchivo(String urlArchivo) throws IOException {
         return sardine.get(urlArchivo);
     }
+    
+    public boolean nuevoNombreArchivoListaWeb(String urlActual, String nuevoNombre) throws IOException, URISyntaxException {
+        if (sardine == null) {
+            throw new IllegalStateException("No hay conexión establecida. Llama a conectar() primero.");
+        }
+
+        String encodedUrlActual = new URI(urlActual).toASCIIString();
+        
+        String encodedNuevoNombre = URLEncoder.encode(nuevoNombre, StandardCharsets.UTF_8.toString()).replace("+", "%20");
+
+        
+        int lastSlash = encodedUrlActual.lastIndexOf('/');
+        if (lastSlash == -1) {
+            throw new IllegalArgumentException("URL inválida: " + urlActual);
+        }
+
+        String urlDestino = encodedUrlActual.substring(0, lastSlash + 1) + encodedNuevoNombre;
+
+        if (sardine.exists(urlDestino)) {
+            throw new IOException("Ya existe un archivo con el nombre: " + nuevoNombre);
+        }
+
+        sardine.move(encodedUrlActual, urlDestino);
+        return true;
+    }
+
     
     public Map<String, String> buscarArchivosOrdenados(String urlCarpeta) throws Exception {
         Map<String, String> archivosOrdenados = new LinkedHashMap<>();
@@ -2931,17 +2992,15 @@ public class ManejadorArchivos {
             throw new Exception("URL inválida. No contiene 'dir='.");
         }
 
-        // Extraer parte después de dir=
+        
         String ruta = linkNextcloud.substring(linkNextcloud.indexOf("dir=") + 4);
         int ampersandIndex = ruta.indexOf("&");
         if (ampersandIndex != -1) {
             ruta = ruta.substring(0, ampersandIndex);
         }
 
-        // Decodificar (por si hay %20)
         ruta = java.net.URLDecoder.decode(ruta, "UTF-8");
 
-        // Codificar parte por parte correctamente
         String[] partes = ruta.split("/");
         StringBuilder url = new StringBuilder("https://drive.mimp.gob.pe/remote.php/webdav");
 
@@ -2956,25 +3015,42 @@ public class ManejadorArchivos {
 
 
 
+    //Solo funciona poniendo en año
+    /*
     public Map<String, String> buscarSubcarpetas(String urlWebDAV, String palabraClave) throws Exception {
+        
         Map<String, String> resultados = new LinkedHashMap<>();
 
         List<DavResource> carpetasNivel1 = sardine.list(urlWebDAV);
-
+        System.out.println("Paso el sardine.list()");
         for (DavResource carpeta : carpetasNivel1) {
+            
             if (!carpeta.isDirectory()) continue;
-
             String nombreCarpeta = carpeta.getName();
+            
             if (nombreCarpeta == null || nombreCarpeta.isEmpty()) continue;
 
-            String urlNivel2 = urlWebDAV;
-            if (!urlNivel2.endsWith("/")) urlNivel2 += "/";
-            urlNivel2 += URLEncoder.encode(nombreCarpeta, "UTF-8").replace("+", "%20");
+            
+            String href = carpeta.getHref().toString();
+            String urlNivel2 = new URL(new URL(urlWebDAV), carpeta.getHref().toString()).toString();
 
+            
+
+            System.out.println("El urlNivel2: " + urlNivel2);
+
+            
             try {
-                List<DavResource> subcarpetas = sardine.list(urlNivel2);
+                System.out.println("Ingresando al try, apunto de dar la urlNivel2");
+                List<DavResource> subcarpetas = sardine.list(urlNivel2, 1);
+                System.out.println("Ya se listo el subcarpetas, mas adelante se daran los encontrados");
+                System.out.println("Cantidad de entradas en subcarpetas (" + urlNivel2 + "): " + subcarpetas.size());
+                for (DavResource sub : subcarpetas) {
+                    System.out.println("Subelemento encontrado: " + sub.getHref());
+                }
+
 
                 for (DavResource sub : subcarpetas) {
+                    System.out.println("La subcarpeta es: " + sub);
                     if (!sub.isDirectory()) continue;
 
                     String nombreSub = sub.getName();
@@ -2983,22 +3059,84 @@ public class ManejadorArchivos {
                     System.out.println("Comparando: " + nombreSub + " vs. " + palabraClave);
 
                     if (normalizar(nombreSub).contains(normalizar(palabraClave))) {
-                        // En lugar de agregar un String mixto, agrega nombre y ruta separados
-                        String rutaSubcarpeta = urlNivel2;
-                        if (!rutaSubcarpeta.endsWith("/")) rutaSubcarpeta += "/";
-                        rutaSubcarpeta += URLEncoder.encode(nombreSub, "UTF-8").replace("+", "%20");
+                        // Construir ruta completa de forma segura usando URL
+                        String hrefSub = sub.getHref().toString();
+
+                        URL fullUrl = new URL(new URL(urlWebDAV), hrefSub);
+                        String rutaSubcarpeta = fullUrl.toString();
 
                         resultados.put(nombreSub, rutaSubcarpeta);
+
+                        System.out.println("carpeta.getHref(): " + carpeta.getHref());
+                        System.out.println("sub.getHref(): " + sub.getHref());
+                        System.out.println("sub.getName(): " + sub.getName());
                     }
+
 
                 }
 
-            } catch (Exception e) {
-                continue;
+            } catch (SardineException se) {
+                System.err.println("SardineException - Código: " + se.getStatusCode() + ", mensaje: " + se.getMessage());
+                // Agrega lógica para ignorar o manejar estos casos según la carpeta
             }
         }
-
+        
         return resultados;
+        
+    }
+*/
+    public Map<String, String> buscarSubcarpetas(String urlWebDAV, String palabraClave) throws Exception {
+        Map<String, String> resultados = new LinkedHashMap<>();
+        buscarRecursivamente(urlWebDAV, palabraClave, resultados);
+        return resultados;
+    }
+
+    private void buscarRecursivamente(String urlActual, String palabraClave, Map<String, String> resultados) {
+        try {
+            System.out.println("🔍 Explorando carpeta: " + urlActual);
+
+            List<DavResource> recursos = sardine.list(urlActual, 1);
+
+            for (DavResource recurso : recursos) {
+                if (!recurso.isDirectory()) continue;
+
+                String nombreCarpeta = recurso.getName();
+                if (nombreCarpeta == null || nombreCarpeta.isEmpty()) continue;
+
+                // Construye URL de la subcarpeta
+                String href = recurso.getHref().toString();
+                String subUrl = new URL(new URL(urlActual), href).toString();
+
+                String nombreNormalizado = normalizar(nombreCarpeta);
+                String palabraNormalizada = normalizar(palabraClave);
+
+                System.out.println("📁 Carpeta encontrada: " + nombreCarpeta + " → " + subUrl);
+                System.out.println("🔎 Comparando: '" + nombreNormalizado + "' CON '" + palabraNormalizada + "'");
+
+                boolean coincide = nombreNormalizado.contains(palabraNormalizada);
+
+                if (coincide) {
+                    resultados.put(nombreCarpeta, subUrl);
+                    System.out.println("✅ Coincidencia encontrada: " + nombreCarpeta + " (no se explorará más dentro)");
+                    continue; // No entrar más en esta carpeta
+                }
+
+                // 🚫 Si no coincide y contiene "exp", no explorar más
+                if (nombreNormalizado.contains("exp")) {
+                    System.out.println("⛔ Carpeta 'exp' ignorada para exploración (sin coincidencia): " + nombreCarpeta);
+                    continue;
+                }
+
+                // ✅ Seguir explorando subcarpetas si no es "exp" ni coincidencia
+                if (!subUrl.equals(urlActual)) {
+                    System.out.println("➡️ Entrando a subcarpeta: " + subUrl);
+                    buscarRecursivamente(subUrl, palabraClave, resultados);
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Error al listar: " + urlActual + " → " + e.getMessage());
+        }
     }
 
     
@@ -3010,9 +3148,7 @@ public class ManejadorArchivos {
                     .toLowerCase();
     }
 
-
-
-
+    
     private void buscarRecursivamente(String url, String palabraClave, List<String> resultados) throws Exception {
         List<DavResource> recursos;
         try {
@@ -3042,6 +3178,9 @@ public class ManejadorArchivos {
     }
 
     
+    public List<DavResource> listarCarpeta(String url) throws IOException {
+        return sardine.list(url); // tu objeto sardine inicializado
+    }
 
     public Map<String, String> listarArchivos(String urlCarpeta) throws Exception {
         Map<String, String> archivos = new LinkedHashMap<>();
@@ -3090,7 +3229,7 @@ public class ManejadorArchivos {
                 for (DavResource sub : nivel2) {
                     if (sub.isDirectory() && sub.getName().toLowerCase().contains(palabraClave.toLowerCase())) {
                         resultados.add(sub.getName() + " (en: " + urlMes + ")");
-                        return resultados; // ❗ Ya se encontró, no seguir buscando
+                        return resultados;
                     }
                 }
             } catch (Exception e) {
@@ -3117,7 +3256,60 @@ public class ManejadorArchivos {
         document.close();
         return pdfTemp;
     }
-
-
     
+    public void subirArchivoHttpClient(String rutaRemota, String usuario, String clave, byte[] datosArchivo) throws IOException {
+        CloseableHttpClient httpClient = HttpClients.custom()
+            .disableAutomaticRetries()
+            .build();
+
+        HttpPut put = new HttpPut(rutaRemota);
+        String auth = Base64.getEncoder().encodeToString((usuario + ":" + clave).getBytes());
+        put.setHeader("Authorization", "Basic " + auth);
+
+        HttpEntity entity = new ByteArrayEntity(datosArchivo);
+        put.setEntity(entity);
+
+        try (CloseableHttpResponse response = httpClient.execute(put)) {
+            int statusCode = response.getStatusLine().getStatusCode();
+            System.out.println("→ PUT status code: " + statusCode + " (" + response.getStatusLine().getReasonPhrase() + ")");
+            if (statusCode >= 400) {
+                System.out.println("Posible error al subir archivo: " + rutaRemota);
+            }
+        }
+        
+    }
+    public int obtenerPuertoDesdeURL(String urlStr) {
+        try {
+            URL url = new URL(urlStr);
+            int puerto = url.getPort();
+
+            // Si no está especificado, usamos el puerto por defecto según protocolo
+            if (puerto == -1) {
+                String protocolo = url.getProtocol();
+                if ("https".equalsIgnoreCase(protocolo)) {
+                    return 443;
+                } else if ("http".equalsIgnoreCase(protocolo)) {
+                    return 80;
+                }
+            }
+
+            return puerto;
+        } catch (MalformedURLException e) {
+            System.err.println("URL malformada al obtener puerto: " + urlStr);
+            e.printStackTrace();
+            return -1;
+        }
+    }
+    public void mostrarInfoConexion(String urlStr) {
+        try {
+            URL url = new URL(urlStr);
+            int puerto = obtenerPuertoDesdeURL(urlStr);
+            System.out.println("Conectando a host: " + url.getHost());
+            System.out.println("Protocolo: " + url.getProtocol().toUpperCase());
+            System.out.println("Puerto: " + puerto);
+        } catch (Exception e) {
+            System.err.println("❌ Error al mostrar información de conexión");
+            e.printStackTrace();
+        }
+    }
 }

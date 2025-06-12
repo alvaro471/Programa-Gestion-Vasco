@@ -12,7 +12,9 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
@@ -33,6 +35,10 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
     // Modelo para jList2 (destino)
     DefaultListModel<String> modeloLista2Rutas = new DefaultListModel<>(); // Guarda rutas
     DefaultListModel<String> modeloLista2Nombres = new DefaultListModel<>(); // Muestra nombres
+    
+    private Map<Integer, Integer> subindicePorNumero = new HashMap<>();
+
+    
 
     public interfazEnumerar3() {
         initComponents();
@@ -565,7 +571,7 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
         );
 
         jLabel1.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        jLabel1.setText("DOCUMENTAR ETAPAS - CREAR EXPEDIENTE");
+        jLabel1.setText("DOCUMENTAR ETAPAS - CREA ARCHIVO");
 
         jButton7.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         jButton7.setText("MENU PRINCIPAL");
@@ -655,52 +661,53 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         int numeroInicial = Integer.parseInt(jComboBox1.getSelectedItem().toString());
 
-        // Obtener los archivos seleccionados en el JList (solo nombres)
-        List<String> archivosSeleccionados = jList1.getSelectedValuesList();
+    // Obtener el contador actual (por defecto empieza en 0 si no existe)
+    int subindiceActual = subindicePorNumero.getOrDefault(numeroInicial, 0);
 
-        // Iterar sobre los archivos seleccionados
-        for (int i = 0; i < archivosSeleccionados.size(); i++) {
-            String nombreArchivo = archivosSeleccionados.get(i);
+    List<String> archivosSeleccionados = jList1.getSelectedValuesList();
 
-            // Buscar la ruta completa del archivo usando el modelo de rutas
-            String rutaArchivo = null;
-            for (int j = 0; j < modeloLista1Nombres.getSize(); j++) {
-                if (modeloLista1Nombres.get(j).equals(nombreArchivo)) {
-                    rutaArchivo = modeloLista1Rutas.get(j);  // Obtener la ruta completa
-                    break;
-                }
-            }
+    for (int i = 0; i < archivosSeleccionados.size(); i++) {
+        String nombreArchivo = archivosSeleccionados.get(i);
+        String rutaArchivo = null;
 
-            // Verificar si se obtuvo la ruta completa
-            if (rutaArchivo != null) {
-                // Crear número con subíndice (e.g., 2.1, 2.2, ...)
-                String numeroConSubindice = numeroInicial + "." + (i + 1);
-
-                // Imprimir ruta para depuración
-                System.out.println("Renombrando archivo en: " + rutaArchivo);
-                
-                ManejadorArchivos.renombrarArchivoConNumero(rutaArchivo, numeroConSubindice);
-            } else {
-                JOptionPane.showMessageDialog(null, "No se encontró la ruta para el archivo: " + nombreArchivo,
-                                              "Error", JOptionPane.ERROR_MESSAGE);
+        // Buscar ruta del archivo
+        for (int j = 0; j < modeloLista1Nombres.getSize(); j++) {
+            if (modeloLista1Nombres.get(j).equals(nombreArchivo)) {
+                rutaArchivo = modeloLista1Rutas.get(j);
+                break;
             }
         }
 
-        //Mostrar la cantidad
-        JOptionPane.showMessageDialog(null, "Archivos renombrados: " + ManejadorArchivos.getContadorArchivosRenombrados());
-        //Devolver a 0
-        ManejadorArchivos.setContadorArchivosRenombrados(0);
+        if (rutaArchivo != null) {
+            // Incrementar el subíndice de forma acumulativa
+            subindiceActual++;
+            String numeroConSubindice = numeroInicial + "." + subindiceActual;
+            System.out.println("Renombrando: " + nombreArchivo + " -> " + numeroConSubindice);
 
-        // Recargar la lista de archivos después de renombrarlos
-        modeloLista1Nombres = new DefaultListModel<>();
-        modeloLista1Rutas = new DefaultListModel<>();
+            ManejadorArchivos.renombrarArchivoConNumero(rutaArchivo, numeroConSubindice);
+        } else {
+            JOptionPane.showMessageDialog(null, "No se encontró la ruta para el archivo: " + nombreArchivo,
+                                          "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
-        ManejadorArchivos.cargarArchivosEnLista(
-            ManejadorArchivos.getRutaCarpeta(),
-            jList1,
-            modeloLista1Nombres,
-            modeloLista1Rutas
-        );
+    // Actualizar el contador en el mapa
+    subindicePorNumero.put(numeroInicial, subindiceActual);
+
+    // Mostrar mensaje
+    JOptionPane.showMessageDialog(null, "Archivos renombrados: " + ManejadorArchivos.getContadorArchivosRenombrados());
+    ManejadorArchivos.setContadorArchivosRenombrados(0);
+
+    // Recargar lista
+    modeloLista1Nombres = new DefaultListModel<>();
+    modeloLista1Rutas = new DefaultListModel<>();
+
+    ManejadorArchivos.cargarArchivosEnLista(
+        ManejadorArchivos.getRutaCarpeta(),
+        jList1,
+        modeloLista1Nombres,
+        modeloLista1Rutas
+    );
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -752,7 +759,7 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
 
             if (indexLetra != -1) {
                 String desdePrimeraLetra = nombreSinNumeracion.substring(indexLetra);
-                if (desdePrimeraLetra.toLowerCase().startsWith("rd")) {
+                if (desdePrimeraLetra.toLowerCase().contains("rd")) {
                     txtNombreConsolidado.setText(nombreArchivo); // Mostrar nombre completo
                     break; // Solo queremos el primero que cumpla
                 }
@@ -1066,9 +1073,19 @@ public class interfazEnumerar3 extends javax.swing.JFrame {
     }//GEN-LAST:event_txtImagenesActionPerformed
 
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+
         txtPDF.setText("");
         txtDOC.setText("");
         txtImagenes.setText("");
+        txtCarpetaArchivos.setText("");
+        jTextField4.setText("");
+        txtNombreConsolidado.setText("");
+        
+        modeloLista1Nombres.clear();
+        modeloLista1Rutas.clear();
+        modeloLista2Rutas.clear();
+        modeloLista2Nombres.clear();
+        
         
     }//GEN-LAST:event_jButton8ActionPerformed
 
